@@ -33,8 +33,6 @@ void ATopDownPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
-	UE_LOG(LogTemp, Warning, TEXT("ATopDownPlayerController::SetupInputComponent"));
-
 	if (UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(InputComponent))
 	{
 		if (ZoomAction)
@@ -99,7 +97,7 @@ void ATopDownPlayerController::MovePreviewTurret(float DeltaTime)
 	{
 		FHitResult Hit;
 		FVector Start = WorldLocation;
-		FVector End = Start + (WorldDirection * 1000.f);
+		FVector End = Start + (WorldDirection * 4000.f);
 
 		if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility))
 		{

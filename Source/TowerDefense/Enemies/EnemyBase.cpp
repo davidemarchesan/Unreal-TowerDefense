@@ -14,8 +14,6 @@ AEnemyBase::AEnemyBase()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
-
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	StaticMesh->SetupAttachment(RootComponent);
 	StaticMesh->SetGenerateOverlapEvents(false); // Avoid mesh collision
@@ -41,7 +39,7 @@ void AEnemyBase::BeginPlay()
 	if (AIController)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Moving ai to center"));
-		EPathFollowingRequestResult::Type Result = AIController->MoveToLocation(FVector(1.f, 10.f, 1.f));
+		EPathFollowingRequestResult::Type Result = AIController->MoveToLocation(FVector(10.f, 10.f, 0.f));
 
 		UE_LOG(LogTemp, Warning, TEXT("Moving ai to center result %d"), Result);
 	}
@@ -58,7 +56,7 @@ void AEnemyBase::Tick(float DeltaTime)
 void AEnemyBase::ApplyDamage(float Damage)
 {
 	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
-	UE_LOG(LogTemp, Warning, TEXT("Enemy: i took %f damage and my health is now %f"), Damage, Health);
+	//UE_LOG(LogTemp, Warning, TEXT("Enemy: i took %f damage and my health is now %f"), Damage, Health);
 
 	if (HealthBarWidget)
 	{
@@ -72,7 +70,7 @@ void AEnemyBase::ApplyDamage(float Damage)
 
 	if (Health <= 0.f)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Im dead, notifying all the turrets"));
+		//UE_LOG(LogTemp, Warning, TEXT("Im dead, notifying all the turrets"));
 		// Notify turrets that I'm dead
 		OnEnemyDeath.Broadcast(this);
 

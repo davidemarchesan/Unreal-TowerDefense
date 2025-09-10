@@ -63,12 +63,12 @@ void ATurretBase::Fire()
 {
 	if (CurrentTarget && CurrentTarget->IsPendingKillPending() == false)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Turret: Fire with damage %f"), Damage);
+		//UE_LOG(LogTemp, Warning, TEXT("Turret: Fire with damage %f"), Damage);
 		CurrentTarget->ApplyDamage(Damage);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Turret: Firing at invalid target, clearing timer"));
+		//UE_LOG(LogTemp, Warning, TEXT("Turret: Firing at invalid target, clearing timer"));
 		GetWorldTimerManager().ClearTimer(FireTimerHandle);
 	}
 }
@@ -95,7 +95,7 @@ void ATurretBase::CheckForFiring()
 void ATurretBase::OnEnemyEnterRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 
-	UE_LOG(LogTemp, Warning, TEXT("Something entered my range!"));
+	UE_LOG(LogTemp, Warning, TEXT("Something entered my range! %s"), *OtherActor->GetName());
 	AEnemyBase* Enemy = Cast<AEnemyBase>(OtherActor);
 
 	if (Enemy)
