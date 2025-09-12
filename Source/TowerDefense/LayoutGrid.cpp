@@ -17,36 +17,73 @@ void ALayoutGrid::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Init empty grid
+	InitializeGrid();
+
+	InitializePlane();
+	InitializeWalls();
+	
+}
+
+void ALayoutGrid::InitializeGrid()
+{
+
+	Center = FVector((Cols / 2) - 1, (Rows / 2) - 1, 0.f);
+
 	Grid.SetNum(Cols);
 	for (int32 Col = 0; Col < Cols; Col++)
 	{
 		Grid[Col].SetNum(Rows);
 		for (int32 Row = 0; Row < Rows; Row++)
 		{
+			Grid[Col][Row] = ECellState::Empty;
+		}
+	}
+}
 
+void ALayoutGrid::InitializePlane()
+{
+}
+
+void ALayoutGrid::InitializeWalls()
+{
+
+	for (int32 Col = 0; Col < Cols; Col++)
+	{
+		for (int32 Row = 0; Row < Rows; Row++)
+		{
 			if (Col == 0 || Col == (Cols - 1) || Row == 0 || Row == (Rows - 1)) {
-
-				Grid[Col][Row] = ECellState::DefaultWall;
-
-				FActorSpawnParameters SpawnParams;
-				FString WallName = FString::Printf(TEXT("Wall_%d_%d"), Row, Col);
-				SpawnParams.Name = FName(*WallName);
-
-				AActor* SpawnedWall = GetWorld()->SpawnActor<AWall>(DefaultWallBluePrintClass, FVector((Row * CellSize), (Col * CellSize), 0.f), FRotator::ZeroRotator, SpawnParams);
-
-				if (SpawnedWall)
-				{
-					SpawnedWall->SetFolderPath(TEXT("Walls/Outer"));
-					SpawnedWall->SetActorLabel(*WallName);
-				}
-			}
-			else {
-				Grid[Col][Row] = ECellState::Empty;
+				SpawnWall(Col, Row, ECellState::DefaultWall, TEXT("Outer"));
 			}
 		}
 	}
+
+	// Enemy Base walls
+	for (int32 i = 1; i <= 5; i++)
+	{
+		SpawnWall(3, i, ECellState::DefaultWall, TEXT("EnemyBase"));
+	}
 	
+	// Ally Base walls
+	for (int32 j = (Rows - 2); j >= (Rows - 6); j--)
+	{
+		SpawnWall((Cols - 4), j, ECellState::DefaultWall, TEXT("AllyBase"));
+	}
+
+}
+
+void ALayoutGrid::SpawnWall(int32 Col, int32 Row, ECellState State, const FString& Folder)
+{
+	Grid[Col][Row] = State;
+
+	AActor* SpawnedWall = GetWorld()->SpawnActor<AWall>(DefaultWallBluePrintClass, FVector((Row * CellSize), (Col * CellSize), 0.f), FRotator::ZeroRotator);
+
+	if (SpawnedWall)
+	{
+		FString WallName = FString::Printf(TEXT("Wall_%d_%d"), Col, Row);
+		FString Path = FString::Printf(TEXT("Walls/%s"), *Folder);
+		SpawnedWall->SetFolderPath(*Path);
+		SpawnedWall->SetActorLabel(*WallName);
+	}
 }
 
 // Called every frame

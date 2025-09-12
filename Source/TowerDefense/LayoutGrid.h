@@ -37,16 +37,26 @@ private:
 	UPROPERTY(EditAnywhere, Category="Grid")
 	int32 Cols = 30;
 
+	void InitializeGrid();
+
+	FVector Center;
+
+	// Plane
+	void InitializePlane();
+	
 	// Cells
 	UPROPERTY(EditAnywhere, Category="BluePrints")
 	float CellSize = 100.f;
 	
-
 	// Walls
 	UPROPERTY(EditAnywhere, Category="BluePrints")
 	TSubclassOf<AWall> WallBluePrintClass;
 
 	UPROPERTY(EditAnywhere, Category="BluePrints")
 	TSubclassOf<AWall> DefaultWallBluePrintClass;
+
+	void InitializeWalls();
+
+	void SpawnWall(int32 Col, int32 Row, ECellState State, const FString& Folder);
 
 };
