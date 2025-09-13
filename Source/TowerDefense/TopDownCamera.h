@@ -57,6 +57,6 @@ private:
 
 	float DesiredArmLength;
 
-	void UpdateZoom(float DeltaTime);
+	void UpdateZoom(float DeltaTime); 
 
 };

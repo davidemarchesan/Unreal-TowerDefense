@@ -7,6 +7,7 @@
 #include "Wall.generated.h"
 
 class UStaticMeshComponent;
+class USceneComponent;
 
 UCLASS()
 class TOWERDEFENSE_API AWall : public AActor
@@ -26,6 +27,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 private: 
+
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	USceneComponent* SceneRoot;
 
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UStaticMeshComponent* Mesh;
