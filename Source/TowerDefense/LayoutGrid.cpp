@@ -3,12 +3,28 @@
 
 #include "LayoutGrid.h"
 #include "Walls/Wall.h"
+#include "NavigationSystem.h"
+#include "NavMesh/NavMeshBoundsVolume.h"
+#include "Components/BrushComponent.h"
+#include "EngineUtils.h"
+
+//creare gamemode
+//creare controller e input diversi
+//spawnare wall
+//mettere le basi
+//calcolare la navmesh
+//spawnare muri
+//salvare layout
+//caricare layout
 
 // Sets default values
 ALayoutGrid::ALayoutGrid()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	FloorComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("FloorComponent"));
+	FloorComponent->SetupAttachment(RootComponent);
 
 }
 
@@ -19,15 +35,45 @@ void ALayoutGrid::BeginPlay()
 
 	InitializeGrid();
 
-	InitializePlane();
+	InitializeFloor();
 	InitializeWalls();
+
+	InitializeNavMesh();
+	BuildNavMesh();
 	
+}
+
+void ALayoutGrid::InitializeNavMesh()
+{
+	for (TActorIterator<ANavMeshBoundsVolume> It(GetWorld()); It; ++It)
+	{
+		NavMesh = *It;
+
+		if (NavMesh)
+		{
+			NavMesh->SetActorLocation(Center);
+			break;
+		}
+	}
+
+	// Get nav system
+	NavSystem = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
+}
+
+void ALayoutGrid::BuildNavMesh()
+{
+
+	if (NavSystem)
+	{
+		NavSystem->Build();
+	}
+
 }
 
 void ALayoutGrid::InitializeGrid()
 {
 
-	Center = FVector((Cols / 2) - 1, (Rows / 2) - 1, 0.f);
+	Center = FVector(((Cols - 1) / 2.0f) * CellSize, ((Rows - 1) / 2.0f) * CellSize, 0.f);
 
 	Grid.SetNum(Cols);
 	for (int32 Col = 0; Col < Cols; Col++)
@@ -40,8 +86,15 @@ void ALayoutGrid::InitializeGrid()
 	}
 }
 
-void ALayoutGrid::InitializePlane()
+void ALayoutGrid::InitializeFloor()
 {
+	// Putting the floor at the grid center, and scaling it
+	FVector CurrentLocation = FloorComponent->GetRelativeLocation();
+	FVector CurrentScale = FloorComponent->GetRelativeScale3D();
+
+	FloorComponent->SetRelativeLocation(FVector(Center.X, Center.Y, CurrentLocation.Z));
+	FloorComponent->SetWorldScale3D(FVector(Cols, Rows, CurrentScale.Z));
+
 }
 
 void ALayoutGrid::InitializeWalls()

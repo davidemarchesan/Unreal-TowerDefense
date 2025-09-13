@@ -10,6 +10,8 @@
 #include "LayoutGrid.generated.h"
 
 class AWall;
+class ANavMeshBoundsVolume;
+class UNavigationSystemV1;
 
 UCLASS()
 class TOWERDEFENSE_API ALayoutGrid : public AActor
@@ -28,6 +30,15 @@ protected:
 
 private:
 
+	// Path Finding
+	ANavMeshBoundsVolume* NavMesh;
+
+	UNavigationSystemV1* NavSystem;
+
+	void InitializeNavMesh();
+
+	void BuildNavMesh();
+
 	// Grid
 	TArray<TArray<ECellState>> Grid;
 
@@ -41,8 +52,11 @@ private:
 
 	FVector Center;
 
-	// Plane
-	void InitializePlane();
+	// Floor
+	UPROPERTY(EditAnywhere, Category="Components")
+	UStaticMeshComponent* FloorComponent;
+
+	void InitializeFloor();
 	
 	// Cells
 	UPROPERTY(EditAnywhere, Category="BluePrints")
