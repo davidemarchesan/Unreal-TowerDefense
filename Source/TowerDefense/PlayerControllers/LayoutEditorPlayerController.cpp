@@ -7,6 +7,8 @@
 #include "TowerDefense/Input/Config/CameraInputConfig.h"
 #include "InputActionValue.h"
 #include "TowerDefense/GameCamera.h"
+#include "TowerDefense/LayoutGrid.h"
+#include "EngineUtils.h"
 
 void ALayoutEditorPlayerController::BeginPlay()
 {
@@ -31,6 +33,8 @@ void ALayoutEditorPlayerController::BeginPlay()
 
 	CameraPawn = Cast<AGameCamera>(GetPawn());
 
+	GetLayoutGrid();
+
 }
 
 void ALayoutEditorPlayerController::SetupInputComponent()
@@ -51,6 +55,13 @@ void ALayoutEditorPlayerController::SetupInputComponent()
 			EnhancedInput->BindAction(CameraInputConfig->IA_ZoomCamera, ETriggerEvent::Completed, this, &ALayoutEditorPlayerController::ZoomCamera);
 		}
 	}
+}
+
+void ALayoutEditorPlayerController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	DeprojectMouse();
 }
 
 void ALayoutEditorPlayerController::MoveCamera(const FInputActionValue& Value)
@@ -80,4 +91,29 @@ void ALayoutEditorPlayerController::ZoomCamera(const FInputActionValue& Value)
 		float InputValue = Value.Get<float>();
 		CameraPawn->RequestZoom(InputValue);
 	}
+}
+
+void ALayoutEditorPlayerController::GetLayoutGrid()
+{
+	for (TActorIterator<ALayoutGrid> It(GetWorld()); It; ++It)
+	{
+		LayoutGrid = *It;
+
+		if (LayoutGrid)
+		{
+			break;
+		}
+	}
+}
+
+void ALayoutEditorPlayerController::DeprojectMouse()
+{
+	if (LayoutGrid == nullptr) return;
+
+	FHitResult Hit;
+	if (GetHitResultUnderCursor(ECC_GameTraceChannel1, false, Hit))
+	{
+		LayoutGrid->RequestPreview(Hit.Location);
+	}
+
 }

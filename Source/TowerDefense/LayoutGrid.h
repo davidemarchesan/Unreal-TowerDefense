@@ -24,6 +24,8 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
+	void RequestPreview(FVector Location);
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -72,5 +74,13 @@ private:
 	void InitializeWalls();
 
 	void SpawnWall(int32 Col, int32 Row, ECellState State, const FString& Folder);
+
+	// Preview wall
+	AWall* PreviewWall = nullptr;
+
+	int32 PreviewWallCol;
+	int32 PreviewWallRow;
+
+	void ResetPreviewWall();
 
 };

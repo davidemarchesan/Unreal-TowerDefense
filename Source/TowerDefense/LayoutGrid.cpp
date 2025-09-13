@@ -9,7 +9,7 @@
 #include "EngineUtils.h"
 
 //creare gamemode
-//creare controller e input diversi
+//done - creare controller e input diversi
 //spawnare wall
 //mettere le basi
 //calcolare la navmesh
@@ -41,6 +41,57 @@ void ALayoutGrid::BeginPlay()
 	InitializeNavMesh();
 	BuildNavMesh();
 	
+}
+
+void ALayoutGrid::RequestPreview(FVector Location)
+{
+
+	UE_LOG(LogTemp, Warning, TEXT("Grid: they asked me if %s is available"), *Location.ToString());
+
+	int32 Col = FMath::RoundToInt(Location.Y / 100.f);
+	int32 Row = FMath::RoundToInt(Location.X / 100.f);
+
+	if (Col == PreviewWallCol && Row == PreviewWallRow)
+	{
+		// Same spot, no need to set again the same position
+		UE_LOG(LogTemp, Warning, TEXT("Same spot, no need to set again the same position"));
+		return;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Grid: converted are %d %d"), Col, Row);
+
+	if (Col < 0 || Row < 0 || Col >= Cols || Row >= Rows)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("out of bounds"));
+		ResetPreviewWall();
+	}
+
+	ECellState State = Grid[Col][Row];
+	UE_LOG(LogTemp, Warning, TEXT("Grid: state is %d"), (uint8)State);
+
+	if (State == ECellState::Empty)
+	{
+
+		// It is ok to preview
+		UE_LOG(LogTemp, Warning, TEXT("it is ok to preview"));
+		PreviewWallCol = Col;
+		PreviewWallRow = Row;
+
+		if (PreviewWall == nullptr)
+		{
+			PreviewWall = GetWorld()->SpawnActor<AWall>(WallBluePrintClass, FVector((Row * CellSize), (Col * CellSize), 0.f), FRotator::ZeroRotator);
+		}
+		else
+		{
+			PreviewWall->SetActorLocation(FVector((Row * CellSize), (Col * CellSize), 0.f));
+		}
+
+	}
+	else
+	{
+		ResetPreviewWall();
+	}
+
 }
 
 void ALayoutGrid::InitializeNavMesh()
@@ -136,6 +187,18 @@ void ALayoutGrid::SpawnWall(int32 Col, int32 Row, ECellState State, const FStrin
 		FString Path = FString::Printf(TEXT("Walls/%s"), *Folder);
 		SpawnedWall->SetFolderPath(*Path);
 		SpawnedWall->SetActorLabel(*WallName);
+	}
+}
+
+void ALayoutGrid::ResetPreviewWall()
+{
+	if (PreviewWall)
+	{
+		PreviewWall->Destroy();
+		PreviewWall = nullptr;
+
+		PreviewWallCol = -1;
+		PreviewWallRow = -1;
 	}
 }
 

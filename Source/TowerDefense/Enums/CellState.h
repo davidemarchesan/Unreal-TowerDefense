@@ -6,7 +6,7 @@
 UENUM(BlueprintType)
 enum class ECellState : uint8
 {
-    Empty UMETA(DisplayName = "Empty"),
-    Wall UMETA(DisplayName = "Wall"),
-    DefaultWall UMETA(DisplayName = "Default Wall")
+    Empty UMETA(DisplayName = "Empty"),                 // 0
+    Wall UMETA(DisplayName = "Wall"),                   // 1
+    DefaultWall UMETA(DisplayName = "Default Wall")     // 2
 };

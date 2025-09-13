@@ -10,6 +10,7 @@ class UInputMappingContext;
 class UInputAction;
 class UCameraInputConfig;
 class AGameCamera;
+class ALayoutGrid;
 struct FInputActionValue;
 
 /**
@@ -25,6 +26,10 @@ protected:
 	virtual void BeginPlay() override;
 
 	virtual void SetupInputComponent() override;
+
+public: 
+
+	virtual void Tick(float DeltaTime) override;
 
 private:
 
@@ -50,5 +55,12 @@ private:
 	void RotateCamera(const FInputActionValue& Value);
 
 	void ZoomCamera(const FInputActionValue& Value);
+
+	// Building
+	ALayoutGrid* LayoutGrid;
+
+	void GetLayoutGrid();
+
+	void DeprojectMouse();
 	
 };
