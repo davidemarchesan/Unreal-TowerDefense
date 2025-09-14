@@ -5,17 +5,20 @@
 #include "Walls/Wall.h"
 #include "Walls/PreviewWall.h"
 #include "NavigationSystem.h"
+#include "NavigationPath.h"
+#include "NavigationData.h"
 #include "NavMesh/NavMeshBoundsVolume.h"
 #include "Components/BrushComponent.h"
 #include "EngineUtils.h"
 #include "TowerDefense/Enums/PreviewWallState.h"
+#include "MainBase.h"
 
-//creare gamemode
 //done - creare controller e input diversi
-//spawnare wall
-//mettere le basi
-//calcolare la navmesh
-//spawnare muri
+//done - spawnare wall
+//done - mettere le basi
+//sistemare AI -> creare nuovo AEnemy con sola AI
+//calcolare la navmesh ad ogni preview
+//creare gamemode
 //salvare layout
 //caricare layout
 
@@ -39,6 +42,7 @@ void ALayoutGrid::BeginPlay()
 
 	InitializeFloor();
 	InitializeWalls();
+	InitializeAllyBase();
 
 	InitializeNavMesh();
 	BuildNavMesh();
@@ -94,6 +98,7 @@ void ALayoutGrid::RequestPreview(FVector Location)
 			PreviewWall->SetActorLocation(FVector((Row * CellSize), (Col * CellSize), 0.f));
 		}
 
+		
 		bool bIsPositionValid = IsPositionValidToBuildOn(Col, Row);
 		PreviewWall->SetPreviewState(bIsPositionValid ? EPreviewWallState::Valid : EPreviewWallState::Invalid);
 
@@ -124,12 +129,19 @@ void ALayoutGrid::InitializeNavMesh()
 		if (NavMesh)
 		{
 			NavMesh->SetActorLocation(WorldGridCenter);
+
+			
 			break;
 		}
 	}
 
 	// Get nav system
 	NavSystem = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
+
+	if (NavSystem)
+	{
+		NavData = NavSystem->GetNavDataForAgentName(FName("Davide"));
+	}
 }
 
 void ALayoutGrid::BuildNavMesh()
@@ -140,6 +152,37 @@ void ALayoutGrid::BuildNavMesh()
 		NavSystem->Build();
 	}
 
+}
+
+bool ALayoutGrid::IsPathAvailable()
+{
+	if (NavSystem)
+	{
+
+		FVector StartPosition((2.5f * CellSize), (2.5f * CellSize), 0.f);
+
+		FPathFindingQuery Query(
+			nullptr,
+			*NavData,
+			StartPosition,
+			WorldGridCenter
+		);
+
+
+		UE_LOG(LogTemp, Warning, TEXT("world grid center %s"), *WorldGridCenter.ToString());
+		FNavPathSharedPtr NavPath;
+
+		FPathFindingResult Result = NavSystem->FindPathSync(Query);
+
+		bool biss = Result.IsSuccessful();
+
+		UE_LOG(LogTemp, Warning, TEXT("IsPathAvailable %s"), (biss == true ? TEXT("y") : TEXT("n")));
+
+		return Result.IsSuccessful();
+
+	}
+
+	return false;
 }
 
 void ALayoutGrid::InitializeGrid()
@@ -172,131 +215,135 @@ bool ALayoutGrid::IsPositionValidToBuildOn(const int32 Col, const int32 Row)
 
 	if (IsOutOfGrid(Col, Row)) return false;
 
-	// 1.A Check if at least a wall is on side
-	bool bHaveAdjacentWall = false;
-	TArray<FIntPoint> AdjacentSides = {
-		FIntPoint(1, 0),	// Right
-		FIntPoint(-1, 0),	// Left
-		FIntPoint(0, 1),	// Top
-		FIntPoint(0, -1),	// Bottom
-	};
+	if (IsPathAvailable() == false) return false;
 
-	for (const FIntPoint& AdjacentSide : AdjacentSides)
-	{
-		int32 ColToCheck = Col + AdjacentSide.X;
-		int32 RowToCheck = Row + AdjacentSide.Y;
+	return true;
 
-		if (IsOutOfGrid(ColToCheck, RowToCheck)) continue;
+	//// 1.A Check if at least a wall is on side
+	//bool bHaveAdjacentWall = false;
+	//TArray<FIntPoint> AdjacentSides = {
+	//	FIntPoint(1, 0),	// Right
+	//	FIntPoint(-1, 0),	// Left
+	//	FIntPoint(0, 1),	// Top
+	//	FIntPoint(0, -1),	// Bottom
+	//};
 
-		if (
-			Grid[ColToCheck][RowToCheck] == ECellState::DefaultWall 
-			|| Grid[ColToCheck][RowToCheck] == ECellState::TurretWall
-		)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Has at least on adjacent wall"));
-			bHaveAdjacentWall = true;
-			break;
-		}
-	}
+	//for (const FIntPoint& AdjacentSide : AdjacentSides)
+	//{
+	//	int32 ColToCheck = Col + AdjacentSide.X;
+	//	int32 RowToCheck = Row + AdjacentSide.Y;
 
-	// 1.B If there are no walls on adjacent sides
-	// check if there are on adjance diagonals
-	// Can not build on diagonals (but can build in the middle of nowhere)
-	if (bHaveAdjacentWall == false)
-	{
-		bool bHaveAdjacentDiagonalWall = false;
-		TArray<FIntPoint> DiagonalAdjacentSides = {
-			FIntPoint(1, 1),	// Top-Right
-			FIntPoint(-1, 1),	// Top-Left
-			FIntPoint(1, -1),	// Bottom-Right
-			FIntPoint(-1, -1),	// Bottom-Left
-		};
+	//	if (IsOutOfGrid(ColToCheck, RowToCheck)) continue;
 
-		for (const FIntPoint& DiagonalAdjacentSide : DiagonalAdjacentSides)
-		{
-			int32 ColToCheck = Col + DiagonalAdjacentSide.X;
-			int32 RowToCheck = Row + DiagonalAdjacentSide.Y;
+	//	if (
+	//		Grid[ColToCheck][RowToCheck] == ECellState::DefaultWall 
+	//		|| Grid[ColToCheck][RowToCheck] == ECellState::TurretWall
+	//	)
+	//	{
+	//		UE_LOG(LogTemp, Warning, TEXT("Has at least on adjacent wall"));
+	//		bHaveAdjacentWall = true;
+	//		break;
+	//	}
+	//}
 
-			if (IsOutOfGrid(ColToCheck, RowToCheck)) continue;
+	//// 1.B If there are no walls on adjacent sides
+	//// check if there are on adjance diagonals
+	//// Can not build on diagonals (but can build in the middle of nowhere)
+	//if (bHaveAdjacentWall == false)
+	//{
+	//	bool bHaveAdjacentDiagonalWall = false;
+	//	TArray<FIntPoint> DiagonalAdjacentSides = {
+	//		FIntPoint(1, 1),	// Top-Right
+	//		FIntPoint(-1, 1),	// Top-Left
+	//		FIntPoint(1, -1),	// Bottom-Right
+	//		FIntPoint(-1, -1),	// Bottom-Left
+	//	};
 
-			if (
-				Grid[ColToCheck][RowToCheck] == ECellState::DefaultWall
-				|| Grid[ColToCheck][RowToCheck] == ECellState::TurretWall
-				)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Yes, it has a diagonal wall! no build man"));
-				bHaveAdjacentDiagonalWall = true;
-				break;
-			}
+	//	for (const FIntPoint& DiagonalAdjacentSide : DiagonalAdjacentSides)
+	//	{
+	//		int32 ColToCheck = Col + DiagonalAdjacentSide.X;
+	//		int32 RowToCheck = Row + DiagonalAdjacentSide.Y;
 
-		}
+	//		if (IsOutOfGrid(ColToCheck, RowToCheck)) continue;
 
-		if (bHaveAdjacentDiagonalWall)
-		{
-			return false;
-		}
-	}
+	//		if (
+	//			Grid[ColToCheck][RowToCheck] == ECellState::DefaultWall
+	//			|| Grid[ColToCheck][RowToCheck] == ECellState::TurretWall
+	//			)
+	//		{
+	//			UE_LOG(LogTemp, Warning, TEXT("Yes, it has a diagonal wall! no build man"));
+	//			bHaveAdjacentDiagonalWall = true;
+	//			break;
+	//		}
 
-	// 2. Check side area
-	UE_LOG(LogTemp, Warning, TEXT("-------------------------"));
-	bool bIsPositionValid = false;
+	//	}
 
-	TArray<TArray<FIntPoint>> Sides = {
-		{ FIntPoint(0, 2), FIntPoint(-2, 2), },		// Right
-		{ FIntPoint(-2, 0), FIntPoint(-2, 2), },	// Left
-		{ FIntPoint(-2, 2), FIntPoint(0, 2), },		// Top
-		{ FIntPoint(-2, 2), FIntPoint(-2, 0), },	// Bottom
-	};
+	//	if (bHaveAdjacentDiagonalWall)
+	//	{
+	//		return false;
+	//	}
+	//}
 
-	for (const TArray<FIntPoint>& Side : Sides)
-	{
-		
-		// Need just one valid side
-		bool bIsSideValid = true;
+	//// 2. Check side area
+	//UE_LOG(LogTemp, Warning, TEXT("-------------------------"));
+	//bool bIsPositionValid = false;
 
-		int32 XStartingPoint = Side[0].X;
-		int32 XEndingPoint = Side[0].Y;
+	//TArray<TArray<FIntPoint>> Sides = {
+	//	{ FIntPoint(0, 2), FIntPoint(-2, 2), },		// Right
+	//	{ FIntPoint(-2, 0), FIntPoint(-2, 2), },	// Left
+	//	{ FIntPoint(-2, 2), FIntPoint(0, 2), },		// Top
+	//	{ FIntPoint(-2, 2), FIntPoint(-2, 0), },	// Bottom
+	//};
 
-		int32 YStartingPoint = Side[1].X;
-		int32 YEndingPoint = Side[1].Y;
+	//for (const TArray<FIntPoint>& Side : Sides)
+	//{
+	//	
+	//	// Need just one valid side
+	//	bool bIsSideValid = true;
 
-		UE_LOG(LogTemp, Warning, TEXT("SIDE x: %d %d | y: %d %d ---------------------"), XStartingPoint, XEndingPoint, YStartingPoint, YEndingPoint);
+	//	int32 XStartingPoint = Side[0].X;
+	//	int32 XEndingPoint = Side[0].Y;
 
-		for (int32 X = XStartingPoint; X <= XEndingPoint; X++)
-		{
-			for (int32 Y = YStartingPoint; Y <= YEndingPoint; Y++)
-			{
-				int32 ColToCheck = Col + X;
-				int32 RowToCheck = Row + Y;
+	//	int32 YStartingPoint = Side[1].X;
+	//	int32 YEndingPoint = Side[1].Y;
 
-				UE_LOG(LogTemp, Warning, TEXT("Checking %d %d"), X, Y);
+	//	UE_LOG(LogTemp, Warning, TEXT("SIDE x: %d %d | y: %d %d ---------------------"), XStartingPoint, XEndingPoint, YStartingPoint, YEndingPoint);
 
-				if (
-					IsOutOfGrid(ColToCheck, RowToCheck)
-					|| Grid[ColToCheck][RowToCheck] != ECellState::Empty)
-				{
-					UE_LOG(LogTemp, Warning, TEXT("XXXXX Failed at %d %d"), X, Y);
-					bIsSideValid = false;
-					break;
-				}
-			}
+	//	for (int32 X = XStartingPoint; X <= XEndingPoint; X++)
+	//	{
+	//		for (int32 Y = YStartingPoint; Y <= YEndingPoint; Y++)
+	//		{
+	//			int32 ColToCheck = Col + X;
+	//			int32 RowToCheck = Row + Y;
 
-			if (bIsSideValid == false)
-			{
-				break;
-			}
-		}
+	//			UE_LOG(LogTemp, Warning, TEXT("Checking %d %d"), X, Y);
 
-		if (bIsSideValid == true)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("vvvvv Side is valid"));
-			bIsPositionValid = true;
-			break;
-		}
+	//			if (
+	//				IsOutOfGrid(ColToCheck, RowToCheck)
+	//				|| Grid[ColToCheck][RowToCheck] != ECellState::Empty)
+	//			{
+	//				UE_LOG(LogTemp, Warning, TEXT("XXXXX Failed at %d %d"), X, Y);
+	//				bIsSideValid = false;
+	//				break;
+	//			}
+	//		}
 
-	}
+	//		if (bIsSideValid == false)
+	//		{
+	//			break;
+	//		}
+	//	}
 
-	return bIsPositionValid;
+	//	if (bIsSideValid == true)
+	//	{
+	//		UE_LOG(LogTemp, Warning, TEXT("vvvvv Side is valid"));
+	//		bIsPositionValid = true;
+	//		break;
+	//	}
+
+	//}
+
+	//return bIsPositionValid;
 
 	// END - V2
 
@@ -439,6 +486,14 @@ void ALayoutGrid::ResetPreviewWall()
 		PreviewWallCol = -1;
 		PreviewWallRow = -1;
 	}
+}
+
+void ALayoutGrid::InitializeAllyBase()
+{
+	float Col = Cols - 2.5f;
+	float Row = Rows - 2.5f;
+
+	GetWorld()->SpawnActor<AMainBase>(AllyBasePrintClass, FVector((Row * CellSize), (Col * CellSize), 0.f), FRotator::ZeroRotator);
 }
 
 // Called every frame

@@ -7,6 +7,7 @@
 #include "TowerDefense/UI/HealthBarWidget.h"
 #include "AIModule.h"
 #include "AIController.h"
+#include "NavigationSystem.h"
 
 // Sets default values
 AEnemyBase::AEnemyBase()
@@ -39,9 +40,24 @@ void AEnemyBase::BeginPlay()
 	if (AIController)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Moving ai to center"));
-		EPathFollowingRequestResult::Type Result = AIController->MoveToLocation(FVector(10.f, 10.f, 0.f));
+		//FVector TargetLocation(400.f, 1270.f, 0.f);
+		FVector TargetLocation(0.f, 0.f, 0.f);
+		//EPathFollowingRequestResult::Type Result = AIController->MoveToLocation(TargetLocation);
 
-		UE_LOG(LogTemp, Warning, TEXT("Moving ai to center result %d"), Result);
+		UNavigationSystemV1* NavSys = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
+		FNavLocation Projected;
+		if (NavSys && NavSys->ProjectPointToNavigation(TargetLocation, Projected))
+		{
+			EPathFollowingRequestResult::Type Result = AIController->MoveToLocation(Projected.Location, 1.f);
+			UE_LOG(LogTemp, Warning, TEXT("Projected.Location %s"), *Projected.Location.ToString());
+			UE_LOG(LogTemp, Warning, TEXT("Moving ai to center result %d"), Result);
+		}
+
+
+
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("no ai controller"));
 	}
 	
 }

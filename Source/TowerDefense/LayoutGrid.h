@@ -13,6 +13,8 @@ class AWall;
 class APreviewWall;
 class ANavMeshBoundsVolume;
 class UNavigationSystemV1;
+class ANavigationData;
+class AMainBase;
 
 UCLASS()
 class TOWERDEFENSE_API ALayoutGrid : public AActor
@@ -40,9 +42,13 @@ private:
 
 	UNavigationSystemV1* NavSystem;
 
+	ANavigationData* NavData;
+
 	void InitializeNavMesh();
 
 	void BuildNavMesh();
+
+	bool IsPathAvailable();
 
 	// Grid
 	TArray<TArray<ECellState>> Grid;
@@ -94,5 +100,11 @@ private:
 	int32 PreviewWallRow;
 
 	void ResetPreviewWall();
+
+	// Ally Base
+	void InitializeAllyBase();
+
+	UPROPERTY(EditAnywhere, Category = "BluePrints")
+	TSubclassOf<AMainBase> AllyBasePrintClass;
 
 };
