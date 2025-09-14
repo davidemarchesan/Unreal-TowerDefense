@@ -18,17 +18,3 @@ AWall::AWall()
 
 }
 
-// Called when the game starts or when spawned
-void AWall::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
-// Called every frame
-void AWall::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-

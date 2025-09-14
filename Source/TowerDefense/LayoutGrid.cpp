@@ -3,10 +3,12 @@
 
 #include "LayoutGrid.h"
 #include "Walls/Wall.h"
+#include "Walls/PreviewWall.h"
 #include "NavigationSystem.h"
 #include "NavMesh/NavMeshBoundsVolume.h"
 #include "Components/BrushComponent.h"
 #include "EngineUtils.h"
+#include "TowerDefense/Enums/PreviewWallState.h"
 
 //creare gamemode
 //done - creare controller e input diversi
@@ -20,7 +22,7 @@
 // Sets default values
 ALayoutGrid::ALayoutGrid()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	FloorComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("FloorComponent"));
@@ -40,13 +42,16 @@ void ALayoutGrid::BeginPlay()
 
 	InitializeNavMesh();
 	BuildNavMesh();
-	
+
 }
 
 void ALayoutGrid::RequestPreview(FVector Location)
 {
 
-	UE_LOG(LogTemp, Warning, TEXT("Grid: they asked me if %s is available"), *Location.ToString());
+	if (bIsGridInitialized == false)
+	{
+		return;
+	}
 
 	int32 Col = FMath::RoundToInt(Location.Y / 100.f);
 	int32 Row = FMath::RoundToInt(Location.X / 100.f);
@@ -54,37 +59,43 @@ void ALayoutGrid::RequestPreview(FVector Location)
 	if (Col == PreviewWallCol && Row == PreviewWallRow)
 	{
 		// Same spot, no need to set again the same position
-		UE_LOG(LogTemp, Warning, TEXT("Same spot, no need to set again the same position"));
 		return;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Grid: converted are %d %d"), Col, Row);
-
-	if (Col < 0 || Row < 0 || Col >= Cols || Row >= Rows)
+	if (IsOutOfGrid(Col, Row))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("out of bounds"));
 		ResetPreviewWall();
+		return;
 	}
 
 	ECellState State = Grid[Col][Row];
-	UE_LOG(LogTemp, Warning, TEXT("Grid: state is %d"), (uint8)State);
 
 	if (State == ECellState::Empty)
 	{
 
 		// It is ok to preview
-		UE_LOG(LogTemp, Warning, TEXT("it is ok to preview"));
 		PreviewWallCol = Col;
 		PreviewWallRow = Row;
 
 		if (PreviewWall == nullptr)
 		{
-			PreviewWall = GetWorld()->SpawnActor<AWall>(WallBluePrintClass, FVector((Row * CellSize), (Col * CellSize), 0.f), FRotator::ZeroRotator);
+			PreviewWall = GetWorld()->SpawnActor<APreviewWall>(PreviewWallBluePrintClass, FVector((Row * CellSize), (Col * CellSize), 0.f), FRotator::ZeroRotator);
+
+			if (PreviewWall)
+			{
+				FString WallName = FString::Printf(TEXT("PreviewWall"), Col, Row);
+				FString Path = FString::Printf(TEXT("Walls"));
+				PreviewWall->SetFolderPath(*Path);
+				PreviewWall->SetActorLabel(*WallName);
+			}
 		}
 		else
 		{
 			PreviewWall->SetActorLocation(FVector((Row * CellSize), (Col * CellSize), 0.f));
 		}
+
+		bool bIsPositionValid = IsPositionValidToBuildOn(Col, Row);
+		PreviewWall->SetPreviewState(bIsPositionValid ? EPreviewWallState::Valid : EPreviewWallState::Invalid);
 
 	}
 	else
@@ -92,6 +103,16 @@ void ALayoutGrid::RequestPreview(FVector Location)
 		ResetPreviewWall();
 	}
 
+}
+
+void ALayoutGrid::RequestWallBuild()
+{
+
+	if (IsPositionValidToBuildOn(PreviewWallCol, PreviewWallRow))
+	{
+		SpawnWall(PreviewWallCol, PreviewWallRow, ECellState::TurretWall, TEXT("TurretWalls"));
+		ResetPreviewWall();
+	}
 }
 
 void ALayoutGrid::InitializeNavMesh()
@@ -102,7 +123,7 @@ void ALayoutGrid::InitializeNavMesh()
 
 		if (NavMesh)
 		{
-			NavMesh->SetActorLocation(Center);
+			NavMesh->SetActorLocation(WorldGridCenter);
 			break;
 		}
 	}
@@ -124,7 +145,7 @@ void ALayoutGrid::BuildNavMesh()
 void ALayoutGrid::InitializeGrid()
 {
 
-	Center = FVector(((Cols - 1) / 2.0f) * CellSize, ((Rows - 1) / 2.0f) * CellSize, 0.f);
+	WorldGridCenter = FVector(((Rows - 1) / 2.0f) * CellSize, ((Cols - 1) / 2.0f) * CellSize, 0.f);
 
 	Grid.SetNum(Cols);
 	for (int32 Col = 0; Col < Cols; Col++)
@@ -135,6 +156,210 @@ void ALayoutGrid::InitializeGrid()
 			Grid[Col][Row] = ECellState::Empty;
 		}
 	}
+
+	bIsGridInitialized = true;
+}
+
+bool ALayoutGrid::IsOutOfGrid(int32 Col, int32 Row)
+{
+	return Col < 0 || Row < 0 || Col >= Cols || Row >= Rows;
+}
+
+bool ALayoutGrid::IsPositionValidToBuildOn(const int32 Col, const int32 Row)
+{
+
+	if (bIsGridInitialized == false) return false;
+
+	if (IsOutOfGrid(Col, Row)) return false;
+
+	// 1.A Check if at least a wall is on side
+	bool bHaveAdjacentWall = false;
+	TArray<FIntPoint> AdjacentSides = {
+		FIntPoint(1, 0),	// Right
+		FIntPoint(-1, 0),	// Left
+		FIntPoint(0, 1),	// Top
+		FIntPoint(0, -1),	// Bottom
+	};
+
+	for (const FIntPoint& AdjacentSide : AdjacentSides)
+	{
+		int32 ColToCheck = Col + AdjacentSide.X;
+		int32 RowToCheck = Row + AdjacentSide.Y;
+
+		if (IsOutOfGrid(ColToCheck, RowToCheck)) continue;
+
+		if (
+			Grid[ColToCheck][RowToCheck] == ECellState::DefaultWall 
+			|| Grid[ColToCheck][RowToCheck] == ECellState::TurretWall
+		)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Has at least on adjacent wall"));
+			bHaveAdjacentWall = true;
+			break;
+		}
+	}
+
+	// 1.B If there are no walls on adjacent sides
+	// check if there are on adjance diagonals
+	// Can not build on diagonals (but can build in the middle of nowhere)
+	if (bHaveAdjacentWall == false)
+	{
+		bool bHaveAdjacentDiagonalWall = false;
+		TArray<FIntPoint> DiagonalAdjacentSides = {
+			FIntPoint(1, 1),	// Top-Right
+			FIntPoint(-1, 1),	// Top-Left
+			FIntPoint(1, -1),	// Bottom-Right
+			FIntPoint(-1, -1),	// Bottom-Left
+		};
+
+		for (const FIntPoint& DiagonalAdjacentSide : DiagonalAdjacentSides)
+		{
+			int32 ColToCheck = Col + DiagonalAdjacentSide.X;
+			int32 RowToCheck = Row + DiagonalAdjacentSide.Y;
+
+			if (IsOutOfGrid(ColToCheck, RowToCheck)) continue;
+
+			if (
+				Grid[ColToCheck][RowToCheck] == ECellState::DefaultWall
+				|| Grid[ColToCheck][RowToCheck] == ECellState::TurretWall
+				)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Yes, it has a diagonal wall! no build man"));
+				bHaveAdjacentDiagonalWall = true;
+				break;
+			}
+
+		}
+
+		if (bHaveAdjacentDiagonalWall)
+		{
+			return false;
+		}
+	}
+
+	// 2. Check side area
+	UE_LOG(LogTemp, Warning, TEXT("-------------------------"));
+	bool bIsPositionValid = false;
+
+	TArray<TArray<FIntPoint>> Sides = {
+		{ FIntPoint(0, 2), FIntPoint(-2, 2), },		// Right
+		{ FIntPoint(-2, 0), FIntPoint(-2, 2), },	// Left
+		{ FIntPoint(-2, 2), FIntPoint(0, 2), },		// Top
+		{ FIntPoint(-2, 2), FIntPoint(-2, 0), },	// Bottom
+	};
+
+	for (const TArray<FIntPoint>& Side : Sides)
+	{
+		
+		// Need just one valid side
+		bool bIsSideValid = true;
+
+		int32 XStartingPoint = Side[0].X;
+		int32 XEndingPoint = Side[0].Y;
+
+		int32 YStartingPoint = Side[1].X;
+		int32 YEndingPoint = Side[1].Y;
+
+		UE_LOG(LogTemp, Warning, TEXT("SIDE x: %d %d | y: %d %d ---------------------"), XStartingPoint, XEndingPoint, YStartingPoint, YEndingPoint);
+
+		for (int32 X = XStartingPoint; X <= XEndingPoint; X++)
+		{
+			for (int32 Y = YStartingPoint; Y <= YEndingPoint; Y++)
+			{
+				int32 ColToCheck = Col + X;
+				int32 RowToCheck = Row + Y;
+
+				UE_LOG(LogTemp, Warning, TEXT("Checking %d %d"), X, Y);
+
+				if (
+					IsOutOfGrid(ColToCheck, RowToCheck)
+					|| Grid[ColToCheck][RowToCheck] != ECellState::Empty)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("XXXXX Failed at %d %d"), X, Y);
+					bIsSideValid = false;
+					break;
+				}
+			}
+
+			if (bIsSideValid == false)
+			{
+				break;
+			}
+		}
+
+		if (bIsSideValid == true)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("vvvvv Side is valid"));
+			bIsPositionValid = true;
+			break;
+		}
+
+	}
+
+	return bIsPositionValid;
+
+	// END - V2
+
+	//// At least 3 sides has to be valid
+	//// Check if there are at least 2 adjacent empty cells (both side and diagonal)
+	//int32 NumberOfValidSides = 0;
+
+	//TArray<TArray<FIntPoint>> Sides = {
+	//	// Right
+	//	{ 
+	//		FIntPoint(1, 0), FIntPoint(2, 0),
+	//		FIntPoint(1, 1), FIntPoint(2, 2),
+	//		FIntPoint(1, -1), FIntPoint(2, -2),
+	//	},
+
+	//	// Left
+	//	{ 
+	//		FIntPoint(-1, 0), FIntPoint(-2, 0),
+	//		FIntPoint(-1, -1), FIntPoint(-2, -2),
+	//		FIntPoint(-1, 1), FIntPoint(-2, 2),
+	//	},
+
+	//	// Top
+	//	{ 
+	//		FIntPoint(0, 1), FIntPoint(0, 2), 
+	//		FIntPoint(1, 1), FIntPoint(2, 2), 
+	//		FIntPoint(-1, 1), FIntPoint(-2, 2), 
+	//	},
+
+	//	// Bottom
+	//	{ 
+	//		FIntPoint(0, -1), FIntPoint(0, -2),
+	//		FIntPoint(1, -1), FIntPoint(2, -2),
+	//		FIntPoint(-1, -1), FIntPoint(-2, -2),
+	//	},
+	//};
+
+	//for (const TArray<FIntPoint>& Side : Sides)
+	//{
+	//	bool bIsSideValid = true;
+
+	//	for (const FIntPoint& Cell : Side)
+	//	{
+
+	//		int32 ColToCheck = Col + Cell.X;
+	//		int32 RowToCheck = Row + Cell.Y;
+
+	//		if (
+	//			IsOutOfGrid(ColToCheck, RowToCheck)
+	//			|| Grid[ColToCheck][RowToCheck] != ECellState::Empty)
+	//		{
+	//			bIsSideValid = false;
+	//			break;
+	//		}
+	//	}
+
+	//	if (bIsSideValid)
+	//	{
+	//		NumberOfValidSides++;
+	//	}
+	//}
+
+	//return NumberOfValidSides >= 3;
 }
 
 void ALayoutGrid::InitializeFloor()
@@ -143,8 +368,8 @@ void ALayoutGrid::InitializeFloor()
 	FVector CurrentLocation = FloorComponent->GetRelativeLocation();
 	FVector CurrentScale = FloorComponent->GetRelativeScale3D();
 
-	FloorComponent->SetRelativeLocation(FVector(Center.X, Center.Y, CurrentLocation.Z));
-	FloorComponent->SetWorldScale3D(FVector(Cols, Rows, CurrentScale.Z));
+	FloorComponent->SetRelativeLocation(FVector(WorldGridCenter.X, WorldGridCenter.Y, CurrentLocation.Z));
+	FloorComponent->SetWorldScale3D(FVector(Rows, Cols, CurrentScale.Z));
 
 }
 
@@ -166,7 +391,7 @@ void ALayoutGrid::InitializeWalls()
 	{
 		SpawnWall(3, i, ECellState::DefaultWall, TEXT("EnemyBase"));
 	}
-	
+
 	// Ally Base walls
 	for (int32 j = (Rows - 2); j >= (Rows - 6); j--)
 	{
@@ -177,9 +402,23 @@ void ALayoutGrid::InitializeWalls()
 
 void ALayoutGrid::SpawnWall(int32 Col, int32 Row, ECellState State, const FString& Folder)
 {
+	if (IsOutOfGrid(Col, Row)) return;
+
 	Grid[Col][Row] = State;
 
-	AActor* SpawnedWall = GetWorld()->SpawnActor<AWall>(DefaultWallBluePrintClass, FVector((Row * CellSize), (Col * CellSize), 0.f), FRotator::ZeroRotator);
+	TSubclassOf<AWall> BluePrintClass;
+	switch (State)
+	{
+	case ECellState::DefaultWall:
+		BluePrintClass = DefaultWallBluePrintClass;
+		break;
+	case ECellState::TurretWall:
+	default:
+		BluePrintClass = TurretWallBluePrintClass;
+		break;
+	}
+
+	AActor* SpawnedWall = GetWorld()->SpawnActor<AWall>(BluePrintClass, FVector((Row * CellSize), (Col * CellSize), 0.f), FRotator::ZeroRotator);
 
 	if (SpawnedWall)
 	{

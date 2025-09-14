@@ -4,6 +4,7 @@
 #include "LayoutEditorPlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "TowerDefense/Input/Config/LayoutEditorInputConfig.h"
 #include "TowerDefense/Input/Config/CameraInputConfig.h"
 #include "InputActionValue.h"
 #include "TowerDefense/GameCamera.h"
@@ -43,6 +44,11 @@ void ALayoutEditorPlayerController::SetupInputComponent()
 
 	if (UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(InputComponent))
 	{
+		if (LayoutEditorInputConfig)
+		{
+			EnhancedInput->BindAction(LayoutEditorInputConfig->IA_PrimaryAction, ETriggerEvent::Triggered, this, &ALayoutEditorPlayerController::PrimaryAction);
+		}
+
 		if (CameraInputConfig)
 		{
 			EnhancedInput->BindAction(CameraInputConfig->IA_MoveCamera, ETriggerEvent::Triggered, this, &ALayoutEditorPlayerController::MoveCamera);
@@ -62,6 +68,14 @@ void ALayoutEditorPlayerController::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	DeprojectMouse();
+}
+
+void ALayoutEditorPlayerController::PrimaryAction()
+{
+	if (LayoutGrid)
+	{
+		LayoutGrid->RequestWallBuild();
+	}
 }
 
 void ALayoutEditorPlayerController::MoveCamera(const FInputActionValue& Value)

@@ -8,6 +8,7 @@
 
 class UInputMappingContext;
 class UInputAction;
+class ULayoutEditorInputConfig;
 class UCameraInputConfig;
 class AGameCamera;
 class ALayoutGrid;
@@ -37,8 +38,8 @@ private:
 	AGameCamera* CameraPawn;
 
 	// Input Mapping Contexts
-	/*UPROPERTY(EditAnywhere, Category = "Input")
-	UCameraInputConfig* LayoutEditorInputConfig;*/
+	UPROPERTY(EditAnywhere, Category = "Input")
+	ULayoutEditorInputConfig* LayoutEditorInputConfig;
 
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputMappingContext* LayoutEditorMappingContext;
@@ -50,6 +51,8 @@ private:
 	UInputMappingContext* CameraMappingContext;
 
 	// Input functions
+	void PrimaryAction();
+
 	void MoveCamera(const FInputActionValue& Value);
 
 	void RotateCamera(const FInputActionValue& Value);

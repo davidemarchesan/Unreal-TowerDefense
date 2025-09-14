@@ -10,6 +10,7 @@
 #include "LayoutGrid.generated.h"
 
 class AWall;
+class APreviewWall;
 class ANavMeshBoundsVolume;
 class UNavigationSystemV1;
 
@@ -25,6 +26,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void RequestPreview(FVector Location);
+
+	void RequestWallBuild();
 
 protected:
 
@@ -52,7 +55,13 @@ private:
 
 	void InitializeGrid();
 
-	FVector Center;
+	bool bIsGridInitialized = false;
+
+	FVector WorldGridCenter;
+
+	bool IsOutOfGrid(int32 Col, int32 Row);
+
+	bool IsPositionValidToBuildOn(int32 Col, int32 Row);
 
 	// Floor
 	UPROPERTY(EditAnywhere, Category="Components")
@@ -66,7 +75,7 @@ private:
 	
 	// Walls
 	UPROPERTY(EditAnywhere, Category="BluePrints")
-	TSubclassOf<AWall> WallBluePrintClass;
+	TSubclassOf<AWall> TurretWallBluePrintClass;
 
 	UPROPERTY(EditAnywhere, Category="BluePrints")
 	TSubclassOf<AWall> DefaultWallBluePrintClass;
@@ -76,7 +85,10 @@ private:
 	void SpawnWall(int32 Col, int32 Row, ECellState State, const FString& Folder);
 
 	// Preview wall
-	AWall* PreviewWall = nullptr;
+	UPROPERTY(EditAnywhere, Category = "BluePrints")
+	TSubclassOf<APreviewWall> PreviewWallBluePrintClass;
+
+	APreviewWall* PreviewWall = nullptr;
 
 	int32 PreviewWallCol;
 	int32 PreviewWallRow;

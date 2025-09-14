@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "TowerDefense/Enums/PreviewWallState.h"
 #include "Wall.generated.h"
 
 class UStaticMeshComponent;
@@ -15,19 +16,12 @@ class TOWERDEFENSE_API AWall : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
+
 	AWall();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+protected: 
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-private: 
-
+	// Components
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	USceneComponent* SceneRoot;
 
