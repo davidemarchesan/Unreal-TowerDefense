@@ -12,6 +12,7 @@
 #include "EngineUtils.h"
 #include "TowerDefense/Enums/PreviewWallState.h"
 #include "MainBase.h"
+#include "DrawDebugHelpers.h"
 
 //done - creare controller e input diversi
 //done - spawnare wall
@@ -156,10 +157,14 @@ void ALayoutGrid::BuildNavMesh()
 
 bool ALayoutGrid::IsPathAvailable()
 {
+	//return true;
 	if (NavSystem)
 	{
 
-		FVector StartPosition((2.5f * CellSize), (2.5f * CellSize), 0.f);
+		NavSystem->Build();
+
+		FVector StartPosition((1.5f * CellSize), (1.5f * CellSize), 0.f);
+		//FVector StartPosition(500.f, 500.f, 0.f);
 
 		FPathFindingQuery Query(
 			nullptr,
@@ -178,7 +183,36 @@ bool ALayoutGrid::IsPathAvailable()
 
 		UE_LOG(LogTemp, Warning, TEXT("IsPathAvailable %s"), (biss == true ? TEXT("y") : TEXT("n")));
 
-		return Result.IsSuccessful();
+		if (Result.IsSuccessful() && Result.Path.IsValid())
+		{
+			if (Result.Path->IsPartial())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("partial"));
+				return false;
+			}
+			else {
+				UE_LOG(LogTemp, Warning, TEXT("OK"));
+
+				const TArray<FNavPathPoint>& Points = Result.Path->GetPathPoints();
+
+				for (int32 i = 0; i < Points.Num(); i++)
+				{
+					const FVector& P = Points[i].Location;
+
+					// Disegna sfera per ogni waypoint
+					DrawDebugSphere(GetWorld(), P, 20.f, 12, FColor::Green, false, 5.f);
+
+					// Disegna linea verso il prossimo
+					if (i + 1 < Points.Num())
+					{
+						const FVector& Next = Points[i + 1].Location;
+						DrawDebugLine(GetWorld(), P, Next, FColor::Yellow, false, 5.f, 0, 2.f);
+					}
+				}
+
+				return true;
+			}
+		}
 
 	}
 
