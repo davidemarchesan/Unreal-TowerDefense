@@ -48,7 +48,7 @@ private:
 
 	void BuildNavMesh();
 
-	bool IsPathAvailable();
+	bool IsPathValid();
 
 	// Grid
 	TArray<TArray<ECellState>> Grid;
@@ -103,6 +103,8 @@ private:
 
 	// Ally Base
 	void InitializeAllyBase();
+
+	FVector WorldAllyBaseLocation;
 
 	UPROPERTY(EditAnywhere, Category = "BluePrints")
 	TSubclassOf<AMainBase> AllyBasePrintClass;

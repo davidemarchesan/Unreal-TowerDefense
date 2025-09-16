@@ -17,8 +17,8 @@
 //done - creare controller e input diversi
 //done - spawnare wall
 //done - mettere le basi
-//sistemare AI -> creare nuovo AEnemy con sola AI
-//calcolare la navmesh ad ogni preview
+//done - sistemare AI -> creare nuovo AEnemy con sola AI
+//done - calcolare la navmesh ad ogni preview
 //creare gamemode
 //salvare layout
 //caricare layout
@@ -84,6 +84,7 @@ void ALayoutGrid::RequestPreview(FVector Location)
 
 		if (PreviewWall == nullptr)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Spawning preview wall"));
 			PreviewWall = GetWorld()->SpawnActor<APreviewWall>(PreviewWallBluePrintClass, FVector((Row * CellSize), (Col * CellSize), 0.f), FRotator::ZeroRotator);
 
 			if (PreviewWall)
@@ -99,7 +100,6 @@ void ALayoutGrid::RequestPreview(FVector Location)
 			PreviewWall->SetActorLocation(FVector((Row * CellSize), (Col * CellSize), 0.f));
 		}
 
-		
 		bool bIsPositionValid = IsPositionValidToBuildOn(Col, Row);
 		PreviewWall->SetPreviewState(bIsPositionValid ? EPreviewWallState::Valid : EPreviewWallState::Invalid);
 
@@ -155,43 +155,33 @@ void ALayoutGrid::BuildNavMesh()
 
 }
 
-bool ALayoutGrid::IsPathAvailable()
+bool ALayoutGrid::IsPathValid()
 {
-	//return true;
 	if (NavSystem)
 	{
 
+		// Yes, we need to run this every time
 		NavSystem->Build();
 
 		FVector StartPosition((1.5f * CellSize), (1.5f * CellSize), 0.f);
-		//FVector StartPosition(500.f, 500.f, 0.f);
 
 		FPathFindingQuery Query(
 			nullptr,
 			*NavData,
 			StartPosition,
-			WorldGridCenter
+			WorldAllyBaseLocation
 		);
 
-
-		UE_LOG(LogTemp, Warning, TEXT("world grid center %s"), *WorldGridCenter.ToString());
 		FNavPathSharedPtr NavPath;
-
 		FPathFindingResult Result = NavSystem->FindPathSync(Query);
-
-		bool biss = Result.IsSuccessful();
-
-		UE_LOG(LogTemp, Warning, TEXT("IsPathAvailable %s"), (biss == true ? TEXT("y") : TEXT("n")));
 
 		if (Result.IsSuccessful() && Result.Path.IsValid())
 		{
 			if (Result.Path->IsPartial())
 			{
-				UE_LOG(LogTemp, Warning, TEXT("partial"));
 				return false;
 			}
 			else {
-				UE_LOG(LogTemp, Warning, TEXT("OK"));
 
 				const TArray<FNavPathPoint>& Points = Result.Path->GetPathPoints();
 
@@ -249,7 +239,7 @@ bool ALayoutGrid::IsPositionValidToBuildOn(const int32 Col, const int32 Row)
 
 	if (IsOutOfGrid(Col, Row)) return false;
 
-	if (IsPathAvailable() == false) return false;
+	if (IsPathValid() == false) return false;
 
 	return true;
 
@@ -527,7 +517,25 @@ void ALayoutGrid::InitializeAllyBase()
 	float Col = Cols - 2.5f;
 	float Row = Rows - 2.5f;
 
-	GetWorld()->SpawnActor<AMainBase>(AllyBasePrintClass, FVector((Row * CellSize), (Col * CellSize), 0.f), FRotator::ZeroRotator);
+	WorldAllyBaseLocation = FVector((Row * CellSize), (Col * CellSize), 0.f);
+
+	GetWorld()->SpawnActor<AMainBase>(AllyBasePrintClass, WorldAllyBaseLocation, FRotator::ZeroRotator);
+
+	if (bIsGridInitialized)
+	{
+
+		// Enemy spawn
+		Grid[1][1] = ECellState::Disabled;
+		Grid[1][2] = ECellState::Disabled;
+		Grid[2][1] = ECellState::Disabled;
+		Grid[2][2] = ECellState::Disabled;
+
+		// Ally base
+		Grid[Cols - 2][Rows - 2] = ECellState::Disabled;
+		Grid[Cols - 2][Rows - 3] = ECellState::Disabled;
+		Grid[Cols - 3][Rows - 2] = ECellState::Disabled;
+		Grid[Cols - 3][Rows - 3] = ECellState::Disabled;
+	}
 }
 
 // Called every frame
