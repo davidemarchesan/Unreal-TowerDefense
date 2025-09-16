@@ -23,6 +23,14 @@
 //salvare layout
 //caricare layout
 
+/*
+to deprecate
+- topdownplayercontroller
+- topdowncamera
+- enemybase
+- topdowngamemode
+*/
+
 // Sets default values
 ALayoutGrid::ALayoutGrid()
 {
