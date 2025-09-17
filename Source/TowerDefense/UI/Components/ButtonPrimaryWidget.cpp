@@ -12,7 +12,6 @@ void SButtonPrimaryWidget::Construct(const FArguments& InArgs)
 {
 	ButtonText = InArgs._ButtonText;
 
-	// Costruisci il widget
 	ChildSlot
 		[
 			SNew(SBorder)

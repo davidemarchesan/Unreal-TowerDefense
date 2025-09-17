@@ -8,6 +8,7 @@
 
 #include "SlateBasics.h"
 #include "SlateExtras.h"
+#include "TowerDefense/UI/Components/ButtonInputWidget.h"
 
 #include "Widgets/SWeakWidget.h"
 #include "Widgets/SOverlay.h"
@@ -22,23 +23,22 @@ void ALayoutEditorHUD::BeginPlay()
 	if (GEngine && GEngine->GameViewport)
 	{
 
-		UE_LOG(LogTemp, Warning, TEXT("Adding HUD"));
-
-		TSharedRef<SOverlay> RootOverlay = SNew(SOverlay);
+		const TSharedRef<SOverlay> RootOverlay = SNew(SOverlay);
 
 		RootOverlay->AddSlot()
-		.HAlign(HAlign_Right)
-		.VAlign(VAlign_Bottom)
-		.Padding(FMargin(20))
+		           .HAlign(HAlign_Right)
+		           .VAlign(VAlign_Bottom)
+		           .Padding(FMargin(20))
 		[
-			SNew(SButtonPrimaryWidget)
-				.ButtonText(FText::FromString("Save"))
+			// SNew(SButtonPrimaryWidget)
+			// .ButtonText(FText::FromString("Save"))
+
+			SNew(SButtonInputWidget)
+			.InputText(FText::FromString("B"))
+			.ButtonText(FText::FromString("BUILD"))
 		];
 
 		GEngine->GameViewport->AddViewportWidgetContent(RootOverlay);
-		/*GEngine->GameViewport->AddViewportWidgetContent(
-			SNew(SWeakWidget).PossiblyNullContent(RootOverlay.ToSharedRef())
-		);*/
 	}
 }
 

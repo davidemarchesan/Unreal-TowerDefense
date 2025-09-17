@@ -14,23 +14,6 @@
 #include "MainBase.h"
 #include "DrawDebugHelpers.h"
 
-//done - creare controller e input diversi
-//done - spawnare wall
-//done - mettere le basi
-//done - sistemare AI -> creare nuovo AEnemy con sola AI
-//done - calcolare la navmesh ad ogni preview
-//creare gamemode
-//salvare layout
-//caricare layout
-
-/*
-to deprecate
-- topdownplayercontroller
-- topdowncamera
-- enemybase
-- topdowngamemode
-*/
-
 // Sets default values
 ALayoutGrid::ALayoutGrid()
 {
@@ -39,6 +22,8 @@ ALayoutGrid::ALayoutGrid()
 
 	FloorComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("FloorComponent"));
 	FloorComponent->SetupAttachment(RootComponent);
+
+	UE_LOG(LogTemp, Warning, TEXT("ALayoutGrid::ALayoutGrid()"));
 
 }
 
