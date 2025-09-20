@@ -71,6 +71,9 @@ private:
 
 	void GetLayoutGrid();
 
+	UFUNCTION()
+	void OnGridInitialized();
+
 	void DeprojectMouse();
 
 	bool bIsBuildMode = false;

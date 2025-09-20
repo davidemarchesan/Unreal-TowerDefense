@@ -6,16 +6,10 @@
 #include "Engine/Engine.h"
 #include "Engine/GameViewportClient.h"
 
-#include "SlateBasics.h"
-#include "SlateExtras.h"
 #include "TowerDefense/PlayerControllers/LayoutEditorPlayerController.h"
 #include "TowerDefense/UI/Components/ButtonInputWidget.h"
 
-#include "Widgets/SWeakWidget.h"
 #include "Widgets/SOverlay.h"
-#include "Widgets/SViewport.h"
-
-#include "TowerDefense/UI/Components/ButtonPrimaryWidget.h"
 
 void ALayoutEditorHUD::BeginPlay()
 {

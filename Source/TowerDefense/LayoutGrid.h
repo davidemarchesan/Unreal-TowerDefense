@@ -10,11 +10,14 @@
 #include "LayoutGrid.generated.h"
 
 class AWall;
+class ATurretWall;
 class APreviewWall;
 class ANavMeshBoundsVolume;
 class UNavigationSystemV1;
 class ANavigationData;
 class AMainBase;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGridInitialized);
 
 UCLASS()
 class TOWERDEFENSE_API ALayoutGrid : public AActor
@@ -32,6 +35,12 @@ public:
 	void RequestWallBuild();
 
 	void RequestResetPreviewWall();
+
+	bool IsGridInitialized() const { return bIsGridInitialized; }
+
+	FVector GetWorldGridCenter() const { return WorldGridCenter; }
+
+	FOnGridInitialized OnGridInitialized;
 
 protected:
 
@@ -54,6 +63,8 @@ private:
 
 	// Grid
 	TArray<TArray<ECellState>> Grid;
+
+	TMap<FIntPoint, AWall*> TurretWallsMap;
 
 	UPROPERTY(EditAnywhere, Category="Grid")
 	int32 Rows = 20;

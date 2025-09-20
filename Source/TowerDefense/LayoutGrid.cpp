@@ -66,15 +66,16 @@ void ALayoutGrid::RequestPreview(FVector Location)
 		return;
 	}
 
+	UE_LOG(LogTemp, Warning, TEXT("ALayoutGrid::RequestPreview() %d %d"), Col, Row);
+	PreviewWallCol = Col;
+	PreviewWallRow = Row;
+	
 	ECellState State = Grid[Col][Row];
 
 	if (State == ECellState::Empty)
 	{
 
 		// It is ok to preview
-		PreviewWallCol = Col;
-		PreviewWallRow = Row;
-
 		if (PreviewWall == nullptr)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Spawning preview wall"));
@@ -82,7 +83,7 @@ void ALayoutGrid::RequestPreview(FVector Location)
 
 			if (PreviewWall)
 			{
-				FString WallName = FString::Printf(TEXT("PreviewWall"), Col, Row);
+				FString WallName = FString::Printf(TEXT("PreviewWall"));
 				FString Path = FString::Printf(TEXT("Walls"));
 				PreviewWall->SetFolderPath(*Path);
 				PreviewWall->SetActorLabel(*WallName);
@@ -107,7 +108,28 @@ void ALayoutGrid::RequestPreview(FVector Location)
 void ALayoutGrid::RequestWallBuild()
 {
 
-	if (IsPositionValidToBuildOn(PreviewWallCol, PreviewWallRow))
+	// temp
+	if (Grid[PreviewWallCol][PreviewWallRow] == ECellState::TurretWall)
+	{
+
+		UE_LOG(LogTemp, Warning, TEXT("ALayoutGrid::RequestWallBuild removing wall"));
+		// Remove wall
+		Grid[PreviewWallCol][PreviewWallRow] = ECellState::Empty;
+
+		FIntPoint Coord(PreviewWallCol, PreviewWallRow);
+
+		AWall** Wall = TurretWallsMap.Find(Coord);
+
+		if (Wall)
+		{
+			TurretWallsMap[Coord]->Destroy();
+			TurretWallsMap.Remove(Coord);
+		}
+
+	}
+	// end temp
+	
+	else if (Grid[PreviewWallCol][PreviewWallRow] == ECellState::Empty && IsPositionValidToBuildOn(PreviewWallCol, PreviewWallRow))
 	{
 		SpawnWall(PreviewWallCol, PreviewWallRow, ECellState::TurretWall, TEXT("TurretWalls"));
 		ResetPreviewWall();
@@ -223,6 +245,9 @@ void ALayoutGrid::InitializeGrid()
 	}
 
 	bIsGridInitialized = true;
+	UE_LOG(LogTemp, Warning, TEXT("ALayoutGrid: grid is initialized"));
+
+	OnGridInitialized.Broadcast();
 }
 
 bool ALayoutGrid::IsOutOfGrid(int32 Col, int32 Row)
@@ -487,7 +512,7 @@ void ALayoutGrid::SpawnWall(int32 Col, int32 Row, ECellState State, const FStrin
 		break;
 	}
 
-	AActor* SpawnedWall = GetWorld()->SpawnActor<AWall>(BluePrintClass, FVector((Row * CellSize), (Col * CellSize), 0.f), FRotator::ZeroRotator);
+	AWall* SpawnedWall = GetWorld()->SpawnActor<AWall>(BluePrintClass, FVector((Row * CellSize), (Col * CellSize), 0.f), FRotator::ZeroRotator);
 
 	if (SpawnedWall)
 	{
@@ -495,6 +520,8 @@ void ALayoutGrid::SpawnWall(int32 Col, int32 Row, ECellState State, const FStrin
 		FString Path = FString::Printf(TEXT("Walls/%s"), *Folder);
 		SpawnedWall->SetFolderPath(*Path);
 		SpawnedWall->SetActorLabel(*WallName);
+
+		TurretWallsMap.Add(FIntPoint(Col, Row), SpawnedWall);
 	}
 }
 

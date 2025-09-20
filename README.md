@@ -12,7 +12,7 @@
 - [x] Spawn walls
 - [x] Create AI with NavMesh
 - [x] Build and valid path when previewing
-- [ ] Create simple UI
+- [ ] [DOING] Create simple UI
 - [ ] Create GameMode
 - [ ] Save and load layout
 
@@ -22,3 +22,8 @@
 - [ ] topdowncamera
 - [ ] enemybase
 - [ ] topdowngamemode
+
+### DOING
+
+Refactor LayoutGrid class to handle placement and removal of wall.
+Create border when hovering turret wall.

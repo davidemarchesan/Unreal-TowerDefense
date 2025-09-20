@@ -131,9 +131,33 @@ void ALayoutEditorPlayerController::GetLayoutGrid()
 
 		if (LayoutGrid)
 		{
+
+			if (LayoutGrid->IsGridInitialized())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("PLAYER CONTROLLER: GRID ALREADY INIT"));
+				OnGridInitialized();
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("PLAYER CONTROLLER: ADD DYNAMIC"));
+				LayoutGrid->OnGridInitialized.AddDynamic(this, &ALayoutEditorPlayerController::OnGridInitialized);
+			}
+			
 			break;
 		}
 	}
+}
+
+void ALayoutEditorPlayerController::OnGridInitialized()
+{
+
+	FVector GridCenter = LayoutGrid->GetWorldGridCenter();
+
+	if (CameraPawn)
+	{
+		CameraPawn->SetActorLocation(GridCenter);
+	}
+
 }
 
 void ALayoutEditorPlayerController::DeprojectMouse()
