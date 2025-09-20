@@ -10,6 +10,7 @@
 #include "TowerDefense/GameCamera.h"
 #include "TowerDefense/LayoutGrid.h"
 #include "EngineUtils.h"
+#include "TowerDefense/UI/LayoutEditor/LayoutEditorHUD.h"
 
 void ALayoutEditorPlayerController::BeginPlay()
 {
@@ -36,6 +37,8 @@ void ALayoutEditorPlayerController::BeginPlay()
 
 	GetLayoutGrid();
 
+	HUD = Cast<ALayoutEditorHUD>(GetHUD());
+
 }
 
 void ALayoutEditorPlayerController::SetupInputComponent()
@@ -47,6 +50,8 @@ void ALayoutEditorPlayerController::SetupInputComponent()
 		if (LayoutEditorInputConfig)
 		{
 			EnhancedInput->BindAction(LayoutEditorInputConfig->IA_PrimaryAction, ETriggerEvent::Triggered, this, &ALayoutEditorPlayerController::PrimaryAction);
+			
+			EnhancedInput->BindAction(LayoutEditorInputConfig->IA_EnterBuildMode, ETriggerEvent::Triggered, this, &ALayoutEditorPlayerController::ToggleBuildMode);
 		}
 
 		if (CameraInputConfig)
@@ -72,9 +77,20 @@ void ALayoutEditorPlayerController::Tick(float DeltaTime)
 
 void ALayoutEditorPlayerController::PrimaryAction()
 {
-	if (LayoutGrid)
+	if (LayoutGrid && IsBuildModeActive())
 	{
 		LayoutGrid->RequestWallBuild();
+	}
+}
+
+void ALayoutEditorPlayerController::ToggleBuildMode()
+{
+	bIsBuildMode = !bIsBuildMode;
+	if (HUD) HUD->ToggleBuildMode(bIsBuildMode);
+
+	if (IsBuildModeActive() == false && LayoutGrid)
+	{
+		LayoutGrid->RequestResetPreviewWall();
 	}
 }
 
@@ -122,7 +138,7 @@ void ALayoutEditorPlayerController::GetLayoutGrid()
 
 void ALayoutEditorPlayerController::DeprojectMouse()
 {
-	if (LayoutGrid == nullptr) return;
+	if (LayoutGrid == nullptr || IsBuildModeActive() == false) return;
 
 	FHitResult Hit;
 	if (GetHitResultUnderCursor(ECC_GameTraceChannel1, false, Hit))

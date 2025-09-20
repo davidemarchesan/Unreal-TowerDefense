@@ -12,6 +12,7 @@ class ULayoutEditorInputConfig;
 class UCameraInputConfig;
 class AGameCamera;
 class ALayoutGrid;
+class ALayoutEditorHUD;
 struct FInputActionValue;
 
 /**
@@ -32,10 +33,16 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
+	// Input functions
+	void ToggleBuildMode();
+
 private:
 
 	// Pawn
 	AGameCamera* CameraPawn;
+
+	// HUD
+	ALayoutEditorHUD* HUD;
 
 	// Input Mapping Contexts
 	UPROPERTY(EditAnywhere, Category = "Input")
@@ -65,5 +72,9 @@ private:
 	void GetLayoutGrid();
 
 	void DeprojectMouse();
+
+	bool bIsBuildMode = false;
+
+	bool IsBuildModeActive() const { return bIsBuildMode;}
 	
 };

@@ -20,6 +20,21 @@ public:
 	virtual void BeginPlay() override;
 	virtual void DrawHUD() override;
 
+	void ToggleBuildMode(bool _bIsBuildMode);
+
 private:
 	ALayoutEditorPlayerController* PlayerController;
+
+	bool bIsBuildMode = false;
+
+	// Components
+	TSharedPtr<SBorder> BuildModeBorder;
+
+	TSharedPtr<SBox> StandardModeBox;
+	TSharedPtr<SBox> BuildModeBox;
+
+	// Button callbacks
+	FReply OnToggleBuildMode();
+
+	void UpdateComponentsOnBuildMode();
 };

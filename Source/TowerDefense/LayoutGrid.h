@@ -31,6 +31,8 @@ public:
 
 	void RequestWallBuild();
 
+	void RequestResetPreviewWall();
+
 protected:
 
 	virtual void BeginPlay() override;

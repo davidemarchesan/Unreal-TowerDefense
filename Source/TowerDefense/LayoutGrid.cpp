@@ -114,6 +114,11 @@ void ALayoutGrid::RequestWallBuild()
 	}
 }
 
+void ALayoutGrid::RequestResetPreviewWall()
+{
+	ResetPreviewWall();
+}
+
 void ALayoutGrid::InitializeNavMesh()
 {
 	for (TActorIterator<ANavMeshBoundsVolume> It(GetWorld()); It; ++It)

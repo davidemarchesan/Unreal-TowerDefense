@@ -11,6 +11,7 @@ void SButtonInputWidget::Construct(const FArguments& InArgs)
 {
 	InputText = InArgs._InputText;
 	ButtonText = InArgs._ButtonText;
+	OnClicked = InArgs._OnClicked;
 
 	FTextBlockStyle TextStyle = FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>("NormalText");
 	TextStyle.SetFontSize(20.f);
@@ -20,6 +21,7 @@ void SButtonInputWidget::Construct(const FArguments& InArgs)
 	ChildSlot
 	[
 		SNew(SButton)
+		.OnClicked(OnClicked)
 		.ContentPadding(FMargin(0.f, 8.f))
 		.Content()
 		[
@@ -37,18 +39,6 @@ void SButtonInputWidget::Construct(const FArguments& InArgs)
 					.TextStyle(&TextStyle)
 				]
 			]
-
-			// + SHorizontalBox::Slot()
-			// .AutoWidth()
-			// [
-			// 	SNew(SBorder)
-			// 	.BorderBackgroundColor(FLinearColor::White)
-			// 	.Padding(FMargin(1.5f, 0.f))
-			// 	[
-			// 		SNew(SSpacer)
-			// 		.Size(FVector2D(.5f, 0.f))
-			// 	]
-			// ]
 
 			+ SHorizontalBox::Slot()
 			.AutoWidth()

@@ -18,6 +18,7 @@ public:
 
 		SLATE_ARGUMENT(FText, InputText)
 		SLATE_ARGUMENT(FText, ButtonText)
+		SLATE_EVENT(FOnClicked, OnClicked)
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs);
@@ -25,4 +26,5 @@ public:
 private:
 	FText InputText;
 	FText ButtonText;
+	FOnClicked OnClicked;
 };
