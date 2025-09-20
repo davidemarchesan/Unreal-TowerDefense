@@ -30,9 +30,11 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
-	void RequestPreview(FVector Location);
+	void RequestPreviewWall(FVector Location);
 
-	void RequestWallBuild();
+	bool RequestWallBuild(FVector Location);
+
+	void RequestWallRemoval(int32 Col, int32 Row);
 
 	void RequestResetPreviewWall();
 
@@ -104,6 +106,8 @@ private:
 	void SpawnWall(int32 Col, int32 Row, ECellState State, const FString& Folder);
 
 	// Preview wall
+	bool bIsPreviewingWall = false;
+	
 	UPROPERTY(EditAnywhere, Category = "BluePrints")
 	TSubclassOf<APreviewWall> PreviewWallBluePrintClass;
 

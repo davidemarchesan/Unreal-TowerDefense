@@ -11,6 +11,7 @@
 #include "TowerDefense/LayoutGrid.h"
 #include "EngineUtils.h"
 #include "TowerDefense/UI/LayoutEditor/LayoutEditorHUD.h"
+#include "TowerDefense/Walls/Wall.h"
 
 void ALayoutEditorPlayerController::BeginPlay()
 {
@@ -20,7 +21,8 @@ void ALayoutEditorPlayerController::BeginPlay()
 
 	if (ULocalPlayer* LocalPlayer = Cast<ULocalPlayer>(Player))
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* InputSystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
+		if (UEnhancedInputLocalPlayerSubsystem* InputSystem = LocalPlayer->GetSubsystem<
+			UEnhancedInputLocalPlayerSubsystem>())
 		{
 			if (LayoutEditorMappingContext)
 			{
@@ -38,7 +40,6 @@ void ALayoutEditorPlayerController::BeginPlay()
 	GetLayoutGrid();
 
 	HUD = Cast<ALayoutEditorHUD>(GetHUD());
-
 }
 
 void ALayoutEditorPlayerController::SetupInputComponent()
@@ -49,21 +50,29 @@ void ALayoutEditorPlayerController::SetupInputComponent()
 	{
 		if (LayoutEditorInputConfig)
 		{
-			EnhancedInput->BindAction(LayoutEditorInputConfig->IA_PrimaryAction, ETriggerEvent::Triggered, this, &ALayoutEditorPlayerController::PrimaryAction);
-			
-			EnhancedInput->BindAction(LayoutEditorInputConfig->IA_EnterBuildMode, ETriggerEvent::Triggered, this, &ALayoutEditorPlayerController::ToggleBuildMode);
+			EnhancedInput->BindAction(LayoutEditorInputConfig->IA_PrimaryAction, ETriggerEvent::Triggered, this,
+			                          &ALayoutEditorPlayerController::PrimaryAction);
+
+			EnhancedInput->BindAction(LayoutEditorInputConfig->IA_EnterBuildMode, ETriggerEvent::Triggered, this,
+			                          &ALayoutEditorPlayerController::ToggleBuildMode);
 		}
 
 		if (CameraInputConfig)
 		{
-			EnhancedInput->BindAction(CameraInputConfig->IA_MoveCamera, ETriggerEvent::Triggered, this, &ALayoutEditorPlayerController::MoveCamera);
-			EnhancedInput->BindAction(CameraInputConfig->IA_MoveCamera, ETriggerEvent::Completed, this, &ALayoutEditorPlayerController::MoveCamera);
-		
-			EnhancedInput->BindAction(CameraInputConfig->IA_RotateCamera, ETriggerEvent::Triggered, this, &ALayoutEditorPlayerController::RotateCamera);
-			EnhancedInput->BindAction(CameraInputConfig->IA_RotateCamera, ETriggerEvent::Completed, this, &ALayoutEditorPlayerController::RotateCamera);
-			
-			EnhancedInput->BindAction(CameraInputConfig->IA_ZoomCamera, ETriggerEvent::Triggered, this, &ALayoutEditorPlayerController::ZoomCamera);
-			EnhancedInput->BindAction(CameraInputConfig->IA_ZoomCamera, ETriggerEvent::Completed, this, &ALayoutEditorPlayerController::ZoomCamera);
+			EnhancedInput->BindAction(CameraInputConfig->IA_MoveCamera, ETriggerEvent::Triggered, this,
+			                          &ALayoutEditorPlayerController::MoveCamera);
+			EnhancedInput->BindAction(CameraInputConfig->IA_MoveCamera, ETriggerEvent::Completed, this,
+			                          &ALayoutEditorPlayerController::MoveCamera);
+
+			EnhancedInput->BindAction(CameraInputConfig->IA_RotateCamera, ETriggerEvent::Triggered, this,
+			                          &ALayoutEditorPlayerController::RotateCamera);
+			EnhancedInput->BindAction(CameraInputConfig->IA_RotateCamera, ETriggerEvent::Completed, this,
+			                          &ALayoutEditorPlayerController::RotateCamera);
+
+			EnhancedInput->BindAction(CameraInputConfig->IA_ZoomCamera, ETriggerEvent::Triggered, this,
+			                          &ALayoutEditorPlayerController::ZoomCamera);
+			EnhancedInput->BindAction(CameraInputConfig->IA_ZoomCamera, ETriggerEvent::Completed, this,
+			                          &ALayoutEditorPlayerController::ZoomCamera);
 		}
 	}
 }
@@ -77,9 +86,26 @@ void ALayoutEditorPlayerController::Tick(float DeltaTime)
 
 void ALayoutEditorPlayerController::PrimaryAction()
 {
-	if (LayoutGrid && IsBuildModeActive())
+	if (IsBuildModeActive() && LayoutGrid)
 	{
-		LayoutGrid->RequestWallBuild();
+		FHitResult Hit;
+		if (GetHitResultUnderCursor(ECC_GameTraceChannel1, false, Hit))
+		{
+			if (Hit.GetActor()->ActorHasTag(FName("TurretWall")))
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Hit is TurretWall"));
+				AWall* TurretWall = Cast<AWall>(Hit.GetActor());
+
+				if (TurretWall)
+				{
+					LayoutGrid->RequestWallRemoval(TurretWall->Col, TurretWall->Row);
+				}
+			}
+			else if (Hit.GetActor()->ActorHasTag(FName("LayoutGrid")))
+			{
+				LayoutGrid->RequestWallBuild(Hit.Location);
+			}
+		}
 	}
 }
 
@@ -96,13 +122,11 @@ void ALayoutEditorPlayerController::ToggleBuildMode()
 
 void ALayoutEditorPlayerController::MoveCamera(const FInputActionValue& Value)
 {
-
 	if (CameraPawn)
 	{
 		FVector2D InputValue = Value.Get<FVector2D>();
 		CameraPawn->RequestMove(FVector2D(InputValue.Y, InputValue.X));
 	}
-
 }
 
 void ALayoutEditorPlayerController::RotateCamera(const FInputActionValue& Value)
@@ -131,18 +155,15 @@ void ALayoutEditorPlayerController::GetLayoutGrid()
 
 		if (LayoutGrid)
 		{
-
 			if (LayoutGrid->IsGridInitialized())
 			{
-				UE_LOG(LogTemp, Warning, TEXT("PLAYER CONTROLLER: GRID ALREADY INIT"));
 				OnGridInitialized();
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("PLAYER CONTROLLER: ADD DYNAMIC"));
 				LayoutGrid->OnGridInitialized.AddDynamic(this, &ALayoutEditorPlayerController::OnGridInitialized);
 			}
-			
+
 			break;
 		}
 	}
@@ -150,24 +171,38 @@ void ALayoutEditorPlayerController::GetLayoutGrid()
 
 void ALayoutEditorPlayerController::OnGridInitialized()
 {
-
+	// Move camera to the grid center
 	FVector GridCenter = LayoutGrid->GetWorldGridCenter();
 
 	if (CameraPawn)
 	{
 		CameraPawn->SetActorLocation(GridCenter);
 	}
-
 }
 
 void ALayoutEditorPlayerController::DeprojectMouse()
 {
-	if (LayoutGrid == nullptr || IsBuildModeActive() == false) return;
+	if (IsBuildModeActive() == false || LayoutGrid == nullptr)
+	{
+		return;
+	}
 
 	FHitResult Hit;
 	if (GetHitResultUnderCursor(ECC_GameTraceChannel1, false, Hit))
 	{
-		LayoutGrid->RequestPreview(Hit.Location);
+		if (Hit.GetActor()->ActorHasTag(FName("TurretWall")))
+		{
+			if (LayoutGrid)
+			{
+				LayoutGrid->RequestResetPreviewWall();
+			}
+		}
+		else if (Hit.GetActor()->ActorHasTag(FName("LayoutGrid")))
+		{
+			if (LayoutGrid)
+			{
+				LayoutGrid->RequestPreviewWall(Hit.Location);
+			}
+		}
 	}
-
 }

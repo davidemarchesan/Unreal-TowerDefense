@@ -19,6 +19,12 @@ public:
 
 	AWall();
 
+	int32 Col;
+
+	int32 Row;
+
+	void SetCoord(int32 _Col, int32 _Row) { Col = _Col; Row = _Row; }
+
 protected: 
 
 	// Components

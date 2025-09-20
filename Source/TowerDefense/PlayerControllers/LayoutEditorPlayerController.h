@@ -78,6 +78,6 @@ private:
 
 	bool bIsBuildMode = false;
 
-	bool IsBuildModeActive() const { return bIsBuildMode;}
+	bool IsBuildModeActive() const { return bIsBuildMode; }
 	
 };

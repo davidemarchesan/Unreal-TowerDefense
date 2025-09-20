@@ -12,8 +12,7 @@ APreviewWall::APreviewWall() : Super()
 void APreviewWall::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// Crea il materiale dinamico per la mesh
+	
 	if (Mesh && Mesh->GetMaterial(0))
 	{
 		DynamicMaterialIstance = Mesh->CreateDynamicMaterialInstance(0, Mesh->GetMaterial(0));
