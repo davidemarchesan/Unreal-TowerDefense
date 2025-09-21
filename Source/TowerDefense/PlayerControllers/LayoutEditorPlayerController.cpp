@@ -10,6 +10,7 @@
 #include "TowerDefense/GameCamera.h"
 #include "TowerDefense/LayoutGrid.h"
 #include "EngineUtils.h"
+#include "TowerDefense/TowerDefenseGameInstance.h"
 #include "TowerDefense/UI/LayoutEditor/LayoutEditorHUD.h"
 #include "TowerDefense/Walls/Wall.h"
 
@@ -40,6 +41,8 @@ void ALayoutEditorPlayerController::BeginPlay()
 	GetLayoutGrid();
 
 	HUD = Cast<ALayoutEditorHUD>(GetHUD());
+
+	GameInstance = Cast<UTowerDefenseGameInstance>(GetGameInstance());
 }
 
 void ALayoutEditorPlayerController::SetupInputComponent()
@@ -117,6 +120,17 @@ void ALayoutEditorPlayerController::ToggleBuildMode()
 	if (IsBuildModeActive() == false && LayoutGrid)
 	{
 		LayoutGrid->RequestResetPreviewWall();
+	}
+}
+
+void ALayoutEditorPlayerController::SaveLayout()
+{
+	if (LayoutGrid && GameInstance)
+	{
+		TArray<FIntPoint> GridLayout;
+		LayoutGrid->GetLayout(GridLayout);
+
+		GameInstance->SaveGridLayout(GridLayout);
 	}
 }
 

@@ -12,9 +12,9 @@
 - [x] Spawn walls
 - [x] Create AI with NavMesh
 - [x] Build and valid path when previewing
-- [ ] [DOING] Create simple UI
-- [ ] Create GameMode
-- [ ] Save and load layout
+- [x] Create simple UI
+- [x] Save and load layout
+- [ ] [DOING] Main menu with Play, Edit Layout and Exit
 
 ### To deprecate
 
@@ -22,8 +22,8 @@
 - [ ] topdowncamera
 - [ ] enemybase
 - [ ] topdowngamemode
+- [ ] towerdefenCe GAME INSTANCE
 
 ### DOING
 
-Refactor LayoutGrid class to handle placement and removal of wall.
-Create border when hovering turret wall.
+Main menu scene

@@ -8,6 +8,7 @@
 
 #include "TowerDefense/PlayerControllers/LayoutEditorPlayerController.h"
 #include "TowerDefense/UI/Components/ButtonInputWidget.h"
+#include "TowerDefense/UI/Components/ButtonPrimaryWidget.h"
 
 #include "Widgets/SOverlay.h"
 
@@ -33,6 +34,22 @@ void ALayoutEditorHUD::BeginPlay()
 				0.f,
 				FLinearColor::Yellow, 10.f))
 			.Visibility(EVisibility::Hidden)
+		];
+
+		// Save overlay
+		RootOverlay->AddSlot()
+		           .HAlign(HAlign_Right)
+		           .VAlign(VAlign_Bottom)
+		           .Padding(FMargin(20))
+		[
+
+			SAssignNew(SaveLayoutBox, SBox)
+			[
+				SNew(SButtonPrimaryWidget)
+				.ButtonText(FText::FromString("SAVE LAYOUT"))
+				.OnClicked(FOnClicked::CreateUObject(this, &ALayoutEditorHUD::OnSaveLayout))
+			]
+			
 		];
 
 		// Commands overlay
@@ -126,10 +143,22 @@ FReply ALayoutEditorHUD::OnToggleBuildMode()
 	return FReply::Unhandled();
 }
 
+FReply ALayoutEditorHUD::OnSaveLayout()
+{
+	if (PlayerController)
+	{
+		PlayerController->SaveLayout();
+	}
+	
+	return FReply::Unhandled();
+}
+
 void ALayoutEditorHUD::UpdateComponentsOnBuildMode()
 {
 	BuildModeBorder->SetVisibility(bIsBuildMode ? EVisibility::Visible : EVisibility::Collapsed);
 
 	StandardModeBox->SetVisibility(!bIsBuildMode ? EVisibility::Visible : EVisibility::Collapsed);
 	BuildModeBox->SetVisibility(bIsBuildMode ? EVisibility::Visible : EVisibility::Collapsed);
+
+	SaveLayoutBox->SetVisibility(!bIsBuildMode ? EVisibility::Visible : EVisibility::Collapsed);
 }

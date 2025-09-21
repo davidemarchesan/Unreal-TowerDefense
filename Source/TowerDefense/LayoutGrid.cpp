@@ -13,6 +13,7 @@
 #include "TowerDefense/Enums/PreviewWallState.h"
 #include "MainBase.h"
 #include "DrawDebugHelpers.h"
+#include "TowerDefenseGameInstance.h"
 
 // Sets default values
 ALayoutGrid::ALayoutGrid()
@@ -24,6 +25,22 @@ ALayoutGrid::ALayoutGrid()
 	FloorComponent->SetupAttachment(RootComponent);
 }
 
+void ALayoutGrid::GetLayout(TArray<FIntPoint>& OutGridLayout)
+{
+	OutGridLayout.Empty();
+
+	for (int32 Col = 0; Col < Cols; Col++)
+	{
+		for (int32 Row = 0; Row < Rows; Row++)
+		{
+			if (Grid[Col][Row] == ECellState::TurretWall)
+			{
+				OutGridLayout.Add(FIntPoint(Col, Row));
+			}
+		}
+	}
+}
+
 // Called when the game starts or when spawned
 void ALayoutGrid::BeginPlay()
 {
@@ -33,6 +50,7 @@ void ALayoutGrid::BeginPlay()
 
 	InitializeFloor();
 	InitializeWalls();
+	LoadSavedLayout();
 	InitializeAllyBase();
 
 	InitializeNavMesh();
@@ -273,6 +291,29 @@ void ALayoutGrid::InitializeWalls()
 	{
 		SpawnWall((Cols - 4), j, ECellState::DefaultWall, TEXT("AllyBase"));
 	}
+}
+
+void ALayoutGrid::LoadSavedLayout()
+{
+	// Temp
+	UTowerDefenseGameInstance* GameInstance = Cast<UTowerDefenseGameInstance>(GetGameInstance());
+	if (GameInstance)
+	{
+		TArray<FIntPoint> SavedGridLayout = GameInstance->LoadGridLayout();
+
+		if (SavedGridLayout.Num() > 0)
+		{
+			for (int32 I = 0; I < SavedGridLayout.Num(); I++)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Loaded grid %d %d"), SavedGridLayout[I].X, SavedGridLayout[I].Y);
+
+				SpawnWall(SavedGridLayout[I].X, SavedGridLayout[I].Y, ECellState::TurretWall, TEXT("TurretWalls"));
+				
+			}
+		}
+	}
+
+	// End Temp
 }
 
 void ALayoutGrid::SpawnWall(int32 Col, int32 Row, ECellState State, const FString& Folder)

@@ -44,6 +44,8 @@ public:
 
 	FOnGridInitialized OnGridInitialized;
 
+	void GetLayout(TArray<FIntPoint>& OutGridLayout);
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -102,6 +104,8 @@ private:
 	TSubclassOf<AWall> DefaultWallBluePrintClass;
 
 	void InitializeWalls();
+
+	void LoadSavedLayout();
 
 	void SpawnWall(int32 Col, int32 Row, ECellState State, const FString& Folder);
 

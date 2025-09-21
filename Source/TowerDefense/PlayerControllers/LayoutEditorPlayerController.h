@@ -13,6 +13,7 @@ class UCameraInputConfig;
 class AGameCamera;
 class ALayoutGrid;
 class ALayoutEditorHUD;
+class UTowerDefenseGameInstance;
 struct FInputActionValue;
 
 /**
@@ -36,10 +37,15 @@ public:
 	// Input functions
 	void ToggleBuildMode();
 
+	void SaveLayout();
+
 private:
 
 	// Pawn
 	AGameCamera* CameraPawn;
+
+	// GameInstance
+	UTowerDefenseGameInstance* GameInstance;
 
 	// HUD
 	ALayoutEditorHUD* HUD;

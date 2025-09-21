@@ -12,17 +12,17 @@ class FText;
 class SButtonPrimaryWidget : public SCompoundWidget
 {
 public:
+	SLATE_BEGIN_ARGS(SButtonPrimaryWidget)
+		{
+		}
 
-	SLATE_BEGIN_ARGS(SButtonPrimaryWidget) {}
 		SLATE_ARGUMENT(FText, ButtonText)
+		SLATE_EVENT(FOnClicked, OnClicked)
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs);
 
 private:
-
 	FText ButtonText;
-
-	FReply OnButtonClick();
-
+	FOnClicked OnClicked;
 };

@@ -32,9 +32,13 @@ private:
 
 	TSharedPtr<SBox> StandardModeBox;
 	TSharedPtr<SBox> BuildModeBox;
+	
+	TSharedPtr<SBox> SaveLayoutBox;
 
 	// Button callbacks
 	FReply OnToggleBuildMode();
+
+	FReply OnSaveLayout();
 
 	void UpdateComponentsOnBuildMode();
 };
