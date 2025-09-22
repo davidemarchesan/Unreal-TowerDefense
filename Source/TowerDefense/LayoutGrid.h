@@ -30,6 +30,8 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
+	void Initialize(int32 _Cols, int32 _Rows);
+
 	void RequestPreviewWall(FVector Location);
 
 	bool RequestWallBuild(FVector Location);
@@ -45,10 +47,6 @@ public:
 	FOnGridInitialized OnGridInitialized;
 
 	void GetLayout(TArray<FIntPoint>& OutGridLayout);
-
-protected:
-
-	virtual void BeginPlay() override;
 
 private:
 

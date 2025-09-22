@@ -11,6 +11,7 @@
 #include "TowerDefense/LayoutGrid.h"
 #include "EngineUtils.h"
 #include "TowerDefense/TowerDefenseGameInstance.h"
+#include "TowerDefense/GameModes/LayoutEditorGameMode.h"
 #include "TowerDefense/UI/LayoutEditor/LayoutEditorHUD.h"
 #include "TowerDefense/Walls/Wall.h"
 
@@ -41,6 +42,8 @@ void ALayoutEditorPlayerController::BeginPlay()
 	GetLayoutGrid();
 
 	HUD = Cast<ALayoutEditorHUD>(GetHUD());
+
+	GameMode = Cast<ALayoutEditorGameMode>(GetWorld()->GetAuthGameMode());
 
 	GameInstance = Cast<UTowerDefenseGameInstance>(GetGameInstance());
 }
@@ -89,24 +92,28 @@ void ALayoutEditorPlayerController::Tick(float DeltaTime)
 
 void ALayoutEditorPlayerController::PrimaryAction()
 {
-	if (IsBuildModeActive() && LayoutGrid)
+	if (IsBuildModeActive() && LayoutGrid && GameMode)
 	{
 		FHitResult Hit;
 		if (GetHitResultUnderCursor(ECC_GameTraceChannel1, false, Hit))
 		{
 			if (Hit.GetActor()->ActorHasTag(FName("TurretWall")))
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Hit is TurretWall"));
-				AWall* TurretWall = Cast<AWall>(Hit.GetActor());
-
-				if (TurretWall)
+				if (const AWall* TurretWall = Cast<AWall>(Hit.GetActor()))
 				{
 					LayoutGrid->RequestWallRemoval(TurretWall->Col, TurretWall->Row);
+					int32 CurrentTurretWalls = GameMode->RegisterTurretWallRemoval();
 				}
 			}
 			else if (Hit.GetActor()->ActorHasTag(FName("LayoutGrid")))
 			{
-				LayoutGrid->RequestWallBuild(Hit.Location);
+				if (GameMode->CanPlaceTurretWall())
+				{
+					if (LayoutGrid->RequestWallBuild(Hit.Location))
+					{
+						int32 CurrentTurretWalls = GameMode->RegisterTurretWallPlacement();
+					}
+				}
 			}
 		}
 	}
@@ -213,7 +220,7 @@ void ALayoutEditorPlayerController::DeprojectMouse()
 		}
 		else if (Hit.GetActor()->ActorHasTag(FName("LayoutGrid")))
 		{
-			if (LayoutGrid)
+			if (GameMode && GameMode->CanPlaceTurretWall() && LayoutGrid)
 			{
 				LayoutGrid->RequestPreviewWall(Hit.Location);
 			}

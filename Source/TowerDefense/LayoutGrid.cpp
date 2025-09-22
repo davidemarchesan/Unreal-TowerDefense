@@ -41,22 +41,6 @@ void ALayoutGrid::GetLayout(TArray<FIntPoint>& OutGridLayout)
 	}
 }
 
-// Called when the game starts or when spawned
-void ALayoutGrid::BeginPlay()
-{
-	Super::BeginPlay();
-
-	InitializeGrid();
-
-	InitializeFloor();
-	InitializeWalls();
-	LoadSavedLayout();
-	InitializeAllyBase();
-
-	InitializeNavMesh();
-	BuildNavMesh();
-}
-
 void ALayoutGrid::RequestPreviewWall(FVector Location)
 {
 	if (bIsGridInitialized == false)
@@ -397,4 +381,22 @@ void ALayoutGrid::InitializeAllyBase()
 void ALayoutGrid::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+void ALayoutGrid::Initialize(int32 _Cols, int32 _Rows)
+{
+
+	Cols = _Cols;
+	Rows = _Rows;
+	
+	InitializeGrid();
+
+	InitializeFloor();
+	InitializeWalls();
+	// LoadSavedLayout();
+	InitializeAllyBase();
+
+	InitializeNavMesh();
+	BuildNavMesh();
+	
 }

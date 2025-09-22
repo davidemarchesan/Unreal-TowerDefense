@@ -14,6 +14,7 @@ class AGameCamera;
 class ALayoutGrid;
 class ALayoutEditorHUD;
 class UTowerDefenseGameInstance;
+class ALayoutEditorGameMode;
 struct FInputActionValue;
 
 /**
@@ -43,6 +44,9 @@ private:
 
 	// Pawn
 	AGameCamera* CameraPawn;
+
+	// GameMode
+	ALayoutEditorGameMode* GameMode;
 
 	// GameInstance
 	UTowerDefenseGameInstance* GameInstance;

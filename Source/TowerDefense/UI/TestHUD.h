@@ -3,15 +3,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/GameInstance.h"
-#include "TowerDefenceGameInstance.generated.h"
+#include "GameFramework/HUD.h"
+#include "TestHUD.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TOWERDEFENSE_API UTowerDefenceGameInstance : public UGameInstance
+class TOWERDEFENSE_API ATestHUD : public AHUD
 {
 	GENERATED_BODY()
+
+public:
+	
+	virtual void BeginPlay() override;
 	
 };
