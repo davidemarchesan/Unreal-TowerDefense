@@ -7,6 +7,10 @@
 #include "TowerDefense/Enums/RunPhase.h"
 #include "RunGameState.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPhaseStart);
+
+class ARunGameMode;
+
 /**
  * 
  */
@@ -15,10 +19,26 @@ class TOWERDEFENSE_API ARunGameState : public AGameStateBase
 {
 	GENERATED_BODY()
 
+protected:
+	// virtual void BeginPlay() override
+	// {
+	// 	Super::BeginPlay();
+	// 	UE_LOG(LogTemp, Warning, TEXT(">>> RunGameState BeginPlay INLINE <<<"));
+	// }
+	virtual void BeginPlay() override;
+	
 private:
 
-	ERunPhase Phase;
+	ARunGameMode* GameMode;
+
+	ERunPhase Phase = ERunPhase::BuyAndBuild;
+
+	UFUNCTION()
+	void OnGameReady();
 
 	float PlayerHealth;
-	
+
+public:
+
+	FOnPhaseStart OnPhaseStart;
 };

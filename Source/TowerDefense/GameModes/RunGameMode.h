@@ -7,6 +7,10 @@
 #include "RunGameMode.generated.h"
 
 class ALayoutGrid;
+class ARunPlayerController;
+class ARunGameState;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGameReady);
 
 /**
  * This class defines the Run rules
@@ -20,7 +24,23 @@ public:
 
 	virtual void BeginPlay() override;
 
+	// Getters
+	bool IsLevelLoaded() const { return bIsLevelLoaded; }
+
+	// Delegates
+	FOnGameReady OnGameReady;
+
 private:
+
+	ARunPlayerController* PlayerController;
+
+	ARunGameState* GameState;
+
+	void GetGameComponents();
+
+	void LoadLevel();
+
+	bool bIsLevelLoaded = false;
 
 	// Grid
 	void InitializeGrid();
