@@ -20,25 +20,31 @@ class TOWERDEFENSE_API ARunGameState : public AGameStateBase
 	GENERATED_BODY()
 
 protected:
-	// virtual void BeginPlay() override
-	// {
-	// 	Super::BeginPlay();
-	// 	UE_LOG(LogTemp, Warning, TEXT(">>> RunGameState BeginPlay INLINE <<<"));
-	// }
+	
 	virtual void BeginPlay() override;
 	
 private:
 
 	ARunGameMode* GameMode;
 
-	ERunPhase Phase = ERunPhase::BuyAndBuild;
+	ERunPhase Phase = ERunPhase::Build;
+
+	int32 PhaseRemainingTime;
+	FTimerHandle TimerHandle;
+
+	void TimerTick();
 
 	UFUNCTION()
 	void OnGameReady();
 
+	int32 WaveNumber = 0;
+
 	float PlayerHealth;
+
+	float PlayerCoins;
 
 public:
 
 	FOnPhaseStart OnPhaseStart;
+	
 };

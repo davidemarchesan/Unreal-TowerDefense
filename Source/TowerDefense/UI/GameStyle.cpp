@@ -30,23 +30,30 @@ void FGameStyle::Initialize()
 
 	// Fonts
 	StyleInstance->Set("TowerDefense.Font.Regular", FSlateFontInfo(
-		                   LoadObject<UFont>(nullptr, TEXT("/Game/UI/Fonts/Quicksand/Quicksand-Regular_Font.Quicksand-Regular_Font")), 20
+		                   LoadObject<UFont>(
+			                   nullptr, TEXT("/Game/UI/Fonts/Quicksand/Quicksand-Regular_Font.Quicksand-Regular_Font")),
+		                   20
 	                   )
 	);
 
 	StyleInstance->Set("TowerDefense.Font.SemiBold", FSlateFontInfo(
-						   LoadObject<UFont>(nullptr, TEXT("/Game/UI/Fonts/Quicksand/Quicksand-Medium_Font.Quicksand-Medium_Font")), 20
-					   )
+		                   LoadObject<UFont>(
+			                   nullptr, TEXT("/Game/UI/Fonts/Quicksand/Quicksand-Medium_Font.Quicksand-Medium_Font")),
+		                   20
+	                   )
 	);
 
 	StyleInstance->Set("TowerDefense.Font.SemiBold", FSlateFontInfo(
-		                   LoadObject<UFont>(nullptr, TEXT("/Game/UI/Fonts/Quicksand/Quicksand-SemiBold_Font.Quicksand-SemiBold_Font")), 20
+		                   LoadObject<UFont>(
+			                   nullptr,
+			                   TEXT("/Game/UI/Fonts/Quicksand/Quicksand-SemiBold_Font.Quicksand-SemiBold_Font")), 20
 	                   )
 	);
 
 	StyleInstance->Set("TowerDefense.Font.Bold", FSlateFontInfo(
-						   LoadObject<UFont>(nullptr, TEXT("/Game/UI/Fonts/Quicksand/Quicksand-Bold_Font.Quicksand-Bold_Font")), 20
-					   )
+		                   LoadObject<UFont>(
+			                   nullptr, TEXT("/Game/UI/Fonts/Quicksand/Quicksand-Bold_Font.Quicksand-Bold_Font")), 20
+	                   )
 	);
 
 	// Colors
@@ -67,11 +74,12 @@ void FGameStyle::Initialize()
 	StyleInstance->Set("TowerDefense.Color.Beige", FLinearColor(ColorBeige));
 
 	const FButtonStyle ButtonStyle = FButtonStyle()
-	                           .SetNormalPadding(FMargin(10))
-	                           .SetPressedPadding(FMargin(8))
-	                           .SetNormal(FSlateColorBrush(ColorBeige))
-	                           .SetHovered(FSlateColorBrush(FLinearColor(0.3f, 0.7f, 1.0f)))
-	                           .SetPressed(FSlateColorBrush(FLinearColor(0.1f, 0.4f, 0.8f)));
+	                                 .SetNormalPadding(FMargin(40))
+	                                 .SetPressedPadding(FMargin(8))
+	                                 .SetNormal(FSlateColorBrush(FLinearColor(FColor::FromHex("F4E409"))))
+	                                 .SetNormalForeground(FLinearColor(0.05f, 0.05f, 0.08f))
+	                                 .SetHovered(FSlateColorBrush(ColorBittersweet))
+	                                 .SetPressed(FSlateColorBrush(ColorBittersweet));
 
 	StyleInstance->Set("TowerDefense.Button", ButtonStyle);
 

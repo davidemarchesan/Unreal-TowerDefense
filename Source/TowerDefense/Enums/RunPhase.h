@@ -6,6 +6,6 @@
 UENUM(BlueprintType)
 enum class ERunPhase : uint8
 {
-	BuyAndBuild UMETA(DisplayName = "Buy and Build"),
+	Build UMETA(DisplayName = "Build"),
 	Wave UMETA(DisplayName = "Wave"),
 };

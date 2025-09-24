@@ -7,26 +7,28 @@
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Engine/Engine.h"
+#include "TowerDefense/UI/GameStyle.h"
 
 void SButtonPrimaryWidget::Construct(const FArguments& InArgs)
 {
 	ButtonText = InArgs._ButtonText;
 	OnClicked = InArgs._OnClicked;
 
-	FTextBlockStyle TextStyle = FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>("NormalText");
-	TextStyle.SetFontSize(20.f);
-
+	FSlateFontInfo Font = FGameStyle::Get().GetFontStyle("TowerDefense.Font.Bold");
+	Font.Size = 40;
+		
 	ChildSlot
 	[
 
 		SNew(SButton)
+		.ButtonStyle(&FGameStyle::Get().GetWidgetStyle<FButtonStyle>("TowerDefense.Button"))
 		.OnClicked(OnClicked)
-		.ContentPadding(FMargin(8.0f, 8.0f))
 		[
 			SNew(STextBlock)
 			.Text(ButtonText)
-			.Justification(ETextJustify::Center)
-			.TextStyle(&TextStyle)
+			.ColorAndOpacity(FGameStyle::Get().GetColor("TowerDefense.Color.Gunmetal"))
+			// .ColorAndOpacity(FLinearColor::White)
+			.Font(Font)
 		]
 
 	];

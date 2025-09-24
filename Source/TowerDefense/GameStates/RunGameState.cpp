@@ -14,7 +14,6 @@ void ARunGameState::BeginPlay()
 
 	if (GameMode)
 	{
-		
 		if (GameMode->IsLevelLoaded())
 		{
 			OnGameReady();
@@ -26,9 +25,31 @@ void ARunGameState::BeginPlay()
 	}
 }
 
+void ARunGameState::TimerTick()
+{
+	PhaseRemainingTime--;
+
+	UE_LOG(LogTemp, Warning, TEXT("A second %d"), PhaseRemainingTime);
+
+	if (PhaseRemainingTime <= 0)
+	{
+		GetWorldTimerManager().ClearTimer(TimerHandle);
+	}
+}
+
 void ARunGameState::OnGameReady()
 {
 	UE_LOG(LogTemp, Warning, TEXT("ARunGameState::OnGameReady"));
+
+	PhaseRemainingTime = 5;
+
+	GetWorldTimerManager().SetTimer(
+		TimerHandle,
+		this,
+		&ARunGameState::TimerTick,
+		1.0f,
+		true
+	);
 
 	OnPhaseStart.Broadcast();
 }

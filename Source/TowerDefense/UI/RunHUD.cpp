@@ -53,6 +53,7 @@ void ARunHUD::InitializeOverlays()
 	{
 		const TSharedRef<SOverlay> RootOverlay = SNew(SOverlay);
 
+		// Loading overlay
 		RootOverlay->AddSlot()
 		           .HAlign(HAlign_Fill)
 		           .VAlign(VAlign_Fill)
@@ -65,7 +66,7 @@ void ARunHUD::InitializeOverlays()
 				SNew(SVerticalBox)
 
 				// Loading
-				+SVerticalBox::Slot()
+				+ SVerticalBox::Slot()
 				.HAlign(HAlign_Center)
 				.VAlign(VAlign_Center)
 				[
@@ -84,39 +85,9 @@ void ARunHUD::InitializeOverlays()
 			]
 		];
 
-		// Build Mode overlay
-		RootOverlay->AddSlot()
-		           .HAlign(HAlign_Fill)
-		           .VAlign(VAlign_Fill)
-		[
-
-			SAssignNew(BuildModeBorder, SBorder)
-			.BorderImage(new FSlateRoundedBoxBrush(
-				FLinearColor::Transparent,
-				0.f,
-				FLinearColor::Yellow, 10.f))
-			.Visibility(EVisibility::Hidden)
-		];
-
-		// Save overlay
+		// Buttons overlay
 		RootOverlay->AddSlot()
 		           .HAlign(HAlign_Right)
-		           .VAlign(VAlign_Bottom)
-		           .Padding(FMargin(20))
-		[
-
-			SAssignNew(SaveLayoutBox, SBox)
-			[
-				SNew(SButtonPrimaryWidget)
-				.ButtonText(FText::FromString("SAVE LAYOUT"))
-				.OnClicked(FOnClicked::CreateUObject(this, &ARunHUD::OnSaveLayout))
-			]
-
-		];
-
-		// Commands overlay
-		RootOverlay->AddSlot()
-		           .HAlign(HAlign_Fill)
 		           .VAlign(VAlign_Bottom)
 		           .Padding(FMargin(20))
 		[
@@ -128,51 +99,51 @@ void ARunHUD::InitializeOverlays()
 			.HAlign(HAlign_Center)
 			[
 
-				SAssignNew(StandardModeBox, SBox)
+
+				SNew(SHorizontalBox)
+
+				+ SHorizontalBox::Slot()
+				.AutoWidth()
 				[
-
-					SNew(SHorizontalBox)
-
-					+ SHorizontalBox::Slot()
-					.AutoWidth()
-					.HAlign(HAlign_Center)
-					.Padding(FMargin(10.f, 0))
-					[
-						SNew(SButtonInputWidget)
-						.InputText(FText::FromString("B"))
-						.ButtonText(FText::FromString("ENTER BUILD MODE"))
-						.OnClicked(FOnClicked::CreateUObject(this, &ARunHUD::OnToggleBuildMode))
-					]
-
+					SNew(SButtonPrimaryWidget)
+					.ButtonText(FText::FromString("Start"))
+					.OnClicked(FOnClicked::CreateUObject(this, &ARunHUD::OnToggleBuildMode))
 				]
+
+				+ SHorizontalBox::Slot()
+				.AutoWidth()
+				[
+					SNew(SBorder)
+					.BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
+					.BorderBackgroundColor(FLinearColor(1.0f, 0.8f, 0.2f))
+					.HAlign(HAlign_Right)
+					[
+						SNew(STextBlock)
+						.Text(FText::FromString("Loading"))
+						.ColorAndOpacity(FLinearColor::Black)
+						
+					]
+				]
+
 
 			]
 
-			// Build Mode container
-			+ SHorizontalBox::Slot()
-			.HAlign(HAlign_Center)
-			[
+		];
 
-				SAssignNew(BuildModeBox, SBox)
-				[
+		// Do not edit this overlay
+		RootOverlay->AddSlot()
+		           .HAlign(HAlign_Left)
+		           .VAlign(VAlign_Top)
+		[
 
-					SNew(SHorizontalBox)
-
-					+ SHorizontalBox::Slot()
-					.AutoWidth()
-					.HAlign(HAlign_Center)
-					.Padding(FMargin(10.f, 0))
-					[
-						SNew(SButtonInputWidget)
-						.InputText(FText::FromString("B"))
-						.ButtonText(FText::FromString("EXIT BUILD MODE"))
-						.OnClicked(FOnClicked::CreateUObject(this, &ARunHUD::OnToggleBuildMode))
-					]
-
-				]
-
-			]
-
+			SNew(SButton)
+			.OnClicked_Lambda([]() -> FReply
+			{
+				FGameStyle::Shutdown();
+				FGameStyle::Initialize();
+				return FReply::Handled();
+			})
+			.Text(FText::FromString("Reload FGameStyles"))
 
 		];
 
