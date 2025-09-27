@@ -23,17 +23,22 @@ public:
 
 	void ToggleBuildMode(bool _bIsBuildMode);
 
+	void UpdateNextWaveTimer(int32 Time);
+
 private:
 
 	ARunGameMode* GameMode;
 	ARunGameState* GameSate;
 	ARunPlayerController* PlayerController;
 
+	// Utils
+	
+
 	// HUD
 	void InitializeOverlays();
 
-
-
+	void CreateTopBar(const TSharedRef<SOverlay>& RootOverlay);
+	
 	bool bShowLoadingScreen = true;
 
 	bool bIsBuildMode = false;
@@ -49,13 +54,17 @@ private:
 
 	// HUD Components
 	TSharedPtr<SBorder> LoadingScreen;
-	
-	TSharedPtr<SBorder> BuildModeBorder;
 
-	TSharedPtr<SBox> StandardModeBox;
-	TSharedPtr<SBox> BuildModeBox;
+	TSharedPtr<SHorizontalBox> NextWaveHBox;
+	TSharedPtr<STextBlock> NextWaveTimerTextBlock;
+	TSharedPtr<SButton> NextWaveSkipButton;
 	
-	TSharedPtr<SBox> SaveLayoutBox;
+	TSharedPtr<SBorder> BuildModeBorder; // deprecated
+
+	TSharedPtr<SBox> StandardModeBox; // deprecated
+	TSharedPtr<SBox> BuildModeBox; // deprecated
+	
+	TSharedPtr<SBox> SaveLayoutBox; // deprecated
 
 	// Button callbacks
 	FReply OnToggleBuildMode();

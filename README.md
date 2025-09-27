@@ -80,3 +80,110 @@ Build on public functions to stay simple.
 ### DOING
 
 Main menu scene
+
+
+-----------------
+# GIOCO
+
+voglio poche cose casuali perché non voglio che il giocatore si senta condizionato da fortune o sfortune, come chest, carte, pescaggio eccetera
+
+> fattore "evita probabilità": no pescaggi, no chest, no random items, no probabilità, no fortuna (non voglio che il giocatore re-inizi la run perché non ha pescato per prima una specifica carta per esempio)
+> fattore "skill del giocatore": bisogna giocare di velocità, intelligenza e furbizia
+> cercare meccaniche che stimolano ciò (ripeto: non chest o pescaggio a fortuna)
+
+il giocatore deve sopravvivere il più tempo possibile
+
+> fattore "infinite run": il gioco non finisce mai
+
+# WAVE
+
+per il fattore "infinite run" ci devono essere infinite wave
+se ci sono infinite wave
+
+come generare le wave? ne genero io 100 off-game con script e faccio in modo che arrivare alla 25 sia difficile
+
+# PUNTEGGIO
+
+se tutti arrivano alla 100, hanno lo stesso punteggio? no
+
+punteggio formato da
+- numero wave
+- vita rimasta alla base
+- numero nemici uccisi
+
+# FASI
+
+ci sono due fasi di gioco che si alternano:
+- preparazione
+- difesa
+
+## preparazione
+
+la preparazione ha un timer di N secondi dopo i quali parte la successiva fase di difesa
+
+in questa fase il giocatore può
+- comprare, vendere, piazzare o spostare i muri -> cambia il percorso dei nemici
+
+## difesa
+
+quando la fase di difesa finisce, si entra in fase di preparaione per la difesa successiva
+
+in questa fase il giocatore può
+- comprare, vendere, piazzare o spostare le torrette
+
+# STATISTICHE
+
+il giocatore può vedere le statistiche in tempo reale 
+- del round
+- overall (tutta la partita)
+
+in questo modo capisce cosa va e cosa non va -> bisogna dare al giocatore chance per riparare agli errori
+
+le statistiche possono essere
+- maggiore danno
+- maggiore cura
+- maggiore tank
+
+# TORRETTA
+
+Torretta (base)
+- tipo/classe ??
+- tier (1 2 3) ??
+- nome dato da giocatore (per statistiche)
+- danno base
+- tipo danno ?? (in conflitto con tipo/classe?)
+- vita base
+- range
+- rateo di fuoco
+- inventory (3 o 4 items?)
+- target preferito ?? (selezionabile la giocatore?)
+
+# NEMICO
+
+Nemico (base)
+- tipo/classe ??
+- tier (1 2 3) ??
+- danno base
+- vita base
+- velocità di movimento
+- rateo di fuoco
+- target preferito (classe torretta, la più vicina)
+
+# V2: MECCANICA DI UPGRADE
+
+itemes alle torri?
+upgrade infiniti alle torri?
+perks alle torri?
+prestigio alle torri?
+
+# V2: PERKS
+
+perks possono essere dati ogni 10 wave, e il giocatore può scegliere
+
+idea perks che possono cambiare la partita (non si possono cambiare in-run):
+- più vita alla base
+- più nemici
+- più danni
+- più cure
+- più vita alle torri
+- più campo di gioco

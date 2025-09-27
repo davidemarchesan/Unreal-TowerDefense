@@ -4,6 +4,7 @@
 #include "RunHUD.h"
 
 #include "GameStyle.h"
+#include "Components/TopBarStat.h"
 #include "Engine/Engine.h"
 #include "Engine/GameViewportClient.h"
 #include "TowerDefense/GameModes/RunGameMode.h"
@@ -47,6 +48,28 @@ void ARunHUD::ToggleBuildMode(bool _bIsBuildMode)
 	UpdateComponentsOnBuildMode();
 }
 
+void ARunHUD::UpdateNextWaveTimer(int32 Time)
+{
+
+	if (!NextWaveHBox || !NextWaveSkipButton || !NextWaveTimerTextBlock)
+	{
+		return;
+	}
+	
+	if (Time <= 0)
+	{
+		NextWaveHBox->SetVisibility(EVisibility::Collapsed);
+	}
+	else if (Time <= 3)
+	{
+		NextWaveSkipButton->SetVisibility(EVisibility::Hidden);
+		NextWaveTimerTextBlock->SetColorAndOpacity(FGameStyle::Get().GetColor("TowerDefense.Color.Yellow"));
+	}
+
+	NextWaveTimerTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%d"), Time)));
+	
+}
+
 void ARunHUD::InitializeOverlays()
 {
 	if (GEngine && GEngine->GameViewport)
@@ -85,6 +108,8 @@ void ARunHUD::InitializeOverlays()
 			]
 		];
 
+		CreateTopBar(RootOverlay);
+
 		// Buttons overlay
 		RootOverlay->AddSlot()
 		           .HAlign(HAlign_Right)
@@ -121,7 +146,7 @@ void ARunHUD::InitializeOverlays()
 						SNew(STextBlock)
 						.Text(FText::FromString("Loading"))
 						.ColorAndOpacity(FLinearColor::Black)
-						
+
 					]
 				]
 
@@ -156,11 +181,154 @@ void ARunHUD::InitializeOverlays()
 	}
 }
 
+void ARunHUD::CreateTopBar(const TSharedRef<SOverlay>& RootOverlay)
+{
+	const float StatBoxWidth = 175.f;
+	const float StatBoxSpacing = 20.f;
+
+	const float StatBoxIconWidth = 32.f;
+
+	// Top bar
+	RootOverlay->AddSlot()
+	           .HAlign(HAlign_Center)
+	           .VAlign(VAlign_Top)
+
+	[
+
+		SNew(SBorder)
+		.BorderImage(
+			new FSlateRoundedBoxBrush(FLinearColor::White, FVector4(0, 0, 12, 12)))
+		.BorderBackgroundColor(FLinearColor(0.f, 0.f, 0.f, 0.5f))
+		.Padding(FMargin(20))
+		[
+
+			SNew(SVerticalBox)
+
+			// Stats
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			[
+				SNew(SHorizontalBox)
+
+				+ SHorizontalBox::Slot()
+				.Padding(FMargin(0.f, 0.f, StatBoxSpacing, 0.f))
+				.VAlign(VAlign_Center)
+				.MinWidth(StatBoxWidth)
+				.MaxWidth(StatBoxWidth)
+				[
+					SNew(STopBarStat)
+					.Icon(FIconData("TowerDefense.Icons.Heart", "TowerDefense.Color.Beige", StatBoxIconWidth))
+					.Text(FTextData(FText::FromString("0"), "TowerDefense.Color.Beige", 23.f))
+				]
+
+				+ SHorizontalBox::Slot()
+				.Padding(FMargin(0.f, 0.f, StatBoxSpacing, 0.f))
+				.MinWidth(StatBoxWidth)
+				.MaxWidth(StatBoxWidth)
+				[
+					SNew(STopBarStat)
+					.Icon(FIconData("TowerDefense.Icons.Star", "TowerDefense.Color.Beige", StatBoxIconWidth))
+					.Text(FTextData(FText::FromString("0"), "TowerDefense.Color.Beige", 23.f))
+				]
+
+				+ SHorizontalBox::Slot()
+				.Padding(FMargin(0.f, 0.f, StatBoxSpacing, 0.f))
+				.MinWidth(StatBoxWidth)
+				.MaxWidth(StatBoxWidth)
+				[
+					SNew(STopBarStat)
+					.Icon(FIconData("TowerDefense.Icons.Coins", "TowerDefense.Color.Beige", StatBoxIconWidth))
+					.Text(FTextData(FText::FromString("0"), "TowerDefense.Color.Beige", 23.f))
+				]
+
+				+ SHorizontalBox::Slot()
+				.Padding(FMargin(0.f, 0.f, StatBoxSpacing, 0.f))
+				.MinWidth(StatBoxWidth)
+				.MaxWidth(StatBoxWidth)
+				[
+					SNew(STopBarStat)
+					.Icon(FIconData("TowerDefense.Icons.Meteor", "TowerDefense.Color.Beige", StatBoxIconWidth))
+					.Text(FTextData(FText::FromString("0"), "TowerDefense.Color.Beige", 23.f))
+				]
+
+				+ SHorizontalBox::Slot()
+				.Padding(FMargin(0.f, 0.f, StatBoxSpacing, 0.f))
+				.MinWidth(StatBoxWidth)
+				.MaxWidth(StatBoxWidth)
+				[
+					SNew(STopBarStat)
+					.Icon(FIconData("TowerDefense.Icons.Skull", "TowerDefense.Color.Beige", StatBoxIconWidth))
+					.Text(FTextData(FText::FromString("0"), "TowerDefense.Color.Beige", 23.f))
+				]
+			]
+
+			// Next wave timer and skip button
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			.Padding(FMargin(0, 20.f, 0, 0))
+			[
+				SAssignNew(NextWaveHBox, SHorizontalBox)
+				.Visibility(EVisibility::Visible)
+
+				+ SHorizontalBox::Slot()
+				.HAlign(HAlign_Left)
+				.VAlign(VAlign_Center)
+				[
+
+					SNew(SHorizontalBox)
+
+					+ SHorizontalBox::Slot()
+					.HAlign(HAlign_Left)
+					.VAlign(VAlign_Center)
+					.Padding(FMargin(0, 0, 10.f, 0))
+					.AutoWidth()
+					[
+						SNew(STextBlock)
+						.Text(FText::FromString("Next wave in:"))
+						.ColorAndOpacity(FGameStyle::Get().GetColor("TowerDefense.Color.Beige"))
+						.Font(FGameStyle::Get().GetFontStyle("TowerDefense.Font.Bold.md"))
+					]
+
+					+ SHorizontalBox::Slot()
+					.HAlign(HAlign_Left)
+					.VAlign(VAlign_Center)
+					.AutoWidth()
+					[
+						SAssignNew(NextWaveTimerTextBlock, STextBlock)
+						.ColorAndOpacity(FGameStyle::Get().GetColor("TowerDefense.Color.Beige"))
+						.Font(FGameStyle::Get().GetFontStyle("TowerDefense.Font.Bold.lg"))
+					]
+
+
+				]
+
+				+ SHorizontalBox::Slot()
+				.HAlign(HAlign_Right)
+				.VAlign(VAlign_Center)
+				[
+					
+					SAssignNew(NextWaveSkipButton, SButton)
+					.ButtonStyle(&FGameStyle::Get().GetWidgetStyle<FButtonStyle>("TowerDefense.Button.Yellow"))
+					[
+						SNew(STextBlock)
+						.Text(FText::FromString("Skip"))
+						.Font(FGameStyle::Get().GetFontStyle("TowerDefense.Font.Bold.sm"))
+					]
+				]
+			]
+
+
+		]
+
+
+	];
+}
+
 void ARunHUD::InitializeDelegateSubscribers()
 {
 	if (GameMode)
 	{
-		GameMode->OnGameReady.AddDynamic(this, &ARunHUD::OnGameReady);
+		GameMode->OnLevelReady.AddDynamic(this, &ARunHUD::OnGameReady);
 	}
 
 	if (GameSate)

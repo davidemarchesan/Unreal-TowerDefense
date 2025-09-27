@@ -22,4 +22,8 @@ public:
 
 private:
 	static TSharedPtr<FSlateStyleSet> StyleInstance;
+
+	static void InitializeFonts();
+	static void InitializeIcons();
+	static void InitializeButtons();
 };

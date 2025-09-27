@@ -14,44 +14,21 @@ void ARunGameMode::BeginPlay()
 	GetGameComponents();
 
 	LoadLevel();
-
-	// Stampa la classe impostata come GameState
-	if (GameStateClass)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("GameMode says GameStateClass = %s"),
-			*GameStateClass->GetName());
-	}
-
-	// Stampa l'istanza effettiva di GameState in gioco
-	if (GameState)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("GameMode has GameState instance = %s"),
-			*GameState->GetClass()->GetName());
-	}
 }
 
 void ARunGameMode::GetGameComponents()
 {
-
 	GameState = GetGameState<ARunGameState>();
-	
 	PlayerController = Cast<ARunPlayerController>(GetWorld()->GetFirstPlayerController());
-
-	
 }
 
 void ARunGameMode::LoadLevel()
 {
-
 	// Spawn grid
 	InitializeGrid();
 
-	// Setup camera
-
-	UE_LOG(LogTemp, Warning, TEXT("GAMEMODE: LEVEL LOADED"));
 	bIsLevelLoaded = true;
-	OnGameReady.Broadcast();
-	
+	OnLevelReady.Broadcast();
 }
 
 void ARunGameMode::InitializeGrid()
@@ -61,9 +38,21 @@ void ARunGameMode::InitializeGrid()
 		return;
 	}
 
-	if (ALayoutGrid* Grid = GetWorld()->SpawnActor<ALayoutGrid>(GridBlueprintClass, FVector::ZeroVector,
-	                                                            FRotator::ZeroRotator))
+	Grid = GetWorld()->SpawnActor<ALayoutGrid>(GridBlueprintClass, FVector::ZeroVector,
+	                                           FRotator::ZeroRotator);
+
+	if (Grid)
 	{
 		Grid->Initialize(GridCols, GridRows);
 	}
+}
+
+FVector ARunGameMode::GetCameraStartLocation()
+{
+	if (Grid)
+	{
+		return Grid->GetWorldGridCenter();
+	}
+
+	return FVector::ZeroVector;
 }

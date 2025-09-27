@@ -36,14 +36,19 @@ void ARunPlayerController::BeginPlay()
 			}
 		}
 	}
-
-	CameraPawn = Cast<AGameCamera>(GetPawn());
 	
 	HUD = Cast<ARunHUD>(GetHUD());
 
 	GameMode = Cast<ARunGameMode>(GetWorld()->GetAuthGameMode());
 
 	GameInstance = Cast<UTowerDefenseGameInstance>(GetGameInstance());
+
+	CameraPawn = Cast<AGameCamera>(GetPawn());
+	if (GameMode && CameraPawn)
+	{
+		CameraPawn->SetActorLocation(GameMode->GetCameraStartLocation());
+		CameraPawn->SetActorRotation(FRotator::ZeroRotator);
+	}
 }
 
 void ARunPlayerController::SetupInputComponent()

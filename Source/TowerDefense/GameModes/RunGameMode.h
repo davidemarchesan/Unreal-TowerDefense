@@ -10,7 +10,7 @@ class ALayoutGrid;
 class ARunPlayerController;
 class ARunGameState;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGameReady);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLevelReady); // Fired when Level is ready to be played
 
 /**
  * This class defines the Run rules
@@ -21,17 +21,15 @@ class TOWERDEFENSE_API ARunGameMode : public AGameModeBase
 	GENERATED_BODY()
 
 public:
-
 	virtual void BeginPlay() override;
 
 	// Getters
 	bool IsLevelLoaded() const { return bIsLevelLoaded; }
 
 	// Delegates
-	FOnGameReady OnGameReady;
+	FOnLevelReady OnLevelReady;
 
 private:
-
 	ARunPlayerController* PlayerController;
 
 	ARunGameState* GameState;
@@ -43,26 +41,34 @@ private:
 	bool bIsLevelLoaded = false;
 
 	// Grid
+	ALayoutGrid* Grid;
+	
 	void InitializeGrid();
 
 public:
-	
 	// Stats
 	UPROPERTY(EditDefaultsOnly, Category = "Stats")
 	float PlayerMaxHealth = 2000.f;
-	
+
+	UPROPERTY(EditDefaultsOnly, Category = "Stats")
+	float PlayerInitialCoins = 2000.f;
+
 	// Phases
-	UPROPERTY(EditDefaultsOnly, Category = "Phases")
-	int32 BuyAndBuildPhaseTimer = 20;
+	UPROPERTY(EditDefaultsOnly, Category = "Gameplay")
+	int32 FirstSetupPhaseTimer = 60;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Gameplay")
+	int32 SetupPhaseTimer = 20;
 
 	// Grid
 	UPROPERTY(EditDefaultsOnly, Category = "Grid")
 	TSubclassOf<ALayoutGrid> GridBlueprintClass;
-	
+
 	UPROPERTY(EditDefaultsOnly, Category = "Grid")
 	int32 GridCols = 10;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Grid")
 	int32 GridRows = 10;
-	
+
+	FVector GetCameraStartLocation();
 };

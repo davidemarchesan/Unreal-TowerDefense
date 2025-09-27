@@ -10,6 +10,8 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPhaseStart);
 
 class ARunGameMode;
+class ARunPlayerController;
+class ARunHUD;
 
 /**
  * 
@@ -26,8 +28,10 @@ protected:
 private:
 
 	ARunGameMode* GameMode;
+	ARunPlayerController* PlayerController;
+	ARunHUD* HUD;
 
-	ERunPhase Phase = ERunPhase::Build;
+	ERunPhase Phase = ERunPhase::Setup;
 
 	int32 PhaseRemainingTime;
 	FTimerHandle TimerHandle;
@@ -35,7 +39,7 @@ private:
 	void TimerTick();
 
 	UFUNCTION()
-	void OnGameReady();
+	void OnLevelReady();
 
 	int32 WaveNumber = 0;
 
