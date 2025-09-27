@@ -15,6 +15,7 @@ class ALayoutGrid;
 class ARunHUD;
 class UTowerDefenseGameInstance;
 class ARunGameMode;
+class ARunGameState;
 struct FInputActionValue;
 
 /**
@@ -35,6 +36,8 @@ public:
 	// Input functions
 	void ToggleBuildMode();
 
+	void SkipSetupPhase();
+
 private:
 	
 	// Pawn
@@ -42,6 +45,8 @@ private:
 
 	// GameMode
 	ARunGameMode* GameMode;
+	
+	ARunGameState* GameState;
 
 	// GameInstance
 	UTowerDefenseGameInstance* GameInstance;

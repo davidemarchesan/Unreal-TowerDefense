@@ -33,7 +33,6 @@ void ARunHUD::BeginPlay()
 
 	InitializeOverlays();
 
-	UpdateComponentsOnBuildMode();
 }
 
 void ARunHUD::DrawHUD()
@@ -45,10 +44,9 @@ void ARunHUD::ToggleBuildMode(bool _bIsBuildMode)
 {
 	bIsBuildMode = _bIsBuildMode;
 
-	UpdateComponentsOnBuildMode();
 }
 
-void ARunHUD::UpdateNextWaveTimer(int32 Time)
+void ARunHUD::OnTimerUpdate(int32 Time)
 {
 
 	if (!NextWaveHBox || !NextWaveSkipButton || !NextWaveTimerTextBlock)
@@ -68,6 +66,19 @@ void ARunHUD::UpdateNextWaveTimer(int32 Time)
 
 	NextWaveTimerTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%d"), Time)));
 	
+}
+
+FReply ARunHUD::OnSkipSetupPhase()
+{
+	if (PlayerController)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ARunPlayerController::OnSkipSetupPhase"));
+		PlayerController->SkipSetupPhase();
+
+		return FReply::Handled();
+	}
+	
+	return FReply::Unhandled();
 }
 
 void ARunHUD::InitializeOverlays()
@@ -108,53 +119,8 @@ void ARunHUD::InitializeOverlays()
 			]
 		];
 
-		CreateTopBar(RootOverlay);
-
-		// Buttons overlay
-		RootOverlay->AddSlot()
-		           .HAlign(HAlign_Right)
-		           .VAlign(VAlign_Bottom)
-		           .Padding(FMargin(20))
-		[
-
-			SNew(SHorizontalBox)
-
-			// Standard Mode container
-			+ SHorizontalBox::Slot()
-			.HAlign(HAlign_Center)
-			[
-
-
-				SNew(SHorizontalBox)
-
-				+ SHorizontalBox::Slot()
-				.AutoWidth()
-				[
-					SNew(SButtonPrimaryWidget)
-					.ButtonText(FText::FromString("Start"))
-					.OnClicked(FOnClicked::CreateUObject(this, &ARunHUD::OnToggleBuildMode))
-				]
-
-				+ SHorizontalBox::Slot()
-				.AutoWidth()
-				[
-					SNew(SBorder)
-					.BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
-					.BorderBackgroundColor(FLinearColor(1.0f, 0.8f, 0.2f))
-					.HAlign(HAlign_Right)
-					[
-						SNew(STextBlock)
-						.Text(FText::FromString("Loading"))
-						.ColorAndOpacity(FLinearColor::Black)
-
-					]
-				]
-
-
-			]
-
-		];
-
+		CreateTopBarOverlay(RootOverlay);
+		
 		// Do not edit this overlay
 		RootOverlay->AddSlot()
 		           .HAlign(HAlign_Left)
@@ -176,12 +142,12 @@ void ARunHUD::InitializeOverlays()
 
 		if (GameMode->IsLevelLoaded())
 		{
-			OnGameReady();
+			OnLevelReady();
 		}
 	}
 }
 
-void ARunHUD::CreateTopBar(const TSharedRef<SOverlay>& RootOverlay)
+void ARunHUD::CreateTopBarOverlay(const TSharedRef<SOverlay>& RootOverlay)
 {
 	const float StatBoxWidth = 175.f;
 	const float StatBoxSpacing = 20.f;
@@ -309,6 +275,7 @@ void ARunHUD::CreateTopBar(const TSharedRef<SOverlay>& RootOverlay)
 					
 					SAssignNew(NextWaveSkipButton, SButton)
 					.ButtonStyle(&FGameStyle::Get().GetWidgetStyle<FButtonStyle>("TowerDefense.Button.Yellow"))
+					.OnClicked(FOnClicked::CreateUObject(this, &ARunHUD::OnSkipSetupPhase))
 					[
 						SNew(STextBlock)
 						.Text(FText::FromString("Skip"))
@@ -328,16 +295,17 @@ void ARunHUD::InitializeDelegateSubscribers()
 {
 	if (GameMode)
 	{
-		GameMode->OnLevelReady.AddDynamic(this, &ARunHUD::OnGameReady);
+		GameMode->OnLevelReady.AddDynamic(this, &ARunHUD::OnLevelReady);
 	}
 
 	if (GameSate)
 	{
 		GameSate->OnPhaseStart.AddDynamic(this, &ARunHUD::OnPhaseStart);
+		GameSate->OnTimerUpdate.AddDynamic(this, &ARunHUD::OnTimerUpdate);
 	}
 }
 
-void ARunHUD::OnGameReady()
+void ARunHUD::OnLevelReady()
 {
 	UE_LOG(LogTemp, Warning, TEXT("HUD: Game is ready!"));
 	if (LoadingScreen)
@@ -349,35 +317,4 @@ void ARunHUD::OnGameReady()
 void ARunHUD::OnPhaseStart()
 {
 	UE_LOG(LogTemp, Warning, TEXT("arunhud: onphasestart"));
-}
-
-FReply ARunHUD::OnToggleBuildMode()
-{
-	if (PlayerController)
-	{
-		PlayerController->ToggleBuildMode();
-		return FReply::Handled();
-	}
-
-	return FReply::Unhandled();
-}
-
-FReply ARunHUD::OnSaveLayout()
-{
-	if (PlayerController)
-	{
-		// PlayerController->SaveLayout();
-	}
-
-	return FReply::Unhandled();
-}
-
-void ARunHUD::UpdateComponentsOnBuildMode()
-{
-	// BuildModeBorder->SetVisibility(bIsBuildMode ? EVisibility::Visible : EVisibility::Collapsed);
-	//
-	// StandardModeBox->SetVisibility(!bIsBuildMode ? EVisibility::Visible : EVisibility::Collapsed);
-	// BuildModeBox->SetVisibility(bIsBuildMode ? EVisibility::Visible : EVisibility::Collapsed);
-	//
-	// SaveLayoutBox->SetVisibility(!bIsBuildMode ? EVisibility::Visible : EVisibility::Collapsed);
 }

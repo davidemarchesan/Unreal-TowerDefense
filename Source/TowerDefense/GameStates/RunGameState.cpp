@@ -38,10 +38,7 @@ void ARunGameState::TimerTick()
 	PhaseRemainingTime--;
 
 	UE_LOG(LogTemp, Warning, TEXT("A second %d"), PhaseRemainingTime);
-	if (HUD)
-	{
-		HUD->UpdateNextWaveTimer(PhaseRemainingTime);
-	}
+	OnTimerUpdate.Broadcast(PhaseRemainingTime);
 
 	if (PhaseRemainingTime <= 0)
 	{
@@ -73,4 +70,9 @@ void ARunGameState::OnLevelReady()
 	);
 
 	OnPhaseStart.Broadcast();
+}
+
+void ARunGameState::SkipSetupPhase()
+{
+	UE_LOG(LogTemp, Warning, TEXT("ARunGameState::SkipSetupPhase"));
 }

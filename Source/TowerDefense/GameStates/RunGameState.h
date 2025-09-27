@@ -8,6 +8,7 @@
 #include "RunGameState.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPhaseStart);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTimerUpdate, int32, Time);
 
 class ARunGameMode;
 class ARunPlayerController;
@@ -50,5 +51,9 @@ private:
 public:
 
 	FOnPhaseStart OnPhaseStart;
+
+	FOnTimerUpdate OnTimerUpdate;
+
+	void SkipSetupPhase();
 	
 };

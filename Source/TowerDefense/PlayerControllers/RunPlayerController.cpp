@@ -12,6 +12,7 @@
 #include "EngineUtils.h"
 #include "TowerDefense/TowerDefenseGameInstance.h"
 #include "TowerDefense/GameModes/RunGameMode.h"
+#include "TowerDefense/GameStates/RunGameState.h"
 #include "TowerDefense/UI/RunHUD.h"
 #include "TowerDefense/Walls/Wall.h"
 
@@ -36,10 +37,12 @@ void ARunPlayerController::BeginPlay()
 			}
 		}
 	}
-	
+
 	HUD = Cast<ARunHUD>(GetHUD());
 
 	GameMode = Cast<ARunGameMode>(GetWorld()->GetAuthGameMode());
+
+	GameState = Cast<ARunGameState>(GetWorld()->GetGameState());
 
 	GameInstance = Cast<UTowerDefenseGameInstance>(GetGameInstance());
 
@@ -130,6 +133,15 @@ void ARunPlayerController::ToggleBuildMode()
 	if (IsBuildModeActive() == false)
 	{
 		// LayoutGrid->RequestResetPreviewWall();
+	}
+}
+
+void ARunPlayerController::SkipSetupPhase()
+{
+	if (GameState)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ARunPlayerController::SkipSetupPhase"));
+		GameState->SkipSetupPhase();
 	}
 }
 

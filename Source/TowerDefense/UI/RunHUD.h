@@ -23,8 +23,6 @@ public:
 
 	void ToggleBuildMode(bool _bIsBuildMode);
 
-	void UpdateNextWaveTimer(int32 Time);
-
 private:
 
 	ARunGameMode* GameMode;
@@ -37,7 +35,7 @@ private:
 	// HUD
 	void InitializeOverlays();
 
-	void CreateTopBar(const TSharedRef<SOverlay>& RootOverlay);
+	void CreateTopBarOverlay(const TSharedRef<SOverlay>& RootOverlay);
 	
 	bool bShowLoadingScreen = true;
 
@@ -47,10 +45,13 @@ private:
 	void InitializeDelegateSubscribers();
 	
 	UFUNCTION()
-	void OnGameReady();
+	void OnLevelReady();
 
 	UFUNCTION()
 	void OnPhaseStart();
+
+	UFUNCTION()
+	void OnTimerUpdate(int32 Time);
 
 	// HUD Components
 	TSharedPtr<SBorder> LoadingScreen;
@@ -67,9 +68,5 @@ private:
 	TSharedPtr<SBox> SaveLayoutBox; // deprecated
 
 	// Button callbacks
-	FReply OnToggleBuildMode();
-
-	FReply OnSaveLayout();
-
-	void UpdateComponentsOnBuildMode();
+	FReply OnSkipSetupPhase();
 };
