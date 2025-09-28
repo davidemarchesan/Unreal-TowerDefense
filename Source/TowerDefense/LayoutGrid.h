@@ -119,7 +119,7 @@ private:
 	int32 PreviewWallRow;
 
 	void ResetPreviewWall();
-
+	
 	// Ally Base
 	void InitializeAllyBase();
 

@@ -74,6 +74,8 @@ void ARunGameState::GoToNextPhase()
 	if (Phase == ERunPhase::Setup)
 	{
 		Phase = ERunPhase::Defense;
+		GameMode->RequestResetPreviewWall();
+		SetBuildWallMode(false);
 	}
 	else
 	{
@@ -104,11 +106,38 @@ void ARunGameState::StopTimer()
 	GetWorldTimerManager().ClearTimer(TimerHandle);
 }
 
+void ARunGameState::SetBuildWallMode(bool _bIsBuildWallMode)
+{
+	bIsBuildWallMode = _bIsBuildWallMode;
+
+	if (bIsBuildWallMode == true)
+	{
+		SetBuildTurretMode(false);
+	}
+	
+	OnBuildWallModeToggle.Broadcast(bIsBuildWallMode);
+}
+
+void ARunGameState::SetBuildTurretMode(bool _bIsBuildTurretMode)
+{
+	bIsBuildTurretMode = _bIsBuildTurretMode;
+
+	if (bIsBuildTurretMode == true)
+	{
+		SetBuildWallMode(false);	
+	}
+	
+	OnBuildTurretModeToggle.Broadcast(bIsBuildTurretMode);
+}
+
 void ARunGameState::ToggleBuildWallMode()
 {
-	bIsBuildWallMode = !bIsBuildWallMode;
+	SetBuildWallMode(!bIsBuildWallMode);
+}
 
-	OnBuildWallModeToggle.Broadcast(bIsBuildWallMode);
+void ARunGameState::ToggleBuildTurretMode()
+{
+	SetBuildTurretMode(!bIsBuildTurretMode);
 }
 
 void ARunGameState::SkipSetupPhase()
@@ -119,3 +148,5 @@ void ARunGameState::SkipSetupPhase()
 
 	GoToNextPhase();
 }
+
+

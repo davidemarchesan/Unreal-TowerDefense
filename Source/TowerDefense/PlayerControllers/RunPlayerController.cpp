@@ -47,6 +47,7 @@ void ARunPlayerController::BeginPlay()
 	if (GameState)
 	{
 		GameState->OnBuildWallModeToggle.AddDynamic(this, &ARunPlayerController::OnBuildWallModeToggle);
+		GameState->OnBuildTurretModeToggle.AddDynamic(this, &ARunPlayerController::OnBuildTurretModeToggle);
 	}
 
 	GameInstance = Cast<UTowerDefenseGameInstance>(GetGameInstance());
@@ -72,6 +73,9 @@ void ARunPlayerController::SetupInputComponent()
 
 			EnhancedInput->BindAction(RunInputConfig->IA_BuildWall, ETriggerEvent::Triggered, this,
 			                          &ARunPlayerController::RequestToggleBuildWallMode);
+
+			EnhancedInput->BindAction(RunInputConfig->IA_BuildTurret, ETriggerEvent::Triggered, this,
+									  &ARunPlayerController::RequestToggleBuildTurretMode);
 		}
 
 		if (CameraInputConfig)
@@ -107,19 +111,42 @@ void ARunPlayerController::PrimaryAction()
 
 	if (GameMode)
 	{
-		FHitResult Hit;
-		if (GetHitResultUnderCursor(ECC_GameTraceChannel1, false, Hit))
+
+		if (bIsBuildWallMode == true)
 		{
-			if (Hit.GetActor()->ActorHasTag(FName("TurretWall")))
+			FHitResult Hit;
+			if (GetHitResultUnderCursor(ECC_GameTraceChannel1, false, Hit))
 			{
-				if (const AWall* TurretWall = Cast<AWall>(Hit.GetActor()))
+				if (Hit.GetActor()->ActorHasTag(FName("TurretWall")))
 				{
-					GameMode->RequestWallRemoval(TurretWall->Col, TurretWall->Row);
+					if (const AWall* TurretWall = Cast<AWall>(Hit.GetActor()))
+					{
+						GameMode->RequestWallRemoval(TurretWall->Col, TurretWall->Row);
+					}
+				}
+				else if (Hit.GetActor()->ActorHasTag(FName("LayoutGrid")))
+				{
+					GameMode->RequestWallBuild(Hit.Location);
 				}
 			}
-			else if (Hit.GetActor()->ActorHasTag(FName("LayoutGrid")))
+		}
+
+		if (bIsBuildTurretMode == true)
+		{
+			FHitResult Hit;
+			if (GetHitResultUnderCursor(ECC_GameTraceChannel1, false, Hit))
 			{
-				GameMode->RequestWallBuild(Hit.Location);
+				if (Hit.GetActor()->ActorHasTag(FName("TurretWall")))
+				{
+					if (AWall* TurretWall = Cast<AWall>(Hit.GetActor()))
+					{
+						UE_LOG(LogTemp, Warning, TEXT("Im pointing to turret wall in position %d %d"), TurretWall->Col, TurretWall->Row);
+	
+						FVector SocketLocation = TurretWall->GetTurretSocketLocation();
+						UE_LOG(LogTemp, Warning, TEXT("SocketLocation: %s"), *SocketLocation.ToString());
+						GameMode->RequestTurretBuild(SocketLocation);
+					}
+				}
 			}
 		}
 	}
@@ -170,8 +197,20 @@ void ARunPlayerController::RequestToggleBuildWallMode()
 
 void ARunPlayerController::OnBuildWallModeToggle(bool _bIsBuildWallMode)
 {
-	UE_LOG(LogTemp, Warning, TEXT("playercontroller delegate OnBuildWallModeToggle"));
 	bIsBuildWallMode = _bIsBuildWallMode;
+}
+
+void ARunPlayerController::RequestToggleBuildTurretMode()
+{
+	if (GameMode)
+	{
+		GameMode->RequestToggleBuildTurretMode();
+	}
+}
+
+void ARunPlayerController::OnBuildTurretModeToggle(bool _bIsBuildTurretMode)
+{
+	bIsBuildTurretMode = _bIsBuildTurretMode;
 }
 
 void ARunPlayerController::DeprojectPointer()
@@ -181,7 +220,7 @@ void ARunPlayerController::DeprojectPointer()
 		return;
 	}
 
-	if (bIsBuildWallMode == false)
+	if (bIsBuildWallMode == false && bIsBuildTurretMode == false)
 	{
 		return;
 	}
@@ -201,4 +240,23 @@ void ARunPlayerController::DeprojectPointer()
 			}
 		}
 	}
+
+	if (bIsBuildTurretMode == true)
+	{
+		FHitResult Hit;
+		if (GetHitResultUnderCursor(ECC_GameTraceChannel1, false, Hit))
+		{
+			if (Hit.GetActor()->ActorHasTag(FName("TurretWall")))
+			{
+				if (AWall* TurretWall = Cast<AWall>(Hit.GetActor()))
+				{
+					// UE_LOG(LogTemp, Warning, TEXT("Im pointing to turret wall in position %d %d"), TurretWall->Col, TurretWall->Row);
+	
+					FVector SocketLocation = TurretWall->GetTurretSocketLocation();
+					// UE_LOG(LogTemp, Warning, TEXT("SocketLocation: %s"), *SocketLocation.ToString());
+				}
+			}
+		}
+	}
+	
 }

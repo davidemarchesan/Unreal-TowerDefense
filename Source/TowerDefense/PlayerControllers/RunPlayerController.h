@@ -75,6 +75,12 @@ private:
 
 	UFUNCTION()
 	void OnBuildWallModeToggle(bool _bIsBuildWallMode);
+
+	void RequestToggleBuildTurretMode();
+	bool bIsBuildTurretMode = false;
+
+	UFUNCTION()
+	void OnBuildTurretModeToggle(bool _bIsBuildTurretMode);
 	
 
 	void DeprojectPointer();

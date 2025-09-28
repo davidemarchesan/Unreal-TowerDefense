@@ -18,3 +18,13 @@ AWall::AWall()
 
 }
 
+FVector AWall::GetTurretSocketLocation()
+{
+	if (Mesh)
+	{
+		return Mesh->GetSocketLocation("TurretSocket");
+	}
+
+	return FVector::ZeroVector;
+}
+

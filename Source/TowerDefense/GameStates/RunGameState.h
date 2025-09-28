@@ -10,6 +10,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPhaseStart, ERunPhase, NewPhase);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTimerUpdate, int32, Time);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBuildWallModeToggle, bool, bIsBuildWallMode);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBuildTurretModeToggle, bool, bIsBuildTurretMode);
 
 class ARunGameMode;
 class ARunPlayerController;
@@ -57,6 +58,11 @@ private:
 
 	// Build Wall Mode
 	bool bIsBuildWallMode = false;
+	void SetBuildWallMode(bool _bIsBuildWallMode);
+
+	// Build Wall Mode
+	bool bIsBuildTurretMode = false;
+	void SetBuildTurretMode(bool _bIsBuildTurretMode);
 
 public:
 
@@ -64,8 +70,15 @@ public:
 	void ToggleBuildWallMode();
 	bool IsBuildWallMode() const { return bIsBuildWallMode; }
 
-	FOnBuildWallModeToggle OnBuildWallModeToggle; 
+	FOnBuildWallModeToggle OnBuildWallModeToggle;
 
+	// Build Turret Mod
+	void ToggleBuildTurretMode();
+	bool IsBuildTurretMode() const { return bIsBuildTurretMode; }
+
+	FOnBuildTurretModeToggle OnBuildTurretModeToggle;
+
+	// Phase
 	ERunPhase GetPhase() const { return Phase; }
 
 	FOnPhaseStart OnPhaseStart;

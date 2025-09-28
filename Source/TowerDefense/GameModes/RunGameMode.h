@@ -9,6 +9,7 @@
 class ALayoutGrid;
 class ARunPlayerController;
 class ARunGameState;
+class ATurretBase;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLevelReady); // Fired when Level is ready to be played
 
@@ -84,4 +85,12 @@ public:
 	void RequestWallBuild(FVector Location);
 	
 	void RequestWallRemoval(int32 Col, int32 Row);
+
+	// Build Turret Mode
+	void RequestToggleBuildTurretMode();
+
+	void RequestTurretBuild(const FVector& Location);
+
+	UPROPERTY(EditAnywhere, Category = "BluePrints")
+	TSubclassOf<ATurretBase> TurretBluePrintClass;
 };

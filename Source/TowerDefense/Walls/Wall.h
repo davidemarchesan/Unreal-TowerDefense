@@ -25,6 +25,8 @@ public:
 
 	void SetCoord(int32 _Col, int32 _Row) { Col = _Col; Row = _Row; }
 
+	FVector GetTurretSocketLocation();
+
 protected: 
 
 	// Components

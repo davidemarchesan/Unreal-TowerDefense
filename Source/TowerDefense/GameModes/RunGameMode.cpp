@@ -6,6 +6,7 @@
 #include "TowerDefense/LayoutGrid.h"
 #include "TowerDefense/PlayerControllers/RunPlayerController.h"
 #include "TowerDefense/GameStates/RunGameState.h"
+#include "TowerDefense/Turrets/TurretBase.h"
 
 void ARunGameMode::BeginPlay()
 {
@@ -105,4 +106,28 @@ void ARunGameMode::RequestWallRemoval(int32 Col, int32 Row)
 	{
 		Grid->RequestWallRemoval(Col, Row);
 	}
+}
+
+void ARunGameMode::RequestToggleBuildTurretMode()
+{
+	if (GameState && GameState->GetPhase() == ERunPhase::Setup)
+	{
+		GameState->ToggleBuildTurretMode();
+
+		if (GameState->IsBuildTurretMode() == false && Grid)
+		{
+			Grid->RequestResetPreviewWall();
+		}
+	}
+}
+
+void ARunGameMode::RequestTurretBuild(const FVector& Location)
+{
+	if (TurretBluePrintClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("gamemode spawning at: %s"), *Location.ToString());
+		GetWorld()->SpawnActor<ATurretBase>(TurretBluePrintClass, Location,
+		                                    FRotator::ZeroRotator
+		);
+	};
 }
