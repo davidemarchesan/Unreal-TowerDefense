@@ -71,4 +71,17 @@ public:
 	int32 GridRows = 10;
 
 	FVector GetCameraStartLocation();
+
+	// Build Wall Mode
+	void RequestToggleBuildWallMode();
+
+	bool CanBuildWall();
+
+	void RequestWallPreview(FVector Location);
+
+	void RequestResetPreviewWall();
+
+	void RequestWallBuild(FVector Location);
+	
+	void RequestWallRemoval(int32 Col, int32 Row);
 };

@@ -9,6 +9,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPhaseStart, ERunPhase, NewPhase);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTimerUpdate, int32, Time);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBuildWallModeToggle, bool, bIsBuildWallMode);
 
 class ARunGameMode;
 class ARunPlayerController;
@@ -54,7 +55,18 @@ private:
 
 	float PlayerCoins;
 
+	// Build Wall Mode
+	bool bIsBuildWallMode = false;
+
 public:
+
+	// Build Wall Mode
+	void ToggleBuildWallMode();
+	bool IsBuildWallMode() const { return bIsBuildWallMode; }
+
+	FOnBuildWallModeToggle OnBuildWallModeToggle; 
+
+	ERunPhase GetPhase() const { return Phase; }
 
 	FOnPhaseStart OnPhaseStart;
 

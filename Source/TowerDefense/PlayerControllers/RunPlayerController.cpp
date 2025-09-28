@@ -13,6 +13,7 @@
 #include "TowerDefense/TowerDefenseGameInstance.h"
 #include "TowerDefense/GameModes/RunGameMode.h"
 #include "TowerDefense/GameStates/RunGameState.h"
+#include "TowerDefense/Input/Config/RunInputConfig.h"
 #include "TowerDefense/UI/RunHUD.h"
 #include "TowerDefense/Walls/Wall.h"
 
@@ -27,9 +28,9 @@ void ARunPlayerController::BeginPlay()
 		if (UEnhancedInputLocalPlayerSubsystem* InputSystem = LocalPlayer->GetSubsystem<
 			UEnhancedInputLocalPlayerSubsystem>())
 		{
-			if (LayoutEditorMappingContext)
+			if (RunMappingContext)
 			{
-				InputSystem->AddMappingContext(LayoutEditorMappingContext, 0);
+				InputSystem->AddMappingContext(RunMappingContext, 1);
 			}
 			if (CameraMappingContext)
 			{
@@ -43,6 +44,10 @@ void ARunPlayerController::BeginPlay()
 	GameMode = Cast<ARunGameMode>(GetWorld()->GetAuthGameMode());
 
 	GameState = Cast<ARunGameState>(GetWorld()->GetGameState());
+	if (GameState)
+	{
+		GameState->OnBuildWallModeToggle.AddDynamic(this, &ARunPlayerController::OnBuildWallModeToggle);
+	}
 
 	GameInstance = Cast<UTowerDefenseGameInstance>(GetGameInstance());
 
@@ -60,13 +65,13 @@ void ARunPlayerController::SetupInputComponent()
 
 	if (UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(InputComponent))
 	{
-		if (LayoutEditorInputConfig)
+		if (RunInputConfig)
 		{
-			EnhancedInput->BindAction(LayoutEditorInputConfig->IA_PrimaryAction, ETriggerEvent::Triggered, this,
+			EnhancedInput->BindAction(RunInputConfig->IA_PrimaryAction, ETriggerEvent::Triggered, this,
 			                          &ARunPlayerController::PrimaryAction);
 
-			EnhancedInput->BindAction(LayoutEditorInputConfig->IA_EnterBuildMode, ETriggerEvent::Triggered, this,
-			                          &ARunPlayerController::ToggleBuildMode);
+			EnhancedInput->BindAction(RunInputConfig->IA_BuildWall, ETriggerEvent::Triggered, this,
+			                          &ARunPlayerController::RequestToggleBuildWallMode);
 		}
 
 		if (CameraInputConfig)
@@ -93,46 +98,30 @@ void ARunPlayerController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	DeprojectMouse();
+	DeprojectPointer();
 }
 
 void ARunPlayerController::PrimaryAction()
 {
-	// if (IsBuildModeActive() && LayoutGrid && GameMode)
-	// {
-	// 	FHitResult Hit;
-	// 	if (GetHitResultUnderCursor(ECC_GameTraceChannel1, false, Hit))
-	// 	{
-	// 		if (Hit.GetActor()->ActorHasTag(FName("TurretWall")))
-	// 		{
-	// 			if (const AWall* TurretWall = Cast<AWall>(Hit.GetActor()))
-	// 			{
-	// 				LayoutGrid->RequestWallRemoval(TurretWall->Col, TurretWall->Row);
-	// 				// int32 CurrentTurretWalls = GameMode->RegisterTurretWallRemoval();
-	// 			}
-	// 		}
-	// 		else if (Hit.GetActor()->ActorHasTag(FName("LayoutGrid")))
-	// 		{
-	// 			// if (GameMode->CanPlaceTurretWall())
-	// 			// {
-	// 			// 	if (LayoutGrid->RequestWallBuild(Hit.Location))
-	// 			// 	{
-	// 			// 		int32 CurrentTurretWalls = GameMode->RegisterTurretWallPlacement();
-	// 			// 	}
-	// 			// }
-	// 		}
-	// 	}
-	// }
-}
+	UE_LOG(LogTemp, Warning, TEXT("Running PrimaryAction"));
 
-void ARunPlayerController::ToggleBuildMode()
-{
-	bIsBuildMode = !bIsBuildMode;
-	if (HUD) HUD->ToggleBuildMode(bIsBuildMode);
-
-	if (IsBuildModeActive() == false)
+	if (GameMode)
 	{
-		// LayoutGrid->RequestResetPreviewWall();
+		FHitResult Hit;
+		if (GetHitResultUnderCursor(ECC_GameTraceChannel1, false, Hit))
+		{
+			if (Hit.GetActor()->ActorHasTag(FName("TurretWall")))
+			{
+				if (const AWall* TurretWall = Cast<AWall>(Hit.GetActor()))
+				{
+					GameMode->RequestWallRemoval(TurretWall->Col, TurretWall->Row);
+				}
+			}
+			else if (Hit.GetActor()->ActorHasTag(FName("LayoutGrid")))
+			{
+				GameMode->RequestWallBuild(Hit.Location);
+			}
+		}
 	}
 }
 
@@ -171,29 +160,45 @@ void ARunPlayerController::ZoomCamera(const FInputActionValue& Value)
 	}
 }
 
-void ARunPlayerController::DeprojectMouse()
+void ARunPlayerController::RequestToggleBuildWallMode()
 {
-	if (IsBuildModeActive() == false)
+	if (GameMode)
+	{
+		GameMode->RequestToggleBuildWallMode();
+	}
+}
+
+void ARunPlayerController::OnBuildWallModeToggle(bool _bIsBuildWallMode)
+{
+	UE_LOG(LogTemp, Warning, TEXT("playercontroller delegate OnBuildWallModeToggle"));
+	bIsBuildWallMode = _bIsBuildWallMode;
+}
+
+void ARunPlayerController::DeprojectPointer()
+{
+	if (!GameMode)
 	{
 		return;
 	}
 
-	FHitResult Hit;
-	if (GetHitResultUnderCursor(ECC_GameTraceChannel1, false, Hit))
+	if (bIsBuildWallMode == false)
 	{
-		if (Hit.GetActor()->ActorHasTag(FName("TurretWall")))
+		return;
+	}
+
+	if (bIsBuildWallMode == true)
+	{
+		FHitResult Hit;
+		if (GetHitResultUnderCursor(ECC_GameTraceChannel1, false, Hit))
 		{
-			// if (LayoutGrid)
-			// {
-			// 	LayoutGrid->RequestResetPreviewWall();
-			// }
-		}
-		else if (Hit.GetActor()->ActorHasTag(FName("LayoutGrid")))
-		{
-			// if (GameMode && GameMode->CanPlaceTurretWall() && LayoutGrid)
-			// {
-			// 	LayoutGrid->RequestPreviewWall(Hit.Location);
-			// }
+			if (Hit.GetActor()->ActorHasTag(FName("TurretWall")))
+			{
+				GameMode->RequestResetPreviewWall();
+			}
+			else if (Hit.GetActor()->ActorHasTag(FName("LayoutGrid")))
+			{
+				GameMode->RequestWallPreview(Hit.Location);
+			}
 		}
 	}
 }

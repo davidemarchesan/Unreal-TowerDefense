@@ -8,7 +8,7 @@
 
 class UInputMappingContext;
 class UInputAction;
-class ULayoutEditorInputConfig;
+class URunInputConfig;
 class UCameraInputConfig;
 class AGameCamera;
 class ALayoutGrid;
@@ -32,10 +32,7 @@ protected:
 
 public:
 	virtual void Tick(float DeltaTime) override;
-
-	// Input functions
-	void ToggleBuildMode();
-
+	
 	void SkipSetupPhase();
 
 private:
@@ -53,11 +50,11 @@ private:
 
 	// Input Mapping Contexts
 	UPROPERTY(EditAnywhere, Category = "Input")
-	ULayoutEditorInputConfig* LayoutEditorInputConfig;
+	URunInputConfig* RunInputConfig;
 
 	UPROPERTY(EditAnywhere, Category="Input")
-	UInputMappingContext* LayoutEditorMappingContext;
-
+	UInputMappingContext* RunMappingContext;
+	
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UCameraInputConfig* CameraInputConfig;
 
@@ -72,11 +69,15 @@ private:
 	void RotateCamera(const FInputActionValue& Value);
 
 	void ZoomCamera(const FInputActionValue& Value);
+	
+	void RequestToggleBuildWallMode();
+	bool bIsBuildWallMode = false;
+
+	UFUNCTION()
+	void OnBuildWallModeToggle(bool _bIsBuildWallMode);
+	
+
+	void DeprojectPointer();
 
 
-	void DeprojectMouse();
-
-	bool bIsBuildMode = false;
-
-	bool IsBuildModeActive() const { return bIsBuildMode; }
 };

@@ -33,7 +33,6 @@ void ARunHUD::BeginPlay()
 	InitializeDelegateSubscribers();
 
 	InitializeOverlays();
-
 }
 
 void ARunHUD::DrawHUD()
@@ -44,17 +43,15 @@ void ARunHUD::DrawHUD()
 void ARunHUD::ToggleBuildMode(bool _bIsBuildMode)
 {
 	bIsBuildMode = _bIsBuildMode;
-
 }
 
 void ARunHUD::OnTimerUpdate(int32 Time)
 {
-
 	if (!NextWaveHBox || !NextWaveSkipButton || !NextWaveTimerTextBlock)
 	{
 		return;
 	}
-	
+
 	if (Time <= 0)
 	{
 		NextWaveHBox->SetVisibility(EVisibility::Collapsed);
@@ -66,7 +63,6 @@ void ARunHUD::OnTimerUpdate(int32 Time)
 	}
 
 	NextWaveTimerTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%d"), Time)));
-	
 }
 
 FReply ARunHUD::OnSkipSetupPhase()
@@ -76,7 +72,7 @@ FReply ARunHUD::OnSkipSetupPhase()
 		PlayerController->SkipSetupPhase();
 		return FReply::Handled();
 	}
-	
+
 	return FReply::Unhandled();
 }
 
@@ -119,7 +115,8 @@ void ARunHUD::InitializeOverlays()
 		];
 
 		CreateTopBarOverlay(RootOverlay);
-		
+		CreateBottomBarOverlay(RootOverlay);
+
 		// Do not edit this overlay
 		RootOverlay->AddSlot()
 		           .HAlign(HAlign_Left)
@@ -271,7 +268,7 @@ void ARunHUD::CreateTopBarOverlay(const TSharedRef<SOverlay>& RootOverlay)
 				.HAlign(HAlign_Right)
 				.VAlign(VAlign_Center)
 				[
-					
+
 					SAssignNew(NextWaveSkipButton, SButton)
 					.ButtonStyle(&FGameStyle::Get().GetWidgetStyle<FButtonStyle>("TowerDefense.Button.Yellow"))
 					.OnClicked(FOnClicked::CreateUObject(this, &ARunHUD::OnSkipSetupPhase))
@@ -287,6 +284,88 @@ void ARunHUD::CreateTopBarOverlay(const TSharedRef<SOverlay>& RootOverlay)
 		]
 
 
+	];
+}
+
+void ARunHUD::CreateBottomBarOverlay(const TSharedRef<SOverlay>& RootOverlay)
+{
+	RootOverlay->AddSlot()
+	           .HAlign(HAlign_Center)
+	           .VAlign(VAlign_Bottom)
+
+	[
+		SAssignNew(BottomBarBorder, SBorder)
+		.BorderImage(
+			new FSlateRoundedBoxBrush(FLinearColor::White, FVector4(12, 12, 0, 0)))
+		.BorderBackgroundColor(FLinearColor(0.f, 0.f, 0.f, 0.5f))
+		.Padding(FMargin(0, 15))
+		[
+
+			SNew(SHorizontalBox)
+
+			+ SHorizontalBox::Slot()
+			.Padding(15, 0)
+			[
+
+				SNew(SVerticalBox)
+
+				+ SVerticalBox::Slot()
+				[
+					SNew(SBox)
+					.HeightOverride(64.f)
+					.WidthOverride(64.f)
+					[
+						SNew(STextBlock)
+						.Justification(ETextJustify::Center)
+						.Text(FText::FromString("1"))
+						.Font(FGameStyle::Get().GetFontStyle("TowerDefense.Font.Bold.md"))
+						.ColorAndOpacity(FGameStyle::Get().GetColor("TowerDefense.Color.Beige"))
+					]
+				]
+
+				+ SVerticalBox::Slot()
+				[
+					SNew(STextBlock)
+					.Justification(ETextJustify::Center)
+					.Text(FText::FromString("Wall"))
+					.Font(FGameStyle::Get().GetFontStyle("TowerDefense.Font.Bold.sm"))
+					.ColorAndOpacity(FGameStyle::Get().GetColor("TowerDefense.Color.Beige"))
+				]
+
+			]
+
+			+ SHorizontalBox::Slot()
+			.Padding(15, 0)
+			[
+
+				SNew(SVerticalBox)
+
+				+ SVerticalBox::Slot()
+				[
+					SNew(SBox)
+					.HeightOverride(64.f)
+					.WidthOverride(64.f)
+					[
+						SNew(STextBlock)
+						.Justification(ETextJustify::Center)
+						.Text(FText::FromString("2"))
+						.Font(FGameStyle::Get().GetFontStyle("TowerDefense.Font.Bold.md"))
+						.ColorAndOpacity(FGameStyle::Get().GetColor("TowerDefense.Color.Beige"))
+					]
+				]
+
+				+ SVerticalBox::Slot()
+				[
+					SNew(STextBlock)
+					.Justification(ETextJustify::Center)
+					.Text(FText::FromString("Turret"))
+					.Font(FGameStyle::Get().GetFontStyle("TowerDefense.Font.Bold.sm"))
+					.ColorAndOpacity(FGameStyle::Get().GetColor("TowerDefense.Color.Beige"))
+				]
+
+			]
+
+		]
 	];
 }
 
@@ -315,18 +394,16 @@ void ARunHUD::OnLevelReady()
 
 void ARunHUD::OnPhaseStart(ERunPhase NewPhase)
 {
-
 	switch (NewPhase)
 	{
-		case ERunPhase::Setup:
+	case ERunPhase::Setup:
 		PrepareForSetupPhase();
 		break;
 
-		case ERunPhase::Defense:
+	case ERunPhase::Defense:
 		PrepareForDefensePhase();
 		break;
 	}
-	
 }
 
 void ARunHUD::PrepareForSetupPhase()
@@ -339,6 +416,8 @@ void ARunHUD::PrepareForSetupPhase()
 	NextWaveTimerTextBlock->SetVisibility(EVisibility::Visible);
 	NextWaveSkipButton->SetVisibility(EVisibility::Visible);
 	NextWaveHBox->SetVisibility(EVisibility::Visible);
+
+	BottomBarBorder->SetVisibility(EVisibility::Visible);
 }
 
 void ARunHUD::PrepareForDefensePhase()
@@ -349,4 +428,5 @@ void ARunHUD::PrepareForDefensePhase()
 	}
 
 	NextWaveHBox->SetVisibility(EVisibility::Collapsed);
+	BottomBarBorder->SetVisibility(EVisibility::Collapsed);
 }

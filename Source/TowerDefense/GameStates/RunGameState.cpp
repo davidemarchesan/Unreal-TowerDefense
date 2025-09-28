@@ -104,6 +104,13 @@ void ARunGameState::StopTimer()
 	GetWorldTimerManager().ClearTimer(TimerHandle);
 }
 
+void ARunGameState::ToggleBuildWallMode()
+{
+	bIsBuildWallMode = !bIsBuildWallMode;
+
+	OnBuildWallModeToggle.Broadcast(bIsBuildWallMode);
+}
+
 void ARunGameState::SkipSetupPhase()
 {
 	UE_LOG(LogTemp, Warning, TEXT("ARunGameState::SkipSetupPhase"));

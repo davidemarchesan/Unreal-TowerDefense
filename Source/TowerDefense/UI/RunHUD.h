@@ -36,6 +36,7 @@ private:
 	void InitializeOverlays();
 
 	void CreateTopBarOverlay(const TSharedRef<SOverlay>& RootOverlay);
+	void CreateBottomBarOverlay(const TSharedRef<SOverlay>& RootOverlay);
 	
 	bool bShowLoadingScreen = true;
 
@@ -63,6 +64,8 @@ private:
 	TSharedPtr<SHorizontalBox> NextWaveHBox;
 	TSharedPtr<STextBlock> NextWaveTimerTextBlock;
 	TSharedPtr<SButton> NextWaveSkipButton;
+
+	TSharedPtr<SBorder> BottomBarBorder;
 	
 	TSharedPtr<SBorder> BuildModeBorder; // deprecated
 
