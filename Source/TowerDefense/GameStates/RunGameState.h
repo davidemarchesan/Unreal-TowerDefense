@@ -7,7 +7,7 @@
 #include "TowerDefense/Enums/RunPhase.h"
 #include "RunGameState.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPhaseStart);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPhaseStart, ERunPhase, NewPhase);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTimerUpdate, int32, Time);
 
 class ARunGameMode;
@@ -41,6 +41,12 @@ private:
 
 	UFUNCTION()
 	void OnLevelReady();
+
+	void GoToNextPhase();
+
+	void StartTimer(int32 Seconds);
+
+	void StopTimer();
 
 	int32 WaveNumber = 0;
 

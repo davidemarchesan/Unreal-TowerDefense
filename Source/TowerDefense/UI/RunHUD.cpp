@@ -8,6 +8,7 @@
 #include "Engine/Engine.h"
 #include "Engine/GameViewportClient.h"
 #include "TowerDefense/GameModes/RunGameMode.h"
+#include "TowerDefense/Enums/RunPhase.h"
 
 #include "TowerDefense/PlayerControllers/RunPlayerController.h"
 #include "TowerDefense/UI/Components/ButtonInputWidget.h"
@@ -72,9 +73,7 @@ FReply ARunHUD::OnSkipSetupPhase()
 {
 	if (PlayerController)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ARunPlayerController::OnSkipSetupPhase"));
 		PlayerController->SkipSetupPhase();
-
 		return FReply::Handled();
 	}
 	
@@ -278,7 +277,7 @@ void ARunHUD::CreateTopBarOverlay(const TSharedRef<SOverlay>& RootOverlay)
 					.OnClicked(FOnClicked::CreateUObject(this, &ARunHUD::OnSkipSetupPhase))
 					[
 						SNew(STextBlock)
-						.Text(FText::FromString("Skip"))
+						.Text(FText::FromString("SKIP"))
 						.Font(FGameStyle::Get().GetFontStyle("TowerDefense.Font.Bold.sm"))
 					]
 				]
@@ -314,7 +313,40 @@ void ARunHUD::OnLevelReady()
 	}
 }
 
-void ARunHUD::OnPhaseStart()
+void ARunHUD::OnPhaseStart(ERunPhase NewPhase)
 {
-	UE_LOG(LogTemp, Warning, TEXT("arunhud: onphasestart"));
+
+	switch (NewPhase)
+	{
+		case ERunPhase::Setup:
+		PrepareForSetupPhase();
+		break;
+
+		case ERunPhase::Defense:
+		PrepareForDefensePhase();
+		break;
+	}
+	
+}
+
+void ARunHUD::PrepareForSetupPhase()
+{
+	if (!NextWaveHBox || !NextWaveSkipButton || !NextWaveTimerTextBlock)
+	{
+		return;
+	}
+
+	NextWaveTimerTextBlock->SetVisibility(EVisibility::Visible);
+	NextWaveSkipButton->SetVisibility(EVisibility::Visible);
+	NextWaveHBox->SetVisibility(EVisibility::Visible);
+}
+
+void ARunHUD::PrepareForDefensePhase()
+{
+	if (!NextWaveHBox)
+	{
+		return;
+	}
+
+	NextWaveHBox->SetVisibility(EVisibility::Collapsed);
 }

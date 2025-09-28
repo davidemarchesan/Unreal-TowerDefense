@@ -48,7 +48,11 @@ private:
 	void OnLevelReady();
 
 	UFUNCTION()
-	void OnPhaseStart();
+	void OnPhaseStart(ERunPhase NewPhase);
+
+	void PrepareForSetupPhase();
+	
+	void PrepareForDefensePhase();
 
 	UFUNCTION()
 	void OnTimerUpdate(int32 Time);

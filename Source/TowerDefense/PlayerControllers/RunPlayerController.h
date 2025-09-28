@@ -43,12 +43,9 @@ private:
 	// Pawn
 	AGameCamera* CameraPawn;
 
-	// GameMode
+	// Game components
 	ARunGameMode* GameMode;
-	
 	ARunGameState* GameState;
-
-	// GameInstance
 	UTowerDefenseGameInstance* GameInstance;
 
 	// HUD

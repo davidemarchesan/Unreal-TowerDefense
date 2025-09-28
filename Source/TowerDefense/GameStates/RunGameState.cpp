@@ -6,6 +6,7 @@
 #include "TowerDefense/GameModes/RunGameMode.h"
 #include "TowerDefense/PlayerControllers/RunPlayerController.h"
 #include "TowerDefense/UI/RunHUD.h"
+#include "TowerDefense/Enums/RunPhase.h"
 
 void ARunGameState::BeginPlay()
 {
@@ -37,7 +38,6 @@ void ARunGameState::TimerTick()
 {
 	PhaseRemainingTime--;
 
-	UE_LOG(LogTemp, Warning, TEXT("A second %d"), PhaseRemainingTime);
 	OnTimerUpdate.Broadcast(PhaseRemainingTime);
 
 	if (PhaseRemainingTime <= 0)
@@ -58,9 +58,38 @@ void ARunGameState::OnLevelReady()
 	PlayerHealth = GameMode->PlayerMaxHealth;
 	PlayerCoins = GameMode->PlayerInitialCoins;
 
+	StartTimer(WaveNumber == 0 ? GameMode->FirstSetupPhaseTimer : GameMode->SetupPhaseTimer);
 
-	PhaseRemainingTime = WaveNumber == 0 ? GameMode->FirstSetupPhaseTimer : GameMode->SetupPhaseTimer;
+	OnPhaseStart.Broadcast(Phase);
+}
 
+void ARunGameState::GoToNextPhase()
+{
+
+	if (!GameMode)
+	{
+		return;
+	}
+
+	if (Phase == ERunPhase::Setup)
+	{
+		Phase = ERunPhase::Defense;
+	}
+	else
+	{
+		Phase = ERunPhase::Setup;
+		StartTimer(GameMode->SetupPhaseTimer);
+	}
+
+	OnPhaseStart.Broadcast(Phase);
+	
+}
+
+void ARunGameState::StartTimer(int32 Seconds)
+{
+
+	PhaseRemainingTime = Seconds;
+	
 	GetWorldTimerManager().SetTimer(
 		TimerHandle,
 		this,
@@ -68,11 +97,18 @@ void ARunGameState::OnLevelReady()
 		1.0f,
 		true
 	);
+}
 
-	OnPhaseStart.Broadcast();
+void ARunGameState::StopTimer()
+{
+	GetWorldTimerManager().ClearTimer(TimerHandle);
 }
 
 void ARunGameState::SkipSetupPhase()
 {
 	UE_LOG(LogTemp, Warning, TEXT("ARunGameState::SkipSetupPhase"));
+
+	StopTimer();
+
+	GoToNextPhase();
 }

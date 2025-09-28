@@ -140,7 +140,6 @@ void ARunPlayerController::SkipSetupPhase()
 {
 	if (GameState)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ARunPlayerController::SkipSetupPhase"));
 		GameState->SkipSetupPhase();
 	}
 }
