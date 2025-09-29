@@ -114,6 +114,10 @@ void ARunGameState::SetBuildWallMode(bool _bIsBuildWallMode)
 	{
 		SetBuildTurretMode(false);
 	}
+	else
+	{
+		GameMode->RequestResetPreviewWall();
+	}
 	
 	OnBuildWallModeToggle.Broadcast(bIsBuildWallMode);
 }
@@ -125,6 +129,10 @@ void ARunGameState::SetBuildTurretMode(bool _bIsBuildTurretMode)
 	if (bIsBuildTurretMode == true)
 	{
 		SetBuildWallMode(false);	
+	}
+	else
+	{
+		GameMode->RequestResetPreviewTurret();
 	}
 	
 	OnBuildTurretModeToggle.Broadcast(bIsBuildTurretMode);

@@ -12,6 +12,7 @@
 class AWall;
 class ATurretWall;
 class APreviewWall;
+class ATurretBase;
 class ANavMeshBoundsVolume;
 class UNavigationSystemV1;
 class ANavigationData;
@@ -32,6 +33,7 @@ public:
 
 	void Initialize(int32 _Cols, int32 _Rows);
 
+	// Walls
 	void RequestPreviewWall(FVector Location);
 
 	bool RequestWallBuild(FVector Location);
@@ -40,6 +42,16 @@ public:
 
 	void RequestResetPreviewWall();
 
+	// Turrets
+	void RequestPreviewTurret(FVector Location);
+
+	bool RequestTurretBuild(FVector Location);
+
+	// void RequestTurretRemoval(int32 Col, int32 Row);
+
+	void RequestResetPreviewTurret();
+
+	// Grid
 	bool IsGridInitialized() const { return bIsGridInitialized; }
 
 	FVector GetWorldGridCenter() const { return WorldGridCenter; }
@@ -119,6 +131,19 @@ private:
 	int32 PreviewWallRow;
 
 	void ResetPreviewWall();
+
+	// Preview turret
+	bool bIsPreviewingTurret = false;
+	
+	UPROPERTY(EditAnywhere, Category = "BluePrints")
+	TSubclassOf<ATurretBase> TurretBluePrintClass;
+
+	ATurretBase* PreviewTurret = nullptr;
+
+	int32 PreviewTurretCol;
+	int32 PreviewTurretRow;
+
+	void ResetPreviewTurret();
 	
 	// Ally Base
 	void InitializeAllyBase();

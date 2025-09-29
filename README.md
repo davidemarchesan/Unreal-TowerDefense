@@ -1,5 +1,19 @@
 # Tower Defense
 
+## Cosa stavo facendo
+
+stavo lavorando sullo spawn delle torri che funziona grazie al socket nelle mesh
+poi volevo spostare lo spawn dalla grid alla gamemode, che regola tutto, che forse dovrebbe tenere anche la griglia logica (non saprei)
+
+poi volevo lavorare sulle preview delle torri, perché non posso fare blueprint e mesh diverse per ogni torre, bisogna usare le dynamic
+
+-- sono qui
+Tip pratico: per torrette e effetti semi-trasparenti (es. glow, selection ring), spesso si crea un componente separato (plane o decal) con materiale traslucido sopra la mesh Nanite. Così la torretta resta Nanite, e l’effetto trasparente è su un componente secondario.
+
+fatto questo, volevo fare lo spawn dei nemici alla fase defense
+
+
+
 ## Links
 
 - https://dev.epicgames.com/documentation/en-us/unreal-engine/API/Runtime/Slate

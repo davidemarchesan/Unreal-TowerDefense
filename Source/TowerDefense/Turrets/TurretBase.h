@@ -9,7 +9,9 @@
 #include "TurretBase.generated.h"
 
 class AEnemyBase;
+class UMaterialInterface;
 class UPrimitiveComponent;
+class UMaterialInstanceDynamic;
 
 UCLASS()
 class TOWERDEFENSE_API ATurretBase : public AActor
@@ -17,16 +19,15 @@ class TOWERDEFENSE_API ATurretBase : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	ATurretBase();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	void SetPreview(bool _bIsPreview);
 
 private: 
 
@@ -43,6 +44,15 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	USphereComponent* DetectionSphere;
 
+	// Preview
+	UPROPERTY(EditDefaultsOnly, Category="Components")
+	UMaterialInterface* PreviewMaterial;
+
+	UMaterialInterface* BaseMaterial;
+	UMaterialInterface* TurretMaterial;
+	
+	bool bIsPreview = true;
+	
 	// Stats
 	UPROPERTY(EditAnywhere, Category="Stats")
 	float Range = 100.0f;

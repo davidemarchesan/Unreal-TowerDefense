@@ -14,6 +14,7 @@
 #include "MainBase.h"
 #include "DrawDebugHelpers.h"
 #include "TowerDefenseGameInstance.h"
+#include "Turrets/TurretBase.h"
 
 // Sets default values
 ALayoutGrid::ALayoutGrid()
@@ -137,6 +138,90 @@ void ALayoutGrid::RequestWallRemoval(int32 Col, int32 Row)
 void ALayoutGrid::RequestResetPreviewWall()
 {
 	ResetPreviewWall();
+}
+
+void ALayoutGrid::RequestPreviewTurret(FVector Location)
+{
+	if (bIsGridInitialized == false)
+	{
+		return;
+	}
+
+	int32 Col = FMath::RoundToInt(Location.Y / 100.f);
+	int32 Row = FMath::RoundToInt(Location.X / 100.f);
+	
+	if (Col == PreviewTurretCol && Row == PreviewTurretRow)
+	{
+		// Same spot, no need to set again the same position
+		return;
+	}
+
+	PreviewTurretCol = Col;
+	PreviewTurretRow = Row;
+
+	ECellState State = Grid[Col][Row];
+
+	if (State == ECellState::TurretWall)
+	{
+		// It is ok to preview
+		bIsPreviewingTurret = true;
+
+		if (PreviewTurret == nullptr)
+		{
+			PreviewTurret = GetWorld()->SpawnActor<ATurretBase>(TurretBluePrintClass,
+			                                                    FVector(Location),
+			                                                    FRotator::ZeroRotator);
+
+			if (PreviewTurret)
+			{
+				FString TurretName = FString::Printf(TEXT("PreviewTurret"));
+				FString Path = FString::Printf(TEXT("Turrets"));
+				PreviewTurret->SetFolderPath(*Path);
+				PreviewTurret->SetActorLabel(*TurretName);
+			}
+		}
+		else
+		{
+			PreviewTurret->SetActorLocation(Location);
+		}
+	}
+	else
+	{
+		ResetPreviewTurret();
+	}
+}
+
+bool ALayoutGrid::RequestTurretBuild(FVector Location)
+{
+	if (Grid[PreviewTurretCol][PreviewTurretRow] == ECellState::TurretWall)
+	{
+		
+		ATurretBase* Turret = GetWorld()->SpawnActor<ATurretBase>(TurretBluePrintClass,
+																FVector(Location),
+																FRotator::ZeroRotator);
+
+		if (Turret)
+		{
+			Turret->SetPreview(false);
+			FString WallName = FString::Printf(TEXT("Turret_%d_%d"), PreviewTurretCol, PreviewTurretRow);
+			FString Path = FString::Printf(TEXT("Turrets"));
+			Turret->SetFolderPath(*Path);
+			Turret->SetActorLabel(*WallName);
+
+			Grid[PreviewTurretCol][PreviewTurretRow] = ECellState::TurretWallWithTurret;
+		}
+		
+		ResetPreviewTurret();
+
+		return true;
+	}
+
+	return false;
+}
+
+void ALayoutGrid::RequestResetPreviewTurret()
+{
+	ResetPreviewTurret();
 }
 
 void ALayoutGrid::InitializeNavMesh()
@@ -292,7 +377,6 @@ void ALayoutGrid::LoadSavedLayout()
 				UE_LOG(LogTemp, Warning, TEXT("Loaded grid %d %d"), SavedGridLayout[I].X, SavedGridLayout[I].Y);
 
 				SpawnWall(SavedGridLayout[I].X, SavedGridLayout[I].Y, ECellState::TurretWall, TEXT("TurretWalls"));
-				
 			}
 		}
 	}
@@ -352,6 +436,25 @@ void ALayoutGrid::ResetPreviewWall()
 	bIsPreviewingWall = false;
 }
 
+void ALayoutGrid::ResetPreviewTurret()
+{
+	if (bIsPreviewingTurret == false)
+	{
+		return;
+	}
+
+	if (PreviewTurret)
+	{
+		PreviewTurret->Destroy();
+		PreviewTurret = nullptr;
+
+		PreviewTurretCol = -1;
+		PreviewTurretRow = -1;
+	}
+
+	bIsPreviewingTurret = false;
+}
+
 void ALayoutGrid::InitializeAllyBase()
 {
 	float Col = Cols - 2.5f;
@@ -385,10 +488,9 @@ void ALayoutGrid::Tick(float DeltaTime)
 
 void ALayoutGrid::Initialize(int32 _Cols, int32 _Rows)
 {
-
 	Cols = _Cols;
 	Rows = _Rows;
-	
+
 	InitializeGrid();
 
 	InitializeFloor();
@@ -398,5 +500,4 @@ void ALayoutGrid::Initialize(int32 _Cols, int32 _Rows)
 
 	InitializeNavMesh();
 	BuildNavMesh();
-	
 }

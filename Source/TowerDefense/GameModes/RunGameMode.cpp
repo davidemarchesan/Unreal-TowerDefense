@@ -121,13 +121,26 @@ void ARunGameMode::RequestToggleBuildTurretMode()
 	}
 }
 
+void ARunGameMode::RequestTurretPreview(FVector Location)
+{
+	if (Grid)
+	{
+		Grid->RequestPreviewTurret(Location);
+	}
+}
+
+void ARunGameMode::RequestResetPreviewTurret()
+{
+	if (Grid)
+	{
+		Grid->RequestResetPreviewTurret();
+	}
+}
+
 void ARunGameMode::RequestTurretBuild(const FVector& Location)
 {
-	if (TurretBluePrintClass)
+	if (GameState && GameState->IsBuildTurretMode() && Grid)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("gamemode spawning at: %s"), *Location.ToString());
-		GetWorld()->SpawnActor<ATurretBase>(TurretBluePrintClass, Location,
-		                                    FRotator::ZeroRotator
-		);
-	};
+		Grid->RequestTurretBuild(Location);
+	}
 }

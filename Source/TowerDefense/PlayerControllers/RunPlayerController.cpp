@@ -253,8 +253,13 @@ void ARunPlayerController::DeprojectPointer()
 					// UE_LOG(LogTemp, Warning, TEXT("Im pointing to turret wall in position %d %d"), TurretWall->Col, TurretWall->Row);
 	
 					FVector SocketLocation = TurretWall->GetTurretSocketLocation();
+					GameMode->RequestTurretPreview(SocketLocation);
 					// UE_LOG(LogTemp, Warning, TEXT("SocketLocation: %s"), *SocketLocation.ToString());
 				}
+			}
+			else if (Hit.GetActor()->ActorHasTag(FName("LayoutGrid")))
+			{
+				GameMode->RequestResetPreviewTurret();
 			}
 		}
 	}

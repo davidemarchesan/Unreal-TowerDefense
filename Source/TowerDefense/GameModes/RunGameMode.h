@@ -89,7 +89,13 @@ public:
 	// Build Turret Mode
 	void RequestToggleBuildTurretMode();
 
+	void RequestTurretPreview(FVector Location);
+
+	void RequestResetPreviewTurret();
+
 	void RequestTurretBuild(const FVector& Location);
+
+	// void RequestTurretRemoval(int32 Col, int32 Row);
 
 	UPROPERTY(EditAnywhere, Category = "BluePrints")
 	TSubclassOf<ATurretBase> TurretBluePrintClass;

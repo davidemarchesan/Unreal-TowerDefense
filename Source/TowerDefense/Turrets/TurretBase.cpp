@@ -35,9 +35,18 @@ ATurretBase::ATurretBase()
 void ATurretBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	TArray<AActor*> OverlappingActors;
-	DetectionSphere->GetOverlappingActors(OverlappingActors, AEnemyBase::StaticClass());
+
+	if (TurretMesh)
+	{
+		TurretMaterial = TurretMesh->GetMaterial(0);
+	}
+
+	if (BaseMesh)
+	{
+		BaseMaterial = BaseMesh->GetMaterial(0);
+	}
+
+	SetPreview(true);
 
 }
 
@@ -45,6 +54,11 @@ void ATurretBase::BeginPlay()
 void ATurretBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (bIsPreview == true)
+	{
+		return;
+	}
 
 	if (CurrentTarget && CurrentTarget->IsPendingKillPending() == false && bTargetLock == true)
 	{
@@ -59,8 +73,46 @@ void ATurretBase::Tick(float DeltaTime)
 
 }
 
+void ATurretBase::SetPreview(bool _bIsPreview)
+{
+
+	bIsPreview = _bIsPreview;
+
+	if (bIsPreview == true && PreviewMaterial)
+	{
+		if (TurretMesh)
+		{
+			TurretMesh->SetMaterial(0, PreviewMaterial);
+		}
+		if (BaseMesh)
+		{
+			BaseMesh->SetMaterial(0, PreviewMaterial);
+		}
+	}
+	else
+	{
+		if (TurretMesh && TurretMaterial)
+		{
+			TurretMesh->SetMaterial(0, TurretMaterial);
+		}
+		if (BaseMesh && BaseMaterial)
+		{
+			BaseMesh->SetMaterial(0, BaseMaterial);
+		}
+
+		TArray<AActor*> OverlappingActors;
+		DetectionSphere->GetOverlappingActors(OverlappingActors, AEnemyBase::StaticClass());
+	}
+	
+}
+
 void ATurretBase::Fire()
 {
+	if (bIsPreview == true)
+	{
+		return;
+	}
+	
 	if (CurrentTarget && CurrentTarget->IsPendingKillPending() == false)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Turret: Fire with damage %f"), Damage);
@@ -75,6 +127,11 @@ void ATurretBase::Fire()
 
 void ATurretBase::CheckForFiring()
 {
+	if (bIsPreview == true)
+	{
+		return;
+	}
+	
 	UE_LOG(LogTemp, Warning, TEXT("Check for firing"));
 	if (EnemiesInRange.Num() > 0)
 	{
@@ -95,6 +152,11 @@ void ATurretBase::CheckForFiring()
 void ATurretBase::OnEnemyEnterRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 
+	if (bIsPreview == true)
+	{
+		return;
+	}
+	
 	UE_LOG(LogTemp, Warning, TEXT("Something entered my range! %s"), *OtherActor->GetName());
 	AEnemyBase* Enemy = Cast<AEnemyBase>(OtherActor);
 
@@ -111,6 +173,11 @@ void ATurretBase::OnEnemyEnterRange(UPrimitiveComponent* OverlappedComponent, AA
 void ATurretBase::OnEnemyExitRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 
+	if (bIsPreview == true)
+	{
+		return;
+	}
+	
 	AEnemyBase* Enemy = Cast<AEnemyBase>(OtherActor);
 
 	if (Enemy) 
