@@ -8,7 +8,7 @@
 #include "Engine/TimerHandle.h"
 #include "TurretBase.generated.h"
 
-class AEnemyBase;
+class AEnemyPawn;
 class UMaterialInterface;
 class UPrimitiveComponent;
 class UMaterialInstanceDynamic;
@@ -75,10 +75,10 @@ private:
 
 	// Targeting
 	UPROPERTY()
-	TArray<AEnemyBase*> EnemiesInRange;
+	TArray<AEnemyPawn*> EnemiesInRange;
 
 	UPROPERTY()
-	AEnemyBase* CurrentTarget;
+	AEnemyPawn* CurrentTarget;
 
 	bool bTargetLock = false;
 
@@ -89,6 +89,6 @@ private:
 	void OnEnemyExitRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	UFUNCTION()
-	void OnEnemyDeath(AEnemyBase* Enemy);
+	void OnEnemyDeath(AEnemyPawn* Enemy);
 
 };

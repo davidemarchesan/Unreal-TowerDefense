@@ -3,7 +3,7 @@
 
 #include "TurretBase.h"
 #include "Components/StaticMeshComponent.h"
-#include "TowerDefense/Enemies/EnemyBase.h"
+#include "TowerDefense/Enemies/EnemyPawn.h"
 
 // Sets default values
 ATurretBase::ATurretBase()
@@ -101,7 +101,7 @@ void ATurretBase::SetPreview(bool _bIsPreview)
 		}
 
 		TArray<AActor*> OverlappingActors;
-		DetectionSphere->GetOverlappingActors(OverlappingActors, AEnemyBase::StaticClass());
+		DetectionSphere->GetOverlappingActors(OverlappingActors, AEnemyPawn::StaticClass());
 	}
 	
 }
@@ -116,7 +116,7 @@ void ATurretBase::Fire()
 	if (CurrentTarget && CurrentTarget->IsPendingKillPending() == false)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Turret: Fire with damage %f"), Damage);
-		CurrentTarget->ApplyDamage(Damage);
+		// CurrentTarget->ApplyDamage(Damage);
 	}
 	else
 	{
@@ -158,13 +158,13 @@ void ATurretBase::OnEnemyEnterRange(UPrimitiveComponent* OverlappedComponent, AA
 	}
 	
 	UE_LOG(LogTemp, Warning, TEXT("Something entered my range! %s"), *OtherActor->GetName());
-	AEnemyBase* Enemy = Cast<AEnemyBase>(OtherActor);
+	AEnemyPawn* Enemy = Cast<AEnemyPawn>(OtherActor);
 
 	if (Enemy)
 	{
 		EnemiesInRange.AddUnique(Enemy);
 
-		Enemy->OnEnemyDeath.AddDynamic(this, &ATurretBase::OnEnemyDeath);
+		// Enemy->OnEnemyDeath.AddDynamic(this, &ATurretBase::OnEnemyDeath);
 
 		CheckForFiring();
 	}
@@ -178,7 +178,7 @@ void ATurretBase::OnEnemyExitRange(UPrimitiveComponent* OverlappedComponent, AAc
 		return;
 	}
 	
-	AEnemyBase* Enemy = Cast<AEnemyBase>(OtherActor);
+	AEnemyPawn* Enemy = Cast<AEnemyPawn>(OtherActor);
 
 	if (Enemy) 
 	{
@@ -188,7 +188,7 @@ void ATurretBase::OnEnemyExitRange(UPrimitiveComponent* OverlappedComponent, AAc
 	}
 }
 
-void ATurretBase::OnEnemyDeath(AEnemyBase* Enemy)
+void ATurretBase::OnEnemyDeath(AEnemyPawn* Enemy)
 {
 	UE_LOG(LogTemp, Warning, TEXT("An enemy i was targetin is dead"));
 }
