@@ -29,9 +29,18 @@ public:
 
 	ALayoutGrid();
 
-	virtual void Tick(float DeltaTime) override;
-
+	// Spawn grid from gamemode
 	void Initialize(int32 _Cols, int32 _Rows);
+	
+	bool IsGridInitialized() const { return bIsGridInitialized; }
+
+	FVector GetWorldGridCenter() const { return WorldGridCenter; }
+
+	FVector GetWorldNexusLocation() const { return WorldNexusLocation; }
+	
+	FVector GetWorldEnemySpawnerLocation() const { return WorldEnemySpawnerLocation; }
+
+	FOnGridInitialized OnGridInitialized;
 
 	// Walls
 	void RequestPreviewWall(FVector Location);
@@ -50,15 +59,6 @@ public:
 	// void RequestTurretRemoval(int32 Col, int32 Row);
 
 	void RequestResetPreviewTurret();
-
-	// Grid
-	bool IsGridInitialized() const { return bIsGridInitialized; }
-
-	FVector GetWorldGridCenter() const { return WorldGridCenter; }
-
-	FOnGridInitialized OnGridInitialized;
-
-	void GetLayout(TArray<FIntPoint>& OutGridLayout);
 
 private:
 
@@ -80,13 +80,10 @@ private:
 
 	TMap<FIntPoint, AWall*> TurretWallsMap;
 
-	UPROPERTY(EditAnywhere, Category="Grid")
 	int32 Rows = 20;
-
-	UPROPERTY(EditAnywhere, Category="Grid")
 	int32 Cols = 30;
 
-	void InitializeGrid();
+	void InitializeLogicalGrid();
 
 	bool bIsGridInitialized = false;
 
@@ -114,15 +111,13 @@ private:
 	TSubclassOf<AWall> DefaultWallBluePrintClass;
 
 	void InitializeWalls();
-
-	void LoadSavedLayout();
-
+	
 	void SpawnWall(int32 Col, int32 Row, ECellState State, const FString& Folder);
 
 	// Preview wall
 	bool bIsPreviewingWall = false;
 	
-	UPROPERTY(EditAnywhere, Category = "BluePrints")
+	UPROPERTY(EditAnywhere, Category = "BluePrints") // todo - not the right place
 	TSubclassOf<APreviewWall> PreviewWallBluePrintClass;
 
 	APreviewWall* PreviewWall = nullptr;
@@ -135,7 +130,7 @@ private:
 	// Preview turret
 	bool bIsPreviewingTurret = false;
 	
-	UPROPERTY(EditAnywhere, Category = "BluePrints")
+	UPROPERTY(EditAnywhere, Category = "BluePrints") // todo - not the right place
 	TSubclassOf<ATurretBase> TurretBluePrintClass;
 
 	ATurretBase* PreviewTurret = nullptr;
@@ -145,12 +140,14 @@ private:
 
 	void ResetPreviewTurret();
 	
-	// Ally Base
-	void InitializeAllyBase();
+	// Nexus
+	void InitializeNexus();
 
-	FVector WorldAllyBaseLocation;
+	FVector WorldNexusLocation;
+	
+	// Enemy spawner
+	void InitializeEnemySpawner();
 
-	UPROPERTY(EditAnywhere, Category = "BluePrints")
-	TSubclassOf<AMainBase> AllyBasePrintClass;
+	FVector WorldEnemySpawnerLocation;
 
 };

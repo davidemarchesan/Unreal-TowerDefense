@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "TowerDefense/Enums/RunPhase.h"
 #include "EnemySpawner.generated.h"
 
 class AEnemyPawn;
@@ -17,9 +18,20 @@ public:
 	// Sets default values for this actor's properties
 	AEnemySpawner();
 
+private:
+
+	ERunPhase Phase = ERunPhase::Setup;
+
+	UFUNCTION()
+	void OnPhaseStart(ERunPhase NewPhase);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	void SpawnEnemy();
+
+	FTimerHandle TimerHandle;
 
 public:	
 	// Called every frame
@@ -28,4 +40,8 @@ public:
 	UPROPERTY(EditAnywhere, Category="BluePrints")
 	TSubclassOf<AEnemyPawn> EnemyBluePrintClass;
 
+	void SetNexusLocation(FVector Location) { NexusLocation = Location; }
+	
+	FVector NexusLocation;
+	
 };

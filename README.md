@@ -7,14 +7,16 @@ poi volevo spostare lo spawn dalla grid alla gamemode, che regola tutto, che for
 
 poi volevo lavorare sulle preview delle torri, perché non posso fare blueprint e mesh diverse per ogni torre, bisogna usare le dynamic
 
+fatto questo, volevo fare lo spawn dei nemici alla fase defense
+grid deve dire a gamemode dove sono gli spawn dei nemici, e dove è la base alleata
+gamemode spawna base alleata e enemyspawner
+
 -- sono qui
 
-fatto questo, volevo fare lo spawn dei nemici alla fase defense
+enemyspawner spawna nemici
+base muore
 
-
-devo fare spawn dei nemici ora. secondo il mio pensiero, Ci deve essere un actor nel gioco che si occupa di spawnare i nemici. Il Game State però si occupa di dare il via allo spawn dei nemici e chiede al gamemode Le regole di tale wave.
-
-gamestate dice che la fase di preparazione è finita e inizia la fase di difesa. gamestate chiede a gamemode che pattern di spawn ha tale wave. gamestate quindi, avvisa actor responsabile di spawnare di iniziare tale wave. actor avvisa gamestate che wave è finita
+problema warning nanite
 
 Tip pratico: per torrette e effetti semi-trasparenti (es. glow, selection ring), spesso si crea un componente separato (plane o decal) con materiale traslucido sopra la mesh Nanite. Così la torretta resta Nanite, e l’effetto trasparente è su un componente secondario.
 

@@ -26,22 +26,6 @@ ALayoutGrid::ALayoutGrid()
 	FloorComponent->SetupAttachment(RootComponent);
 }
 
-void ALayoutGrid::GetLayout(TArray<FIntPoint>& OutGridLayout)
-{
-	OutGridLayout.Empty();
-
-	for (int32 Col = 0; Col < Cols; Col++)
-	{
-		for (int32 Row = 0; Row < Rows; Row++)
-		{
-			if (Grid[Col][Row] == ECellState::TurretWall)
-			{
-				OutGridLayout.Add(FIntPoint(Col, Row));
-			}
-		}
-	}
-}
-
 void ALayoutGrid::RequestPreviewWall(FVector Location)
 {
 	if (bIsGridInitialized == false)
@@ -104,7 +88,7 @@ void ALayoutGrid::RequestPreviewWall(FVector Location)
 
 bool ALayoutGrid::RequestWallBuild(FVector Location)
 {
-	if (Grid[PreviewWallCol][PreviewWallRow] == ECellState::Empty && IsPositionValidToBuildOn(
+	if (IsOutOfGrid(PreviewWallCol, PreviewWallRow) == false && Grid[PreviewWallCol][PreviewWallRow] == ECellState::Empty && IsPositionValidToBuildOn(
 		PreviewWallCol, PreviewWallRow))
 	{
 		SpawnWall(PreviewWallCol, PreviewWallRow, ECellState::TurretWall, TEXT("TurretWalls"));
@@ -268,8 +252,8 @@ bool ALayoutGrid::IsPathValid()
 		FPathFindingQuery Query(
 			nullptr,
 			*NavData,
-			StartPosition,
-			WorldAllyBaseLocation
+			WorldEnemySpawnerLocation,
+			WorldNexusLocation
 		);
 
 		FNavPathSharedPtr NavPath;
@@ -291,7 +275,7 @@ bool ALayoutGrid::IsPathValid()
 	return false;
 }
 
-void ALayoutGrid::InitializeGrid()
+void ALayoutGrid::InitializeLogicalGrid()
 {
 	WorldGridCenter = FVector(((Rows - 1) / 2.0f) * CellSize, ((Cols - 1) / 2.0f) * CellSize, 0.f);
 
@@ -362,27 +346,26 @@ void ALayoutGrid::InitializeWalls()
 	}
 }
 
-void ALayoutGrid::LoadSavedLayout()
-{
-	// Temp
-	UTowerDefenseGameInstance* GameInstance = Cast<UTowerDefenseGameInstance>(GetGameInstance());
-	if (GameInstance)
-	{
-		TArray<FIntPoint> SavedGridLayout = GameInstance->LoadGridLayout();
-
-		if (SavedGridLayout.Num() > 0)
-		{
-			for (int32 I = 0; I < SavedGridLayout.Num(); I++)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Loaded grid %d %d"), SavedGridLayout[I].X, SavedGridLayout[I].Y);
-
-				SpawnWall(SavedGridLayout[I].X, SavedGridLayout[I].Y, ECellState::TurretWall, TEXT("TurretWalls"));
-			}
-		}
-	}
-
-	// End Temp
-}
+// void ALayoutGrid::LoadSavedLayout()
+// {
+// 	// Temp
+// 	UTowerDefenseGameInstance* GameInstance = Cast<UTowerDefenseGameInstance>(GetGameInstance());
+// 	if (GameInstance)
+// 	{
+// 		TArray<FIntPoint> SavedGridLayout = GameInstance->LoadGridLayout();
+//
+// 		if (SavedGridLayout.Num() > 0)
+// 		{
+// 			for (int32 I = 0; I < SavedGridLayout.Num(); I++)
+// 			{
+// 				UE_LOG(LogTemp, Warning, TEXT("Loaded grid %d %d"), SavedGridLayout[I].X, SavedGridLayout[I].Y);
+//
+// 				SpawnWall(SavedGridLayout[I].X, SavedGridLayout[I].Y, ECellState::TurretWall, TEXT("TurretWalls"));
+// 			}
+// 		}
+// 	}
+// 	
+// }
 
 void ALayoutGrid::SpawnWall(int32 Col, int32 Row, ECellState State, const FString& Folder)
 {
@@ -455,24 +438,16 @@ void ALayoutGrid::ResetPreviewTurret()
 	bIsPreviewingTurret = false;
 }
 
-void ALayoutGrid::InitializeAllyBase()
+void ALayoutGrid::InitializeNexus()
 {
 	float Col = Cols - 2.5f;
 	float Row = Rows - 2.5f;
 
-	WorldAllyBaseLocation = FVector((Row * CellSize), (Col * CellSize), 0.f);
-
-	GetWorld()->SpawnActor<AMainBase>(AllyBasePrintClass, WorldAllyBaseLocation, FRotator::ZeroRotator);
+	WorldNexusLocation = FVector((Row * CellSize), (Col * CellSize), 0.f);
 
 	if (bIsGridInitialized)
 	{
-		// Enemy spawn
-		Grid[1][1] = ECellState::Disabled;
-		Grid[1][2] = ECellState::Disabled;
-		Grid[2][1] = ECellState::Disabled;
-		Grid[2][2] = ECellState::Disabled;
-
-		// Ally base
+		// Nexus cells can't be used
 		Grid[Cols - 2][Rows - 2] = ECellState::Disabled;
 		Grid[Cols - 2][Rows - 3] = ECellState::Disabled;
 		Grid[Cols - 3][Rows - 2] = ECellState::Disabled;
@@ -480,10 +455,21 @@ void ALayoutGrid::InitializeAllyBase()
 	}
 }
 
-// Called every frame
-void ALayoutGrid::Tick(float DeltaTime)
+void ALayoutGrid::InitializeEnemySpawner()
 {
-	Super::Tick(DeltaTime);
+	const float Col = 1.5f;
+	const float Row = 1.5f;
+
+	WorldEnemySpawnerLocation = FVector((Row * CellSize), (Col * CellSize), 0.f);
+
+	if (bIsGridInitialized)
+	{
+		// Enemy spawner cells can't be used
+		Grid[1][1] = ECellState::Disabled;
+		Grid[1][2] = ECellState::Disabled;
+		Grid[2][1] = ECellState::Disabled;
+		Grid[2][2] = ECellState::Disabled;
+	}
 }
 
 void ALayoutGrid::Initialize(int32 _Cols, int32 _Rows)
@@ -491,12 +477,13 @@ void ALayoutGrid::Initialize(int32 _Cols, int32 _Rows)
 	Cols = _Cols;
 	Rows = _Rows;
 
-	InitializeGrid();
+	InitializeLogicalGrid();
 
 	InitializeFloor();
 	InitializeWalls();
-	// LoadSavedLayout();
-	InitializeAllyBase();
+	
+	InitializeNexus();
+	InitializeEnemySpawner();
 
 	InitializeNavMesh();
 	BuildNavMesh();

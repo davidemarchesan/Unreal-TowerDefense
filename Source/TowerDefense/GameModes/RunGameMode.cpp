@@ -4,8 +4,10 @@
 #include "RunGameMode.h"
 
 #include "TowerDefense/LayoutGrid.h"
+#include "TowerDefense/Enemies/EnemySpawner.h"
 #include "TowerDefense/PlayerControllers/RunPlayerController.h"
 #include "TowerDefense/GameStates/RunGameState.h"
+#include "TowerDefense/Nexus/Nexus.h"
 #include "TowerDefense/Turrets/TurretBase.h"
 
 void ARunGameMode::BeginPlay()
@@ -45,6 +47,23 @@ void ARunGameMode::InitializeGrid()
 	if (Grid)
 	{
 		Grid->Initialize(GridCols, GridRows);
+
+		if (NexusBlueprintClass)
+		{
+			GetWorld()->SpawnActor<ANexus>(NexusBlueprintClass, Grid->GetWorldNexusLocation(), FRotator::ZeroRotator);
+		}
+
+		if (EnemySpawnerBlueprintClass)
+		{
+			EnemySpawner = GetWorld()->SpawnActor<AEnemySpawner>(EnemySpawnerBlueprintClass,
+			                                                     Grid->GetWorldEnemySpawnerLocation(),
+			                                                     FRotator::ZeroRotator);
+
+			if (EnemySpawner)
+			{
+				EnemySpawner->SetNexusLocation(Grid->GetWorldNexusLocation());
+			}
+		}
 	}
 }
 

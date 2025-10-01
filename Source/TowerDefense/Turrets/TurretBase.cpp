@@ -115,8 +115,8 @@ void ATurretBase::Fire()
 	
 	if (CurrentTarget && CurrentTarget->IsPendingKillPending() == false)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Turret: Fire with damage %f"), Damage);
-		// CurrentTarget->ApplyDamage(Damage);
+		UE_LOG(LogTemp, Warning, TEXT("Turret: Fire with damage %f"), Damage);
+		CurrentTarget->ApplyDamage(Damage);
 	}
 	else
 	{
@@ -164,7 +164,7 @@ void ATurretBase::OnEnemyEnterRange(UPrimitiveComponent* OverlappedComponent, AA
 	{
 		EnemiesInRange.AddUnique(Enemy);
 
-		// Enemy->OnEnemyDeath.AddDynamic(this, &ATurretBase::OnEnemyDeath);
+		Enemy->OnEnemyDeath.AddDynamic(this, &ATurretBase::OnEnemyDeath);
 
 		CheckForFiring();
 	}

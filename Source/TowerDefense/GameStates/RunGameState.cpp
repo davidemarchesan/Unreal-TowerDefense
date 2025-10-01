@@ -74,8 +74,12 @@ void ARunGameState::GoToNextPhase()
 	if (Phase == ERunPhase::Setup)
 	{
 		Phase = ERunPhase::Defense;
+		
 		GameMode->RequestResetPreviewWall();
 		SetBuildWallMode(false);
+		
+		GameMode->RequestResetPreviewTurret();
+		SetBuildTurretMode(false);
 	}
 	else
 	{

@@ -9,7 +9,7 @@
 class UCapsuleComponent;
 class UWidgetComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDeath, AEnemyBase*, Enemy);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDeath_Deprecated, AEnemyBase*, Enemy);
 
 UCLASS()
 class TOWERDEFENSE_API AEnemyBase : public ACharacter
@@ -46,6 +46,6 @@ public:
 	void ApplyDamage(float Damage);
 
 	UPROPERTY(BlueprintAssignable, Category="Events")
-	FOnEnemyDeath OnEnemyDeath;
+	FOnEnemyDeath_Deprecated OnEnemyDeath;
 
 };

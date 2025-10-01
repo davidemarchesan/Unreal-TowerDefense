@@ -7,6 +7,8 @@
 #include "RunGameMode.generated.h"
 
 class ALayoutGrid;
+class AEnemySpawner;
+class ANexus;
 class ARunPlayerController;
 class ARunGameState;
 class ATurretBase;
@@ -46,6 +48,9 @@ private:
 	
 	void InitializeGrid();
 
+	// Enemy spawner
+	AEnemySpawner* EnemySpawner;
+
 public:
 	// Stats
 	UPROPERTY(EditDefaultsOnly, Category = "Stats")
@@ -64,6 +69,12 @@ public:
 	// Grid
 	UPROPERTY(EditDefaultsOnly, Category = "Grid")
 	TSubclassOf<ALayoutGrid> GridBlueprintClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Grid")
+	TSubclassOf<AEnemySpawner> EnemySpawnerBlueprintClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Grid")
+	TSubclassOf<ANexus> NexusBlueprintClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Grid")
 	int32 GridCols = 10;

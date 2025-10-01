@@ -135,7 +135,7 @@ void ALayoutEditorPlayerController::SaveLayout()
 	if (LayoutGrid && GameInstance)
 	{
 		TArray<FIntPoint> GridLayout;
-		LayoutGrid->GetLayout(GridLayout);
+		// LayoutGrid->GetLayout(GridLayout);
 
 		GameInstance->SaveGridLayout(GridLayout);
 	}
