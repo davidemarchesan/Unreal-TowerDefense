@@ -144,7 +144,7 @@ void ARunPlayerController::PrimaryAction()
 	
 						FVector SocketLocation = TurretWall->GetTurretSocketLocation();
 						UE_LOG(LogTemp, Warning, TEXT("SocketLocation: %s"), *SocketLocation.ToString());
-						GameMode->RequestTurretBuild(TEXT("Sniper"), SocketLocation);
+						GameMode->RequestTurretBuild(TEXT("Cannon"), SocketLocation);
 					}
 				}
 			}

@@ -9,6 +9,7 @@
 #include "TurretBase.generated.h"
 
 class AEnemyPawn;
+class UTurretDataAsset;
 class UMaterialInterface;
 class UPrimitiveComponent;
 class UMaterialInstanceDynamic;
@@ -29,46 +30,24 @@ public:
 
 	void SetPreview(bool _bIsPreview);
 
-private: 
+	UPROPERTY(EditAnywhere, Category = "Stats")
+	UTurretDataAsset* TurretData;
+
+protected: 
 
 	// Components
 	UPROPERTY(VisibleAnywhere, Category="Components")
 	UStaticMeshComponent* BaseMesh;
 
 	UPROPERTY(VisibleAnywhere, Category = "Components")
-	USceneComponent* TurretParent;
-
-	UPROPERTY(VisibleAnywhere, Category = "Components")
-	UStaticMeshComponent* TurretMesh;
-
-	UPROPERTY(VisibleAnywhere, Category = "Components")
 	USphereComponent* DetectionSphere;
-
-	// Preview
-	UPROPERTY(EditDefaultsOnly, Category="Components")
-	UMaterialInterface* PreviewMaterial;
-
-	UMaterialInterface* BaseMaterial;
-	UMaterialInterface* TurretMaterial;
 	
 	bool bIsPreview = true;
+
+	bool bListenForEnemies = false;
+
+	bool bListenForTurrets = false;
 	
-	// Stats
-	UPROPERTY(EditAnywhere, Category="Stats")
-	float Range = 100.0f;
-
-	UPROPERTY(EditAnywhere, Category = "Stats")
-	float FireRate = 10.0f;
-
-	UPROPERTY(EditAnywhere, Category = "Stats")
-	float Damage = 10.0f;
-
-	UPROPERTY(EditAnywhere, Category = "Stats")
-	float RotationSpeed = 10.f;
-
-	UPROPERTY(EditAnywhere, Category = "Stats")
-	float Price = 100.f;
-
 	// Fire
 	FTimerHandle FireTimerHandle;
 
@@ -79,6 +58,9 @@ private:
 	// Targeting
 	UPROPERTY()
 	TArray<AEnemyPawn*> EnemiesInRange;
+
+	UPROPERTY()
+	TArray<ATurretBase*> TurretsInRange;
 
 	UPROPERTY()
 	AEnemyPawn* CurrentTarget;
