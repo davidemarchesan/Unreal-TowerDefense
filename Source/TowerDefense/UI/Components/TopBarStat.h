@@ -36,7 +36,11 @@ SLATE_END_ARGS()
 
 void Construct(const FArguments& InArgs);
 
+	void SetText(const FText& NewText);
+
 private:
 	FIconData Icon;
 	FTextData Text;
+
+	TSharedPtr<STextBlock> TextBlock;
 };

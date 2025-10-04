@@ -27,12 +27,14 @@ void ARunHUD::BeginPlay()
 
 	// Getting game components
 	GameMode = Cast<ARunGameMode>(GetWorld()->GetAuthGameMode());
-	GameSate = GetWorld()->GetGameState<ARunGameState>();
+	GameState = GetWorld()->GetGameState<ARunGameState>();
 	PlayerController = Cast<ARunPlayerController>(GetOwningPlayerController());
 
 	InitializeDelegateSubscribers();
 
 	InitializeOverlays();
+
+	InitializeHUDVariables();
 }
 
 void ARunHUD::DrawHUD()
@@ -63,6 +65,28 @@ void ARunHUD::OnTimerUpdate(int32 Time)
 	}
 
 	NextWaveTimerTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%d"), Time)));
+}
+
+void ARunHUD::OnPlayerHealthChange(float PlayerHealth)
+{
+	if (PlayerHealthStat)
+	{
+		FNumberFormattingOptions FormattingOptions;
+		FormattingOptions.SetMaximumFractionalDigits(0);
+		
+		PlayerHealthStat->SetText(FText::AsNumber(PlayerHealth, &FormattingOptions));
+	}
+}
+
+void ARunHUD::OnPlayerCoinsChange(float PlayerCoins)
+{
+	if (PlayerCoinsStat)
+	{
+		FNumberFormattingOptions FormattingOptions;
+		FormattingOptions.SetMaximumFractionalDigits(0);
+		
+		PlayerCoinsStat->SetText(FText::AsNumber(PlayerCoins, &FormattingOptions));
+	}
 }
 
 FReply ARunHUD::OnSkipSetupPhase()
@@ -143,6 +167,15 @@ void ARunHUD::InitializeOverlays()
 	}
 }
 
+void ARunHUD::InitializeHUDVariables()
+{
+	if (GameState)
+	{
+		OnPlayerHealthChange(GameState->GetPlayerHealth());
+		OnPlayerCoinsChange(GameState->GetPlayerCoins());
+	}
+}
+
 void ARunHUD::CreateTopBarOverlay(const TSharedRef<SOverlay>& RootOverlay)
 {
 	const float StatBoxWidth = 175.f;
@@ -154,13 +187,14 @@ void ARunHUD::CreateTopBarOverlay(const TSharedRef<SOverlay>& RootOverlay)
 	RootOverlay->AddSlot()
 	           .HAlign(HAlign_Center)
 	           .VAlign(VAlign_Top)
+	           .Padding(FMargin(20.f))
 
 	[
 
 		SNew(SBorder)
 		.BorderImage(
-			new FSlateRoundedBoxBrush(FLinearColor::White, FVector4(0, 0, 12, 12)))
-		.BorderBackgroundColor(FLinearColor(0.f, 0.f, 0.f, 0.5f))
+			new FSlateRoundedBoxBrush(FLinearColor::White, 24.f))
+		.BorderBackgroundColor(FGameStyle::Get().GetColor("TowerDefense.Color.Gunmetal"))
 		.Padding(FMargin(20))
 		[
 
@@ -178,7 +212,7 @@ void ARunHUD::CreateTopBarOverlay(const TSharedRef<SOverlay>& RootOverlay)
 				.MinWidth(StatBoxWidth)
 				.MaxWidth(StatBoxWidth)
 				[
-					SNew(STopBarStat)
+					SAssignNew(PlayerHealthStat, STopBarStat)
 					.Icon(FIconData("TowerDefense.Icons.Heart", "TowerDefense.Color.Beige", StatBoxIconWidth))
 					.Text(FTextData(FText::FromString("0"), "TowerDefense.Color.Beige", 23.f))
 				]
@@ -188,7 +222,7 @@ void ARunHUD::CreateTopBarOverlay(const TSharedRef<SOverlay>& RootOverlay)
 				.MinWidth(StatBoxWidth)
 				.MaxWidth(StatBoxWidth)
 				[
-					SNew(STopBarStat)
+					SAssignNew(PlayerCoinsStat, STopBarStat)
 					.Icon(FIconData("TowerDefense.Icons.Star", "TowerDefense.Color.Beige", StatBoxIconWidth))
 					.Text(FTextData(FText::FromString("0"), "TowerDefense.Color.Beige", 23.f))
 				]
@@ -376,10 +410,13 @@ void ARunHUD::InitializeDelegateSubscribers()
 		GameMode->OnLevelReady.AddDynamic(this, &ARunHUD::OnLevelReady);
 	}
 
-	if (GameSate)
+	if (GameState)
 	{
-		GameSate->OnPhaseStart.AddDynamic(this, &ARunHUD::OnPhaseStart);
-		GameSate->OnTimerUpdate.AddDynamic(this, &ARunHUD::OnTimerUpdate);
+		GameState->OnPhaseStart.AddDynamic(this, &ARunHUD::OnPhaseStart);
+		GameState->OnTimerUpdate.AddDynamic(this, &ARunHUD::OnTimerUpdate);
+
+		GameState->OnPlayerHealthChange.AddDynamic(this, &ARunHUD::OnPlayerHealthChange);
+		GameState->OnPlayerCoinsChange.AddDynamic(this, &ARunHUD::OnPlayerCoinsChange);
 	}
 }
 

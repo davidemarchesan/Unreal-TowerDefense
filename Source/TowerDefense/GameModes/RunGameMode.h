@@ -12,6 +12,7 @@ class ANexus;
 class ARunPlayerController;
 class ARunGameState;
 class ATurretBase;
+class UTurretRegistry;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLevelReady); // Fired when Level is ready to be played
 
@@ -25,6 +26,9 @@ class TOWERDEFENSE_API ARunGameMode : public AGameModeBase
 
 public:
 	virtual void BeginPlay() override;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Registry")
+	UTurretRegistry* TurretRegistry;
 
 	// Getters
 	bool IsLevelLoaded() const { return bIsLevelLoaded; }
@@ -104,7 +108,7 @@ public:
 
 	void RequestResetPreviewTurret();
 
-	void RequestTurretBuild(const FVector& Location);
+	void RequestTurretBuild(FName TurretID, const FVector& Location);
 
 	// void RequestTurretRemoval(int32 Col, int32 Row);
 

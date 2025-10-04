@@ -9,6 +9,7 @@
 class ARunGameMode;
 class ARunGameState;
 class ARunPlayerController;
+class STopBarStat;
 
 /**
  * 
@@ -26,7 +27,7 @@ public:
 private:
 
 	ARunGameMode* GameMode;
-	ARunGameState* GameSate;
+	ARunGameState* GameState;
 	ARunPlayerController* PlayerController;
 
 	// Utils
@@ -41,6 +42,8 @@ private:
 	bool bShowLoadingScreen = true;
 
 	bool bIsBuildMode = false;
+
+	void InitializeHUDVariables();
 
 	// Delegates
 	void InitializeDelegateSubscribers();
@@ -58,6 +61,12 @@ private:
 	UFUNCTION()
 	void OnTimerUpdate(int32 Time);
 
+	UFUNCTION()
+	void OnPlayerHealthChange(float PlayerHealth);
+
+	UFUNCTION()
+	void OnPlayerCoinsChange(float PlayerCoins);
+
 	// HUD Components
 	TSharedPtr<SBorder> LoadingScreen;
 
@@ -66,6 +75,9 @@ private:
 	TSharedPtr<SButton> NextWaveSkipButton;
 
 	TSharedPtr<SBorder> BottomBarBorder;
+
+	TSharedPtr<STopBarStat> PlayerHealthStat;
+	TSharedPtr<STopBarStat> PlayerCoinsStat;
 	
 	TSharedPtr<SBorder> BuildModeBorder; // deprecated
 

@@ -11,7 +11,6 @@
 #include "Components/BrushComponent.h"
 #include "EngineUtils.h"
 #include "TowerDefense/Enums/PreviewWallState.h"
-#include "MainBase.h"
 #include "DrawDebugHelpers.h"
 #include "TowerDefenseGameInstance.h"
 #include "Turrets/TurretBase.h"
@@ -175,12 +174,12 @@ void ALayoutGrid::RequestPreviewTurret(FVector Location)
 	}
 }
 
-bool ALayoutGrid::RequestTurretBuild(FVector Location)
+bool ALayoutGrid::RequestTurretBuild(TSubclassOf<ATurretBase>* TurretClass, FVector Location)
 {
 	if (Grid[PreviewTurretCol][PreviewTurretRow] == ECellState::TurretWall)
 	{
 		
-		ATurretBase* Turret = GetWorld()->SpawnActor<ATurretBase>(TurretBluePrintClass,
+		ATurretBase* Turret = GetWorld()->SpawnActor<ATurretBase>(**TurretClass,
 																FVector(Location),
 																FRotator::ZeroRotator);
 

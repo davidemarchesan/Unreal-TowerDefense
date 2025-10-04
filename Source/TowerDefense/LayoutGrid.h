@@ -16,7 +16,6 @@ class ATurretBase;
 class ANavMeshBoundsVolume;
 class UNavigationSystemV1;
 class ANavigationData;
-class AMainBase;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGridInitialized);
 
@@ -54,7 +53,7 @@ public:
 	// Turrets
 	void RequestPreviewTurret(FVector Location);
 
-	bool RequestTurretBuild(FVector Location);
+	bool RequestTurretBuild(TSubclassOf<ATurretBase>* TurretClass, FVector Location);
 
 	// void RequestTurretRemoval(int32 Col, int32 Row);
 

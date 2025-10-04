@@ -9,6 +9,7 @@
 #include "TowerDefense/GameStates/RunGameState.h"
 #include "TowerDefense/Nexus/Nexus.h"
 #include "TowerDefense/Turrets/TurretBase.h"
+#include "TowerDefense/Turrets/Data/TurretRegistry.h"
 
 void ARunGameMode::BeginPlay()
 {
@@ -156,10 +157,16 @@ void ARunGameMode::RequestResetPreviewTurret()
 	}
 }
 
-void ARunGameMode::RequestTurretBuild(const FVector& Location)
+void ARunGameMode::RequestTurretBuild(FName TurretID, const FVector& Location)
 {
-	if (GameState && GameState->IsBuildTurretMode() && Grid)
+
+	if (TurretRegistry && GameState && GameState->IsBuildTurretMode() && Grid)
 	{
-		Grid->RequestTurretBuild(Location);
+		UTurretDataAsset* TurretData = TurretRegistry->GetTurretByID(TurretID);
+
+		if (TurretData && TurretData->TurretClass)
+		{
+			Grid->RequestTurretBuild(&TurretData->TurretClass, Location);
+		}
 	}
 }

@@ -55,8 +55,8 @@ void ARunGameState::OnLevelReady()
 	}
 	
 	// Setup player
-	PlayerHealth = GameMode->PlayerMaxHealth;
-	PlayerCoins = GameMode->PlayerInitialCoins;
+	SetPlayerHealth(GameMode->PlayerMaxHealth);
+	SetPlayerCoins(GameMode->PlayerInitialCoins);
 
 	StartTimer(WaveNumber == 0 ? GameMode->FirstSetupPhaseTimer : GameMode->SetupPhaseTimer);
 
@@ -108,6 +108,18 @@ void ARunGameState::StartTimer(int32 Seconds)
 void ARunGameState::StopTimer()
 {
 	GetWorldTimerManager().ClearTimer(TimerHandle);
+}
+
+void ARunGameState::SetPlayerHealth(float _PlayerHealth)
+{
+	PlayerHealth = _PlayerHealth;
+	OnPlayerHealthChange.Broadcast(PlayerHealth);
+}
+
+void ARunGameState::SetPlayerCoins(float _PlayerCoins)
+{
+	PlayerCoins = _PlayerCoins;
+	OnPlayerCoinsChange.Broadcast(PlayerCoins);
 }
 
 void ARunGameState::SetBuildWallMode(bool _bIsBuildWallMode)

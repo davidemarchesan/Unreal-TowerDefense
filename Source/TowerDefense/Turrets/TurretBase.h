@@ -66,6 +66,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Stats")
 	float RotationSpeed = 10.f;
 
+	UPROPERTY(EditAnywhere, Category = "Stats")
+	float Price = 100.f;
+
 	// Fire
 	FTimerHandle FireTimerHandle;
 

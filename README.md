@@ -11,13 +11,22 @@ fatto questo, volevo fare lo spawn dei nemici alla fase defense
 grid deve dire a gamemode dove sono gli spawn dei nemici, e dove è la base alleata
 gamemode spawna base alleata e enemyspawner
 
--- sono qui
-
 enemyspawner spawna nemici
 base muore
 
-problema warning nanite
+-- sono qui
 
+push su economia e punteggio
+- dare soldi a inizio game
+- prendere torre e dare costo
+- prendere muro e dare costo
+- prendere nemico e dare punteggio
+- creare wave e post-wave (loop)
+
+creare upgrade torri
+creare wave sempre più difficili
+
+problema warning nanite
 Tip pratico: per torrette e effetti semi-trasparenti (es. glow, selection ring), spesso si crea un componente separato (plane o decal) con materiale traslucido sopra la mesh Nanite. Così la torretta resta Nanite, e l’effetto trasparente è su un componente secondario.
 
 ## Links

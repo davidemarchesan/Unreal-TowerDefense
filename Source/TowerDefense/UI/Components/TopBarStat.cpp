@@ -66,7 +66,7 @@ void STopBarStat::Construct(const FArguments& InArgs)
 				.HAlign(HAlign_Center)
 				.AutoWidth()
 				[
-					SNew(STextBlock)
+					SAssignNew(TextBlock, STextBlock)
 					.Text(Text.Text)
 					.Font(FGameStyle::Get().GetFontStyle("TowerDefense.Font.Bold.md"))
 					.ColorAndOpacity(FGameStyle::Get().GetColor(Text.Color))
@@ -77,4 +77,12 @@ void STopBarStat::Construct(const FArguments& InArgs)
 		]
 
 	];
+}
+
+void STopBarStat::SetText(const FText& NewText)
+{
+	if (TextBlock)
+	{
+		TextBlock->SetText(NewText);
+	}
 }
