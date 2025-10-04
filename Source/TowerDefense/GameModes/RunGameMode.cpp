@@ -164,9 +164,22 @@ void ARunGameMode::RequestTurretBuild(FName TurretID, const FVector& Location)
 	{
 		UTurretDataAsset* TurretData = TurretRegistry->GetTurretByID(TurretID);
 
-		if (TurretData && TurretData->TurretClass)
+		if (TurretData)
 		{
-			Grid->RequestTurretBuild(&TurretData->TurretClass, Location);
+			if (GameState->GetPlayerCoins() < TurretData->Stats.Price)
+			{
+				return;
+			}
+			
+			if (TurretData->TurretClass)
+			{
+				if (bool bResult = Grid->RequestTurretBuild(&TurretData->TurretClass, Location); bResult == true)
+				{
+					GameState->SpendPlayerCoins(TurretData->Stats.Price);
+				}
+			}
+			
 		}
+
 	}
 }

@@ -185,7 +185,7 @@ bool ALayoutGrid::RequestTurretBuild(TSubclassOf<ATurretBase>* TurretClass, FVec
 
 		if (Turret)
 		{
-			Turret->SetPreview(false);
+			Turret->SetPreviewState(false);
 			FString WallName = FString::Printf(TEXT("Turret_%d_%d"), PreviewTurretCol, PreviewTurretRow);
 			FString Path = FString::Printf(TEXT("Turrets"));
 			Turret->SetFolderPath(*Path);

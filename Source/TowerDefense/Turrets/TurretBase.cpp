@@ -2,9 +2,14 @@
 
 
 #include "TurretBase.h"
+
+#include "Components/DecalComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Data/TurretDataAsset.h"
 #include "TowerDefense/Enemies/EnemyPawn.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
+
 
 // Sets default values
 ATurretBase::ATurretBase()
@@ -19,6 +24,13 @@ ATurretBase::ATurretBase()
 
 	DetectionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("DetectionSphere"));
 	DetectionSphere->SetupAttachment(RootComponent);
+
+	RangeDecal = CreateDefaultSubobject<UDecalComponent>(TEXT("RangeDecal"));
+	RangeDecal->SetupAttachment(RootComponent);
+	RangeDecal->SetRelativeRotation(FRotator(-90.f, 0.f, 0.f));
+	RangeDecal->DecalSize = FVector::ZeroVector;
+	RangeDecal->SetVisibility(false);
+	
 }
 
 // Called when the game starts or when spawned
@@ -33,8 +45,16 @@ void ATurretBase::BeginPlay()
 
 		if (bListenForEnemies)
 		{
-			DetectionSphere->OnComponentBeginOverlap.AddDynamic(this, &ATurretBase::OnEnemyEnterRange);
-			DetectionSphere->OnComponentEndOverlap.AddDynamic(this, &ATurretBase::OnEnemyExitRange);
+			DetectionSphere->OnComponentBeginOverlap.AddDynamic(this, &ATurretBase::OnEnemyEnterRangeDelegate);
+			DetectionSphere->OnComponentEndOverlap.AddDynamic(this, &ATurretBase::OnEnemyExitRangeDelegate);
+		}
+
+		if (RangeDecalMaterial)
+		{
+			// RangeDecal->SetDecalMaterial(RangeDecalMaterial);
+			// RangeDecal->DecalSize = FVector(TurretData->Stats.Range, TurretData->Stats.Range, 50.f);
+			// RangeDecal->DecalSize = FVector(200.f, 200.f, 20.f);
+			// RangeDecal->SetVisibility(true);
 		}
 	}
 
@@ -45,6 +65,21 @@ void ATurretBase::BeginPlay()
 void ATurretBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (bShowRangeDebugSphere == true && DetectionSphere)
+	{
+		DrawDebugSphere(
+			GetWorld(),
+			DetectionSphere->GetComponentLocation(),
+			DetectionSphere->GetUnscaledSphereRadius(),
+			32,
+			FColor::Green,
+			false,
+			-1.f,
+			0,
+			1.f
+		);
+	}
 
 	// if (bIsPreview == true)
 	// {
@@ -63,10 +98,10 @@ void ATurretBase::Tick(float DeltaTime)
 	// }
 }
 
-void ATurretBase::SetPreview(bool _bIsPreview)
+void ATurretBase::SetPreviewState(bool _bIsPreview)
 {
-	// bIsPreview = _bIsPreview;
-	//
+	bIsPreview = _bIsPreview;
+	
 	// if (bIsPreview == false && PreviewMaterial)
 	// {
 	// 	TArray<AActor*> OverlappingActors;
@@ -116,28 +151,32 @@ void ATurretBase::CheckForFiring()
 	// }
 }
 
-void ATurretBase::OnEnemyEnterRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+void ATurretBase::OnEnemyEnterRangeDelegate(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                     UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                                     const FHitResult& SweepResult)
 {
-	if (bIsPreview == true && bListenForEnemies == false)
+	if (bIsPreview == true || bListenForEnemies == false)
 	{
 		return;
 	}
 	
-	UE_LOG(LogTemp, Warning, TEXT("Something entered my range! %s"), *OtherActor->GetName());
-
 	if (AEnemyPawn* Enemy = Cast<AEnemyPawn>(OtherActor))
 	{
-		EnemiesInRange.AddUnique(Enemy);
-		Enemy->OnEnemyDeath.AddDynamic(this, &ATurretBase::OnEnemyDeath);
+		OnEnemyEnterRange(Enemy);
 	}
 }
 
-void ATurretBase::OnEnemyExitRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-                                   UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+void ATurretBase::OnEnemyEnterRange(AEnemyPawn* Enemy)
 {
-	if (bIsPreview == true && bListenForEnemies == false)
+	EnemiesInRange.AddUnique(Enemy);
+	Enemy->OnEnemyDeath.AddDynamic(this, &ATurretBase::OnEnemyDeath);
+}
+
+void ATurretBase::OnEnemyExitRangeDelegate(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+                                           UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	
+	if (bIsPreview == true || bListenForEnemies == false)
 	{
 		return;
 	}
@@ -151,5 +190,4 @@ void ATurretBase::OnEnemyExitRange(UPrimitiveComponent* OverlappedComponent, AAc
 
 void ATurretBase::OnEnemyDeath(AEnemyPawn* Enemy)
 {
-	UE_LOG(LogTemp, Warning, TEXT("An enemy i was targetin is dead"));
 }

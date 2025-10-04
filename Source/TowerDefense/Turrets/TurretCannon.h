@@ -6,6 +6,8 @@
 #include "TurretBase.h"
 #include "TurretCannon.generated.h"
 
+class AEnemyPawn;
+
 /**
  * 
  */
@@ -17,7 +19,28 @@ class TOWERDEFENSE_API ATurretCannon : public ATurretBase
 public:
 	ATurretCannon();
 
+	virtual void Tick(float DeltaTime) override;
+
 protected:
+
+	// Targeting and Firing
+	AEnemyPawn* CurrentTarget = nullptr;
+
+	void StartFireTimer();
+	void StopFireTimer();
+	
+	void Fire();
+
+	FTimerHandle FireTimer;
+
+	void SelectTarget();
+	void ResetTarget();
+
+	void RotateTurret(float DeltaTime);
+
+	float RotationSpeed = 10.f;
+
+	virtual void OnEnemyEnterRange(AEnemyPawn* Enemy) override;
 	
 	// Components
 	UPROPERTY(VisibleAnywhere, Category = "Components")

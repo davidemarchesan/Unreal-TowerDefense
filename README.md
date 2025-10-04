@@ -17,8 +17,9 @@ base muore
 -- sono qui
 
 push su economia e punteggio
-- dare soldi a inizio game
-- prendere torre e dare costo
+fatto - dare soldi a inizio game
+fatto - prendere torre e dare costo
+- risolvere problema data asset che si ricarica -> passare a tmap
 - prendere muro e dare costo
 - prendere nemico e dare punteggio
 - creare wave e post-wave (loop)

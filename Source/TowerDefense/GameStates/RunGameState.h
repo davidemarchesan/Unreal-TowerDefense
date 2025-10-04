@@ -98,5 +98,9 @@ public:
 
 	float GetPlayerCoins() const { return PlayerCoins; }
 	FOnPlayerCoinsChange OnPlayerCoinsChange;
+
+	void AddPlayerCoins(float _PlayerCoins);
+	
+	void SpendPlayerCoins(float _PlayerCoins);
 	
 };

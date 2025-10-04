@@ -13,6 +13,7 @@ class UTurretDataAsset;
 class UMaterialInterface;
 class UPrimitiveComponent;
 class UMaterialInstanceDynamic;
+class UDecalComponent;
 
 UCLASS()
 class TOWERDEFENSE_API ATurretBase : public AActor
@@ -28,10 +29,13 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
-	void SetPreview(bool _bIsPreview);
+	void SetPreviewState(bool _bIsPreview);
 
 	UPROPERTY(EditAnywhere, Category = "Stats")
 	UTurretDataAsset* TurretData;
+
+	UPROPERTY(EditAnywhere, Category = "Debug")
+	bool bShowRangeDebugSphere = false;
 
 protected: 
 
@@ -47,8 +51,14 @@ protected:
 	bool bListenForEnemies = false;
 
 	bool bListenForTurrets = false;
+
+	// Range
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Range")
+	UDecalComponent* RangeDecal;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Range")
+	UMaterialInterface* RangeDecalMaterial;
 	
-	// Fire
 	FTimerHandle FireTimerHandle;
 
 	void Fire();
@@ -68,10 +78,12 @@ protected:
 	bool bTargetLock = false;
 
 	UFUNCTION()
-	void OnEnemyEnterRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	void OnEnemyEnterRangeDelegate(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	virtual void OnEnemyEnterRange(AEnemyPawn* Enemy);
+	
 	UFUNCTION()
-	void OnEnemyExitRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	void OnEnemyExitRangeDelegate(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	UFUNCTION()
 	void OnEnemyDeath(AEnemyPawn* Enemy);

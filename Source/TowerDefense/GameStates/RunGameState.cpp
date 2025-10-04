@@ -118,7 +118,7 @@ void ARunGameState::SetPlayerHealth(float _PlayerHealth)
 
 void ARunGameState::SetPlayerCoins(float _PlayerCoins)
 {
-	PlayerCoins = _PlayerCoins;
+	PlayerCoins = _PlayerCoins < 0.f ? 0.f : _PlayerCoins;
 	OnPlayerCoinsChange.Broadcast(PlayerCoins);
 }
 
@@ -171,6 +171,16 @@ void ARunGameState::SkipSetupPhase()
 	StopTimer();
 
 	GoToNextPhase();
+}
+
+void ARunGameState::AddPlayerCoins(float _PlayerCoins)
+{
+	SetPlayerCoins(PlayerCoins + _PlayerCoins);
+}
+
+void ARunGameState::SpendPlayerCoins(float _PlayerCoins)
+{
+	AddPlayerCoins(-(_PlayerCoins));
 }
 
 

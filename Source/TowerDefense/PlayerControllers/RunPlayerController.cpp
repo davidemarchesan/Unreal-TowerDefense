@@ -107,7 +107,6 @@ void ARunPlayerController::Tick(float DeltaTime)
 
 void ARunPlayerController::PrimaryAction()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Running PrimaryAction"));
 
 	if (GameMode)
 	{
@@ -140,10 +139,7 @@ void ARunPlayerController::PrimaryAction()
 				{
 					if (AWall* TurretWall = Cast<AWall>(Hit.GetActor()))
 					{
-						UE_LOG(LogTemp, Warning, TEXT("Im pointing to turret wall in position %d %d"), TurretWall->Col, TurretWall->Row);
-	
 						FVector SocketLocation = TurretWall->GetTurretSocketLocation();
-						UE_LOG(LogTemp, Warning, TEXT("SocketLocation: %s"), *SocketLocation.ToString());
 						GameMode->RequestTurretBuild(TEXT("Cannon"), SocketLocation);
 					}
 				}
