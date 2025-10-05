@@ -27,14 +27,14 @@ class STopBarStat : public SCompoundWidget
 {
 public:
 	SLATE_BEGIN_ARGS(STopBarStat)
-	{
-	}
+		{
+		}
 
-	SLATE_ARGUMENT(FIconData, Icon)
-	SLATE_ARGUMENT(FTextData, Text)
-SLATE_END_ARGS()
+		SLATE_ARGUMENT(FIconData, Icon)
+		SLATE_ARGUMENT(FTextData, Text)
+	SLATE_END_ARGS()
 
-void Construct(const FArguments& InArgs);
+	void Construct(const FArguments& InArgs);
 
 	void SetText(const FText& NewText);
 

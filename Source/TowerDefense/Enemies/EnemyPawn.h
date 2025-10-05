@@ -4,11 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "Data/EnemyStats.h"
 #include "EnemyPawn.generated.h"
 
 class USphereComponent;
 class UStaticMeshComponent;
 class UFloatingPawnMovement;
+class ARunGameMode;
+class ARunGameState;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDeath, AEnemyPawn*, Enemy);
 
@@ -24,15 +27,13 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	// Stats
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Stats")
-	float MaxHealth = 100.f;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
-	float Health;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Turret")
+	FName EnemyID;
 
 	void SetDestination(FVector Location);
+
+	float Health;
 
 	// Damage
 	void ApplyDamage(float Damage);
@@ -44,7 +45,12 @@ protected:
 
 	virtual void BeginPlay() override;
 
-private:
+	ARunGameMode* GameMode;
+
+	ARunGameState* GameState;
+
+	// Stats
+	FEnemyStats* Stats;
 
 	// Components
 	UPROPERTY(VisibleAnywhere, Category = "Components")
@@ -55,6 +61,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UFloatingPawnMovement* MovementComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+	class UWidgetComponent* HealthBarComponent;
 
 
 };

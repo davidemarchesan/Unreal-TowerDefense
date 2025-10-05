@@ -13,6 +13,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBuildWallModeToggle, bool, bIsBui
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBuildTurretModeToggle, bool, bIsBuildTurretMode);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerHealthChange, float, PlayerHealth);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerCoinsChange, float, PlayerCoins);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerPointsChange, float, PlayerPoints);
 
 class ARunGameMode;
 class ARunPlayerController;
@@ -61,6 +62,8 @@ private:
 	void SetPlayerCoins(float _PlayerCoins);
 	float PlayerCoins;
 
+	float PlayerPoints = 0.f;
+
 	// Build Wall Mode
 	bool bIsBuildWallMode = false;
 	void SetBuildWallMode(bool _bIsBuildWallMode);
@@ -91,16 +94,25 @@ public:
 	FOnTimerUpdate OnTimerUpdate;
 
 	void SkipSetupPhase();
-
-	// Stats
+	
+	// Stats - Health
 	float GetPlayerHealth() const { return PlayerHealth; }
 	FOnPlayerHealthChange OnPlayerHealthChange;
+	
+	void ReducePlayerHealth(float Damage);
 
+	// Stats - Coins
 	float GetPlayerCoins() const { return PlayerCoins; }
 	FOnPlayerCoinsChange OnPlayerCoinsChange;
 
 	void AddPlayerCoins(float _PlayerCoins);
 	
 	void SpendPlayerCoins(float _PlayerCoins);
+
+	// Stats - Points
+	float GetPlayerPoints() const { return PlayerPoints; }
+	FOnPlayerPointsChange OnPlayerPointsChange;
+	
+	void AddPlayerPoints(float _PlayerPoints);
 	
 };

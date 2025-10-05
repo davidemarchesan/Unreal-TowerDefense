@@ -35,7 +35,9 @@ void ATurretCannon::Tick(float DeltaTime)
 
 void ATurretCannon::StartFireTimer()
 {
-	GetWorldTimerManager().SetTimer(FireTimerHandle, this, &ATurretCannon::Fire, 1.f / TurretData->Stats.RateOfFire, true);
+	Fire();
+	GetWorldTimerManager().SetTimer(FireTimerHandle, this, &ATurretCannon::Fire, 1.f / Stats->RateOfFire,
+	                                true);
 }
 
 void ATurretCannon::StopFireTimer()
@@ -48,15 +50,20 @@ void ATurretCannon::StopFireTimer()
 
 void ATurretCannon::Fire()
 {
-	if (bIsPreview == true || CurrentTarget == nullptr)
+	if (bIsPreview == true)
 	{
-		StopFireTimer();
+		return;
+	}
+
+	if (CurrentTarget == nullptr)
+	{
+		ResetTarget();
 		return;
 	}
 
 	if (CurrentTarget && CurrentTarget->IsPendingKillPending() == false)
 	{
-		CurrentTarget->ApplyDamage(TurretData->Stats.Damage);
+		CurrentTarget->ApplyDamage(Stats->Damage);
 	}
 	else
 	{
@@ -64,28 +71,40 @@ void ATurretCannon::Fire()
 	}
 }
 
-void ATurretCannon::SelectTarget()
+void ATurretCannon::SearchForNewTarget()
 {
-	if (CurrentTarget != nullptr)
+	if (CurrentTarget != nullptr || bIsSearchingForNewTarget == true)
 	{
 		return;
 	}
 
+	bIsSearchingForNewTarget = true;
+
 	if (EnemiesInRange.Num() > 0)
 	{
-		CurrentTarget = EnemiesInRange[0];
-		StartFireTimer();
+		for (AEnemyPawn* Enemy : EnemiesInRange)
+		{
+			if (Enemy != nullptr && Enemy->IsPendingKillPending() == false)
+			{
+				CurrentTarget = Enemy;
+				break;
+			}
+		}
+
+		if (CurrentTarget)
+		{
+			StartFireTimer();
+		}
 	}
-	else
-	{
-		ResetTarget();
-	}
+
+	bIsSearchingForNewTarget = false;
 }
 
 void ATurretCannon::ResetTarget()
 {
 	CurrentTarget = nullptr;
 	StopFireTimer();
+	SearchForNewTarget();
 }
 
 void ATurretCannon::RotateTurret(float DeltaTime)
@@ -102,7 +121,8 @@ void ATurretCannon::RotateTurret(float DeltaTime)
 		LookAtRotation.Roll = 0.f;
 
 
-		const FRotator NewRotation = FMath::RInterpTo(TurretParent->GetComponentRotation(), LookAtRotation, DeltaTime, RotationSpeed);
+		const FRotator NewRotation = FMath::RInterpTo(TurretParent->GetComponentRotation(), LookAtRotation, DeltaTime,
+		                                              RotationSpeed);
 		TurretParent->SetWorldRotation(NewRotation);
 	}
 }
@@ -110,6 +130,25 @@ void ATurretCannon::RotateTurret(float DeltaTime)
 void ATurretCannon::OnEnemyEnterRange(AEnemyPawn* Enemy)
 {
 	Super::OnEnemyEnterRange(Enemy);
-	
-	SelectTarget();
+	SearchForNewTarget();
+}
+
+void ATurretCannon::OnEnemyExitRange(AEnemyPawn* Enemy)
+{
+	Super::OnEnemyExitRange(Enemy);
+
+	if (Enemy != nullptr && CurrentTarget != nullptr && Enemy == CurrentTarget)
+	{
+		ResetTarget();
+	}
+}
+
+void ATurretCannon::OnEnemyDeath(AEnemyPawn* Enemy)
+{
+	Super::OnEnemyDeath(Enemy);
+
+	if (Enemy != nullptr && CurrentTarget != nullptr && Enemy == CurrentTarget)
+	{
+		ResetTarget();
+	}
 }

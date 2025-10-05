@@ -4,6 +4,7 @@
 #include "EnemySpawner.h"
 
 #include "EnemyPawn.h"
+#include "TowerDefense/GameModes/RunGameMode.h"
 #include "TowerDefense/GameStates/RunGameState.h"
 
 // Sets default values
@@ -38,6 +39,13 @@ void AEnemySpawner::BeginPlay()
 {
 	Super::BeginPlay();
 
+	GameMode = GetWorld()->GetAuthGameMode<ARunGameMode>();
+
+	if (GameMode)
+	{
+		EnemyDataTable = GameMode->GetEnemyDataTable();
+	}
+
 	ARunGameState* GameState = GetWorld()->GetGameState<ARunGameState>();
 	if (GameState)
 	{
@@ -47,8 +55,13 @@ void AEnemySpawner::BeginPlay()
 
 void AEnemySpawner::SpawnEnemy()
 {
-	AEnemyPawn* Enemy = GetWorld()->SpawnActor<AEnemyPawn>(EnemyBluePrintClass, GetActorLocation(), GetActorRotation());
-	Enemy->SetDestination(NexusLocation);
+
+	if (TSubclassOf<AEnemyPawn> EnemyClass = GameMode->EnemyRegistry->GetEnemyClass(TEXT("Tank")))
+	{
+		AEnemyPawn* Enemy = GetWorld()->SpawnActor<AEnemyPawn>(EnemyClass, GetActorLocation(), GetActorRotation());
+		Enemy->SetDestination(NexusLocation);
+	}
+	
 }
 
 // Called every frame

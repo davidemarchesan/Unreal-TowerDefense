@@ -4,10 +4,13 @@
 #include "TurretStats.generated.h"
 
 USTRUCT(BlueprintType)
-struct FTurretStats
+struct FTurretStats : public FTableRowBase
 {
 	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Turret")
+	FName ID;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Turret")
 	float Damage = 10.f;
 

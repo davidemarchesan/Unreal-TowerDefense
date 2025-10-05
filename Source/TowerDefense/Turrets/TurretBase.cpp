@@ -5,10 +5,8 @@
 
 #include "Components/DecalComponent.h"
 #include "Components/StaticMeshComponent.h"
-#include "Data/TurretDataAsset.h"
 #include "TowerDefense/Enemies/EnemyPawn.h"
-#include "NiagaraFunctionLibrary.h"
-#include "NiagaraComponent.h"
+#include "TowerDefense/GameModes/RunGameMode.h"
 
 
 // Sets default values
@@ -30,7 +28,6 @@ ATurretBase::ATurretBase()
 	RangeDecal->SetRelativeRotation(FRotator(-90.f, 0.f, 0.f));
 	RangeDecal->DecalSize = FVector::ZeroVector;
 	RangeDecal->SetVisibility(false);
-	
 }
 
 // Called when the game starts or when spawned
@@ -38,23 +35,22 @@ void ATurretBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (TurretData)
+	GameMode = GetWorld()->GetAuthGameMode<ARunGameMode>();
+
+	if (GameMode && TurretID.IsValid() && TurretID.IsNone() == false)
 	{
-		DetectionSphere->SetSphereRadius(TurretData->Stats.Range);
-		UE_LOG(LogTemp, Warning, TEXT("range %f"), TurretData->Stats.Range);
+		Stats = GameMode->GetTurretStats(TurretID);
 
-		if (bListenForEnemies)
+		if (Stats)
 		{
-			DetectionSphere->OnComponentBeginOverlap.AddDynamic(this, &ATurretBase::OnEnemyEnterRangeDelegate);
-			DetectionSphere->OnComponentEndOverlap.AddDynamic(this, &ATurretBase::OnEnemyExitRangeDelegate);
-		}
+			DetectionSphere->SetSphereRadius(Stats->Range);
+			UE_LOG(LogTemp, Warning, TEXT("range %f"), Stats->Range);
 
-		if (RangeDecalMaterial)
-		{
-			// RangeDecal->SetDecalMaterial(RangeDecalMaterial);
-			// RangeDecal->DecalSize = FVector(TurretData->Stats.Range, TurretData->Stats.Range, 50.f);
-			// RangeDecal->DecalSize = FVector(200.f, 200.f, 20.f);
-			// RangeDecal->SetVisibility(true);
+			if (bListenForEnemies)
+			{
+				DetectionSphere->OnComponentBeginOverlap.AddDynamic(this, &ATurretBase::OnEnemyEnterRangeDelegate);
+				DetectionSphere->OnComponentEndOverlap.AddDynamic(this, &ATurretBase::OnEnemyExitRangeDelegate);
+			}
 		}
 	}
 
@@ -101,7 +97,7 @@ void ATurretBase::Tick(float DeltaTime)
 void ATurretBase::SetPreviewState(bool _bIsPreview)
 {
 	bIsPreview = _bIsPreview;
-	
+
 	// if (bIsPreview == false && PreviewMaterial)
 	// {
 	// 	TArray<AActor*> OverlappingActors;
@@ -152,14 +148,14 @@ void ATurretBase::CheckForFiring()
 }
 
 void ATurretBase::OnEnemyEnterRangeDelegate(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-                                    UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
-                                    const FHitResult& SweepResult)
+                                            UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+                                            const FHitResult& SweepResult)
 {
 	if (bIsPreview == true || bListenForEnemies == false)
 	{
 		return;
 	}
-	
+
 	if (AEnemyPawn* Enemy = Cast<AEnemyPawn>(OtherActor))
 	{
 		OnEnemyEnterRange(Enemy);
@@ -169,13 +165,16 @@ void ATurretBase::OnEnemyEnterRangeDelegate(UPrimitiveComponent* OverlappedCompo
 void ATurretBase::OnEnemyEnterRange(AEnemyPawn* Enemy)
 {
 	EnemiesInRange.AddUnique(Enemy);
-	Enemy->OnEnemyDeath.AddDynamic(this, &ATurretBase::OnEnemyDeath);
+
+	if (Enemy && Enemy->IsPendingKillPending() == false)
+	{
+		Enemy->OnEnemyDeath.AddDynamic(this, &ATurretBase::OnEnemyDeath);
+	}
 }
 
 void ATurretBase::OnEnemyExitRangeDelegate(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                            UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	
 	if (bIsPreview == true || bListenForEnemies == false)
 	{
 		return;
@@ -183,11 +182,16 @@ void ATurretBase::OnEnemyExitRangeDelegate(UPrimitiveComponent* OverlappedCompon
 
 	if (AEnemyPawn* Enemy = Cast<AEnemyPawn>(OtherActor))
 	{
-		EnemiesInRange.Remove(Enemy);
-		// CheckForFiring();
+		OnEnemyExitRange(Enemy);
 	}
+}
+
+void ATurretBase::OnEnemyExitRange(AEnemyPawn* Enemy)
+{
+	EnemiesInRange.Remove(Enemy);
 }
 
 void ATurretBase::OnEnemyDeath(AEnemyPawn* Enemy)
 {
+	EnemiesInRange.Remove(Enemy);
 }

@@ -8,6 +8,7 @@
 #include "EnemySpawner.generated.h"
 
 class AEnemyPawn;
+class ARunGameMode;
 
 UCLASS()
 class TOWERDEFENSE_API AEnemySpawner : public AActor
@@ -24,6 +25,10 @@ private:
 
 	UFUNCTION()
 	void OnPhaseStart(ERunPhase NewPhase);
+
+	ARunGameMode* GameMode;
+
+	UDataTable* EnemyDataTable;
 
 protected:
 	// Called when the game starts or when spawned

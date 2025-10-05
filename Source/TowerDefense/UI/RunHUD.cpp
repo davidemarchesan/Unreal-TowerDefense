@@ -89,6 +89,17 @@ void ARunHUD::OnPlayerCoinsChange(float PlayerCoins)
 	}
 }
 
+void ARunHUD::OnPlayerPointsChange(float PlayerPoints)
+{
+	if (PlayerPointsStat)
+	{
+		FNumberFormattingOptions FormattingOptions;
+		FormattingOptions.SetMaximumFractionalDigits(0);
+		
+		PlayerPointsStat->SetText(FText::AsNumber(PlayerPoints, &FormattingOptions));
+	}
+}
+
 FReply ARunHUD::OnSkipSetupPhase()
 {
 	if (PlayerController)
@@ -173,6 +184,7 @@ void ARunHUD::InitializeHUDVariables()
 	{
 		OnPlayerHealthChange(GameState->GetPlayerHealth());
 		OnPlayerCoinsChange(GameState->GetPlayerCoins());
+		OnPlayerPointsChange(GameState->GetPlayerPoints());
 	}
 }
 
@@ -222,7 +234,7 @@ void ARunHUD::CreateTopBarOverlay(const TSharedRef<SOverlay>& RootOverlay)
 				.MinWidth(StatBoxWidth)
 				.MaxWidth(StatBoxWidth)
 				[
-					SAssignNew(PlayerCoinsStat, STopBarStat)
+					SAssignNew(PlayerPointsStat, STopBarStat)
 					.Icon(FIconData("TowerDefense.Icons.Star", "TowerDefense.Color.Beige", StatBoxIconWidth))
 					.Text(FTextData(FText::FromString("0"), "TowerDefense.Color.Beige", 23.f))
 				]
@@ -232,7 +244,7 @@ void ARunHUD::CreateTopBarOverlay(const TSharedRef<SOverlay>& RootOverlay)
 				.MinWidth(StatBoxWidth)
 				.MaxWidth(StatBoxWidth)
 				[
-					SNew(STopBarStat)
+					SAssignNew(PlayerCoinsStat, STopBarStat)
 					.Icon(FIconData("TowerDefense.Icons.Coins", "TowerDefense.Color.Beige", StatBoxIconWidth))
 					.Text(FTextData(FText::FromString("0"), "TowerDefense.Color.Beige", 23.f))
 				]
@@ -417,6 +429,7 @@ void ARunHUD::InitializeDelegateSubscribers()
 
 		GameState->OnPlayerHealthChange.AddDynamic(this, &ARunHUD::OnPlayerHealthChange);
 		GameState->OnPlayerCoinsChange.AddDynamic(this, &ARunHUD::OnPlayerCoinsChange);
+		GameState->OnPlayerPointsChange.AddDynamic(this, &ARunHUD::OnPlayerPointsChange);
 	}
 }
 

@@ -6,6 +6,10 @@
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
 #include "AIController.h"
+#include "Components/WidgetComponent.h"
+#include "TowerDefense/GameModes/RunGameMode.h"
+#include "TowerDefense/GameStates/RunGameState.h"
+#include "TowerDefense/UI/Widgets/HealthBarWidgetWrapper.h"
 
 // Sets default values
 AEnemyPawn::AEnemyPawn()
@@ -23,6 +27,12 @@ AEnemyPawn::AEnemyPawn()
 	MovementComponent = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("MovementComponent"));
 	MovementComponent->UpdatedComponent = RootComponent;
 
+	HealthBarComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarComponent"));
+	HealthBarComponent->SetupAttachment(RootComponent);
+	HealthBarComponent->SetDrawSize(FVector2D(100, 20));
+	HealthBarComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	HealthBarComponent->SetWidgetClass(UHealthBarWidgetWrapper::StaticClass());
+
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
 
@@ -37,24 +47,35 @@ void AEnemyPawn::SetDestination(FVector Location)
 
 void AEnemyPawn::ApplyDamage(float Damage)
 {
-	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
-	UE_LOG(LogTemp, Warning, TEXT("Enemy: i took %f damage and my health is now %f"), Damage, Health);
 
-	// if (HealthBarWidget)
-	// {
-	// 	if (UHealthBarWidget* Widget = Cast<UHealthBarWidget>(HealthBarWidget->GetUserWidgetObject()))
-	// 	{
-	// 		Widget->SetHealthPercent(Health / MaxHealth);
-	// 	}
-	//
-	// 	HealthBarWidget->SetVisibility(Health < MaxHealth);
-	// }
+	if (!Stats)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No stats"));
+		return;
+	}
+	
+	Health = FMath::Clamp(Health - Damage, 0.f, Stats->Health);
+	// UE_LOG(LogTemp, Warning, TEXT("Enemy: i took %f damage and my health is now %f"), Damage, Health);
+
+	if (HealthBarComponent && Stats)
+	{
+		if (UHealthBarWidgetWrapper* Widget = Cast<UHealthBarWidgetWrapper>(HealthBarComponent->GetUserWidgetObject()))
+		{
+			Widget->SetHealthPercent(Health / Stats->Health);
+		}
+	}
 
 	if (Health <= 0.f)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Im dead, notifying all the turrets"));
 		// Notify turrets that I'm dead
 		OnEnemyDeath.Broadcast(this);
+
+		if (GameState && Stats)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Reward: %f"), Stats->Reward);
+			GameState->AddPlayerPoints(Stats->Reward);
+		}
 
 		Destroy();
 	}
@@ -65,7 +86,21 @@ void AEnemyPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Health = MaxHealth;
+	GameMode = GetWorld()->GetAuthGameMode<ARunGameMode>();
+
+	GameState = GetWorld()->GetGameState<ARunGameState>();
+
+	if (GameMode && EnemyID.IsValid() && EnemyID.IsNone() == false)
+	{
+		Stats = GameMode->GetEnemyStats(EnemyID);
+
+		if (Stats)
+		{
+			Health = Stats->Health;
+		}
+	}
+	
+	
 }
 
 // Called every frame

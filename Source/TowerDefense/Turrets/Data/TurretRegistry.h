@@ -3,11 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "TurretDataAsset.h"
 #include "Engine/DataAsset.h"
 #include "TurretRegistry.generated.h"
-
-class UTurretDataAsset;
 
 /**
  * 
@@ -20,16 +17,13 @@ class TOWERDEFENSE_API UTurretRegistry : public UDataAsset
 public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Turret")
-	TArray<UTurretDataAsset*> Turrets;
+	TMap<FName, TSubclassOf<ATurretBase>> Turrets;
 
-	UTurretDataAsset* GetTurretByID(FName TurretID) const
+	TSubclassOf<ATurretBase> GetTurretClass(FName TurretID) const
 	{
-		for (auto* Turret : Turrets)
+		if (const TSubclassOf<ATurretBase>* Found = Turrets.Find(TurretID))
 		{
-			if (Turret && Turret->TurretID == TurretID)
-			{
-				return Turret;
-			}
+			return *Found;
 		}
 		return nullptr;
 	}

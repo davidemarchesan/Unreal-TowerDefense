@@ -67,6 +67,9 @@ private:
 	UFUNCTION()
 	void OnPlayerCoinsChange(float PlayerCoins);
 
+	UFUNCTION()
+	void OnPlayerPointsChange(float PlayerPoints);
+
 	// HUD Components
 	TSharedPtr<SBorder> LoadingScreen;
 
@@ -78,6 +81,7 @@ private:
 
 	TSharedPtr<STopBarStat> PlayerHealthStat;
 	TSharedPtr<STopBarStat> PlayerCoinsStat;
+	TSharedPtr<STopBarStat> PlayerPointsStat;
 	
 	TSharedPtr<SBorder> BuildModeBorder; // deprecated
 

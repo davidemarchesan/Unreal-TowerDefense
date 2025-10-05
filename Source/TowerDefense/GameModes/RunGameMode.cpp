@@ -68,6 +68,26 @@ void ARunGameMode::InitializeGrid()
 	}
 }
 
+FTurretStats* ARunGameMode::GetTurretStats(FName TurretID)
+{
+	if (TurretDataTable)
+	{
+		return TurretDataTable->FindRow<FTurretStats>(TurretID, TEXT("Lookup Turret Stats"));
+	}
+
+	return nullptr;
+}
+
+FEnemyStats* ARunGameMode::GetEnemyStats(FName EnemyID)
+{
+	if (EnemyDataTable)
+	{
+		return EnemyDataTable->FindRow<FEnemyStats>(EnemyID, TEXT("Lookup Enemy Stats"));
+	}
+
+	return nullptr;
+}
+
 FVector ARunGameMode::GetCameraStartLocation()
 {
 	if (Grid)
@@ -116,7 +136,10 @@ void ARunGameMode::RequestWallBuild(FVector Location)
 {
 	if (GameState && GameState->GetPhase() == ERunPhase::Setup && GameState->IsBuildWallMode() && Grid)
 	{
-		Grid->RequestWallBuild(Location);
+		if (bool bResult = Grid->RequestWallBuild(Location))
+		{
+			GameState->SpendPlayerCoins(WallPrice);
+		}
 	}
 }
 
@@ -159,27 +182,22 @@ void ARunGameMode::RequestResetPreviewTurret()
 
 void ARunGameMode::RequestTurretBuild(FName TurretID, const FVector& Location)
 {
-
-	if (TurretRegistry && GameState && GameState->IsBuildTurretMode() && Grid)
+	if (TurretRegistry && TurretDataTable && GameState && GameState->IsBuildTurretMode() && Grid)
 	{
-		UTurretDataAsset* TurretData = TurretRegistry->GetTurretByID(TurretID);
-
-		if (TurretData)
+		if (TSubclassOf<ATurretBase> TurretClass = TurretRegistry->GetTurretClass(TurretID))
 		{
-			if (GameState->GetPlayerCoins() < TurretData->Stats.Price)
+			if (const FTurretStats* TurretStats = GetTurretStats(TurretID))
 			{
-				return;
-			}
-			
-			if (TurretData->TurretClass)
-			{
-				if (bool bResult = Grid->RequestTurretBuild(&TurretData->TurretClass, Location); bResult == true)
+				if (GameState->GetPlayerCoins() < TurretStats->Price)
 				{
-					GameState->SpendPlayerCoins(TurretData->Stats.Price);
+					return;
+				}
+
+				if (bool bResult = Grid->RequestTurretBuild(&TurretClass, Location); bResult == true)
+				{
+					GameState->SpendPlayerCoins(TurretStats->Price);
 				}
 			}
-			
 		}
-
 	}
 }

@@ -173,6 +173,11 @@ void ARunGameState::SkipSetupPhase()
 	GoToNextPhase();
 }
 
+void ARunGameState::ReducePlayerHealth(float Damage)
+{
+	SetPlayerHealth(FMath::Max(PlayerHealth -  Damage, 0.f));
+}
+
 void ARunGameState::AddPlayerCoins(float _PlayerCoins)
 {
 	SetPlayerCoins(PlayerCoins + _PlayerCoins);
@@ -181,6 +186,13 @@ void ARunGameState::AddPlayerCoins(float _PlayerCoins)
 void ARunGameState::SpendPlayerCoins(float _PlayerCoins)
 {
 	AddPlayerCoins(-(_PlayerCoins));
+}
+
+void ARunGameState::AddPlayerPoints(float _PlayerPoints)
+{
+	PlayerPoints = PlayerPoints + _PlayerPoints;
+	UE_LOG(LogTemp, Warning, TEXT("Player Points: %f"), PlayerPoints);
+	OnPlayerPointsChange.Broadcast(PlayerPoints);
 }
 
 

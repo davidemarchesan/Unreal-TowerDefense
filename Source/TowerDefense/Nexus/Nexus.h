@@ -8,6 +8,7 @@
 
 class UBoxComponent;
 class UWidgetComponent;
+class ARunGameState;
 
 UCLASS()
 class TOWERDEFENSE_API ANexus : public AActor
@@ -44,6 +45,8 @@ public:
 	class UWidgetComponent* HealthBarWidget;
 
 private:
+
+	ARunGameState* GameState;
 
 	void TakeDamageFromEnemy(float EnemyHealth);
 

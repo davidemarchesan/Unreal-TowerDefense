@@ -33,14 +33,20 @@ protected:
 
 	FTimerHandle FireTimer;
 
-	void SelectTarget();
+	bool bIsSearchingForNewTarget = false;
+	
+	void SearchForNewTarget();
 	void ResetTarget();
 
 	void RotateTurret(float DeltaTime);
 
-	float RotationSpeed = 10.f;
+	float RotationSpeed = 20.f;
 
 	virtual void OnEnemyEnterRange(AEnemyPawn* Enemy) override;
+
+	virtual void OnEnemyExitRange(AEnemyPawn* Enemy) override;
+
+	virtual void OnEnemyDeath(AEnemyPawn* Enemy) override;
 	
 	// Components
 	UPROPERTY(VisibleAnywhere, Category = "Components")

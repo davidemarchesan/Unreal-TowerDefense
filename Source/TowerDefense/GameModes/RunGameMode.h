@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "TowerDefense/Enemies/Data/EnemyRegistry.h"
+#include "TowerDefense/Enemies/Data/EnemyStats.h"
+#include "TowerDefense/Turrets/Data/TurretStats.h"
 #include "RunGameMode.generated.h"
 
 class ALayoutGrid;
@@ -29,6 +32,17 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Registry")
 	UTurretRegistry* TurretRegistry;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Registry")
+	UDataTable* TurretDataTable;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Registry")
+	UEnemyRegistry* EnemyRegistry;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Registry")
+	UDataTable* EnemyDataTable;
+
+	
 
 	// Getters
 	bool IsLevelLoaded() const { return bIsLevelLoaded; }
@@ -62,6 +76,16 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Stats")
 	float PlayerInitialCoins = 2000.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Stats")
+	float WallPrice = 200.f;
+
+	FTurretStats* GetTurretStats(FName TurretID);
+
+	// Enemies
+	UDataTable* GetEnemyDataTable() const { return EnemyDataTable; }
+	
+	FEnemyStats* GetEnemyStats(FName EnemyID);
 
 	// Phases
 	UPROPERTY(EditDefaultsOnly, Category = "Gameplay")

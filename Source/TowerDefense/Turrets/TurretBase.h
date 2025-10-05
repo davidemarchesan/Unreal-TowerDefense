@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/SphereComponent.h"
+#include "Data/TurretStats.h"
 #include "Engine/TimerHandle.h"
 #include "TurretBase.generated.h"
 
@@ -14,6 +15,7 @@ class UMaterialInterface;
 class UPrimitiveComponent;
 class UMaterialInstanceDynamic;
 class UDecalComponent;
+class ARunGameMode;
 
 UCLASS()
 class TOWERDEFENSE_API ATurretBase : public AActor
@@ -31,13 +33,18 @@ public:
 
 	void SetPreviewState(bool _bIsPreview);
 
-	UPROPERTY(EditAnywhere, Category = "Stats")
-	UTurretDataAsset* TurretData;
-
+	UPROPERTY(EditDefaultsOnly, Category = "Turret")
+	FName TurretID;
+	
 	UPROPERTY(EditAnywhere, Category = "Debug")
 	bool bShowRangeDebugSphere = false;
 
-protected: 
+protected:
+
+	ARunGameMode* GameMode;
+
+	// Stats
+	FTurretStats* Stats;
 
 	// Components
 	UPROPERTY(VisibleAnywhere, Category="Components")
@@ -68,7 +75,7 @@ protected:
 	// Targeting
 	UPROPERTY()
 	TArray<AEnemyPawn*> EnemiesInRange;
-
+	
 	UPROPERTY()
 	TArray<ATurretBase*> TurretsInRange;
 
@@ -85,7 +92,9 @@ protected:
 	UFUNCTION()
 	void OnEnemyExitRangeDelegate(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	virtual void OnEnemyExitRange(AEnemyPawn* Enemy);
+	
 	UFUNCTION()
-	void OnEnemyDeath(AEnemyPawn* Enemy);
+	virtual void OnEnemyDeath(AEnemyPawn* Enemy);
 
 };

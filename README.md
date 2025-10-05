@@ -19,9 +19,12 @@ base muore
 push su economia e punteggio
 fatto - dare soldi a inizio game
 fatto - prendere torre e dare costo
-- risolvere problema data asset che si ricarica -> passare a tmap
-- prendere muro e dare costo
-- prendere nemico e dare punteggio
+fatto - risolvere problema data asset che si ricarica -> passare a tmap
+fatto - fare cambio target
+fatto - prendere muro e dare costo -> ridurre coins
+fatto - prendere nemico e dare punteggio -> dare punteggio
+fatto - mostrare vita sopra nemico
+qui >>>>>>>>>> - sync vita base con ui + vita sopra base
 - creare wave e post-wave (loop)
 
 creare upgrade torri
