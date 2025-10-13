@@ -6,6 +6,7 @@
 #include "Components/WidgetComponent.h"
 #include "TowerDefense/Enemies/EnemyPawn.h"
 #include "TowerDefense/GameStates/RunGameState.h"
+#include "TowerDefense/UI/Widgets/HealthBarWidgetWrapper.h"
 
 // Sets default values
 ANexus::ANexus()
@@ -30,22 +31,25 @@ ANexus::ANexus()
 	Mesh->SetGenerateOverlapEvents(false); // Avoid mesh collision
 
 	// UI
-	// HealthBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarWidget"));
-	// HealthBarWidget->SetupAttachment(RootComponent);
-	// HealthBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
-	// HealthBarWidget->SetDrawSize(FVector2D(100, 10));
-	// HealthBarWidget->SetVisibility(false);
+	HealthBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarWidget"));
+	HealthBarWidget->SetupAttachment(RootComponent);
+	HealthBarWidget->SetDrawSize(FVector2D(100, 20));
+	HealthBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
+	HealthBarWidget->SetWidgetClass(UHealthBarWidgetWrapper::StaticClass());
+	HealthBarWidget->SetVisibility(false);
 
 }
 
 // Called when the game starts or when spawned
 void ANexus::BeginPlay()
 {
+	UE_LOG(LogTemp, Warning, TEXT("ANexus beginplay"));
 	Super::BeginPlay();
 
 	GameState = GetWorld()->GetGameState<ARunGameState>();
 
 	Health = MaxHealth;
+	UE_LOG(LogTemp, Warning, TEXT("Health initial: %f"), Health);
 	
 }
 
@@ -59,18 +63,19 @@ void ANexus::Tick(float DeltaTime)
 void ANexus::TakeDamageFromEnemy(float EnemyHealth)
 {
 
-	Health = FMath::Clamp(Health - EnemyHealth, 0.f, MaxHealth);
-	UE_LOG(LogTemp, Warning, TEXT("Health: %f"), Health);
+	// Health = FMath::Clamp(Health - EnemyHealth, 0.f, MaxHealth);
+	Health = FMath::Max(0.f, (Health - EnemyHealth));
+	UE_LOG(LogTemp, Warning, TEXT("took %f damage, so Health: %f"), EnemyHealth, Health);
 
-	// if (HealthBarWidget)
-	// {
-	// 	if (UHealthBarWidget* Widget = Cast<UHealthBarWidget>(HealthBarWidget->GetUserWidgetObject()))
-	// 	{
-	// 		Widget->SetHealthPercent(Health / MaxHealth);
-	// 	}
-	//
-	// 	HealthBarWidget->SetVisibility(Health < MaxHealth);
-	// }
+	if (HealthBarWidget && EnemyHealth)
+	{
+		if (UHealthBarWidgetWrapper* Widget = Cast<UHealthBarWidgetWrapper>(HealthBarWidget->GetUserWidgetObject()))
+		{
+			Widget->SetHealthPercent(Health / MaxHealth);
+		}
+	
+		HealthBarWidget->SetVisibility(true);
+	}
 
 	if (GameState)
 	{

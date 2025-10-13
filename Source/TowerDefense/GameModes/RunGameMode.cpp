@@ -51,7 +51,10 @@ void ARunGameMode::InitializeGrid()
 
 		if (NexusBlueprintClass)
 		{
-			GetWorld()->SpawnActor<ANexus>(NexusBlueprintClass, Grid->GetWorldNexusLocation(), FRotator::ZeroRotator);
+			if (ANexus* Nexus = GetWorld()->SpawnActor<ANexus>(NexusBlueprintClass, Grid->GetWorldNexusLocation(), FRotator::ZeroRotator))
+			{
+				Nexus->SetMaxHealth(PlayerMaxHealth);
+			}
 		}
 
 		if (EnemySpawnerBlueprintClass)

@@ -35,11 +35,10 @@ public:
 	UStaticMeshComponent* Mesh;
 
 	// Stats
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Stats")
 	float MaxHealth = 2000.f;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Stats")
 	float Health;
+
+	void SetMaxHealth(const float NewMaxHealth) { MaxHealth = NewMaxHealth; Health = MaxHealth; }
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 	class UWidgetComponent* HealthBarWidget;
