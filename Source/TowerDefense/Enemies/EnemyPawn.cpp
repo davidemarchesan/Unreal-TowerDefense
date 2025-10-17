@@ -75,6 +75,7 @@ void AEnemyPawn::ApplyDamage(float Damage)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Reward: %f"), Stats->Reward);
 			GameState->AddPlayerPoints(Stats->Reward);
+			GameState->AddPlayerCoins(Stats->Reward);
 		}
 
 		Destroy();
@@ -97,6 +98,11 @@ void AEnemyPawn::BeginPlay()
 		if (Stats)
 		{
 			Health = Stats->Health;
+
+			if (MovementComponent)
+			{
+				MovementComponent->MaxSpeed = Stats->Speed;
+			}
 		}
 	}
 	

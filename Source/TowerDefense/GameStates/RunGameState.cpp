@@ -191,7 +191,6 @@ void ARunGameState::SpendPlayerCoins(float _PlayerCoins)
 void ARunGameState::AddPlayerPoints(float _PlayerPoints)
 {
 	PlayerPoints = PlayerPoints + _PlayerPoints;
-	UE_LOG(LogTemp, Warning, TEXT("Player Points: %f"), PlayerPoints);
 	OnPlayerPointsChange.Broadcast(PlayerPoints);
 }
 

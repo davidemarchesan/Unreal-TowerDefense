@@ -3,12 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Data/Wave.h"
 #include "GameFramework/Actor.h"
 #include "TowerDefense/Enums/RunPhase.h"
 #include "EnemySpawner.generated.h"
 
 class AEnemyPawn;
 class ARunGameMode;
+class ARunGameState;
 
 UCLASS()
 class TOWERDEFENSE_API AEnemySpawner : public AActor
@@ -28,15 +30,30 @@ private:
 
 	ARunGameMode* GameMode;
 
+	ARunGameState* GameState;
+
 	UDataTable* EnemyDataTable;
+
+	// Wave
+	FWave HardCodedWave;
+	
+	FTimerHandle EnemiesGroupSpawnTimerHandle;
+	FTimerHandle EnemyUnitSpawnTimerHandle;
+
+	void StartWave();
+	void StartEnemiesGroup();
+
+	void GoToNextEnemiesGroup();
+
+	int32 CurrentEnemyGroup = 0;
+	int32 CurrentEnemyUnit = 0;
+
+	void SpawnEnemy();
+	
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-	void SpawnEnemy();
-
-	FTimerHandle TimerHandle;
 
 public:	
 	// Called every frame

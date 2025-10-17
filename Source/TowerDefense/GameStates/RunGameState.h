@@ -47,8 +47,6 @@ private:
 	UFUNCTION()
 	void OnLevelReady();
 
-	void GoToNextPhase();
-
 	void StartTimer(int32 Seconds);
 
 	void StopTimer();
@@ -93,6 +91,7 @@ public:
 
 	FOnTimerUpdate OnTimerUpdate;
 
+	void GoToNextPhase();
 	void SkipSetupPhase();
 	
 	// Stats - Health

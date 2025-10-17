@@ -4,6 +4,7 @@
 #include "EnemySpawner.h"
 
 #include "EnemyPawn.h"
+#include "Data/Wave.h"
 #include "TowerDefense/GameModes/RunGameMode.h"
 #include "TowerDefense/GameStates/RunGameState.h"
 
@@ -19,18 +20,71 @@ void AEnemySpawner::OnPhaseStart(ERunPhase NewPhase)
 	switch (NewPhase)
 	{
 	case ERunPhase::Defense:
-		GetWorldTimerManager().SetTimer(
-			TimerHandle,
-			this,
-			&AEnemySpawner::SpawnEnemy,
-			2.0f,
-			true
-		);
+		StartWave();
 		break;
 
 	case ERunPhase::Setup:
-		GetWorldTimerManager().ClearTimer(TimerHandle);
+		// GetWorldTimerManager().ClearTimer(EnemiesGroupSpawnTimerHandle);
 		break;
+	}
+}
+
+void AEnemySpawner::StartWave()
+{
+	TArray<FWaveEnemiesGroup> HardCodedEnemies = {
+		FWaveEnemiesGroup(1.0, "Tank", 2),
+		FWaveEnemiesGroup(1.0, "Fast", 5),
+	};
+	HardCodedWave = FWave(3.f, HardCodedEnemies);
+
+	StartEnemiesGroup();
+}
+
+void AEnemySpawner::StartEnemiesGroup()
+{
+	GetWorldTimerManager().ClearTimer(EnemiesGroupSpawnTimerHandle);
+
+	if (CurrentEnemyGroup >= HardCodedWave.EnemiesGroups.Num())
+	{
+		return;
+	}
+
+	FWaveEnemiesGroup Group = HardCodedWave.EnemiesGroups[CurrentEnemyGroup];
+
+	GetWorldTimerManager().SetTimer(
+		EnemyUnitSpawnTimerHandle,
+		this,
+		&AEnemySpawner::SpawnEnemy,
+		Group.SpawnDelay,
+		true
+	);
+}
+
+void AEnemySpawner::GoToNextEnemiesGroup()
+{
+	CurrentEnemyGroup++;
+	CurrentEnemyUnit = 0;
+
+	if (CurrentEnemyGroup >= HardCodedWave.EnemiesGroups.Num())
+	{
+		// Wave is over
+		GetWorldTimerManager().ClearTimer(EnemiesGroupSpawnTimerHandle);
+		GetWorldTimerManager().ClearTimer(EnemyUnitSpawnTimerHandle);
+
+		if (GameState)
+		{
+			GameState->GoToNextPhase();
+		}
+	}
+	else
+	{
+		GetWorldTimerManager().SetTimer(
+			EnemiesGroupSpawnTimerHandle,
+			this,
+			&AEnemySpawner::StartEnemiesGroup,
+			HardCodedWave.SpawnDelay,
+			false
+		);
 	}
 }
 
@@ -40,13 +94,12 @@ void AEnemySpawner::BeginPlay()
 	Super::BeginPlay();
 
 	GameMode = GetWorld()->GetAuthGameMode<ARunGameMode>();
-
 	if (GameMode)
 	{
 		EnemyDataTable = GameMode->GetEnemyDataTable();
 	}
 
-	ARunGameState* GameState = GetWorld()->GetGameState<ARunGameState>();
+	GameState = GetWorld()->GetGameState<ARunGameState>();
 	if (GameState)
 	{
 		GameState->OnPhaseStart.AddDynamic(this, &AEnemySpawner::OnPhaseStart);
@@ -55,13 +108,28 @@ void AEnemySpawner::BeginPlay()
 
 void AEnemySpawner::SpawnEnemy()
 {
+	if (CurrentEnemyGroup >= HardCodedWave.EnemiesGroups.Num())
+	{
+		return;
+	}
 
-	if (TSubclassOf<AEnemyPawn> EnemyClass = GameMode->EnemyRegistry->GetEnemyClass(TEXT("Tank")))
+	FWaveEnemiesGroup Group = HardCodedWave.EnemiesGroups[CurrentEnemyGroup];
+
+	if (const TSubclassOf<AEnemyPawn> EnemyClass = GameMode->EnemyRegistry->GetEnemyClass(Group.EnemyId))
 	{
 		AEnemyPawn* Enemy = GetWorld()->SpawnActor<AEnemyPawn>(EnemyClass, GetActorLocation(), GetActorRotation());
 		Enemy->SetDestination(NexusLocation);
+
+		CurrentEnemyUnit++;
+
+		if (CurrentEnemyUnit >= Group.Count)
+		{
+			// This group of enemies is over
+			GetWorldTimerManager().ClearTimer(EnemyUnitSpawnTimerHandle);
+
+			GoToNextEnemiesGroup();
+		}
 	}
-	
 }
 
 // Called every frame
