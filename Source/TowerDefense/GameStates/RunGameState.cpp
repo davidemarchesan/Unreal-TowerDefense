@@ -13,7 +13,6 @@ void ARunGameState::BeginPlay()
 	Super::BeginPlay();
 
 	GameMode = Cast<ARunGameMode>(GetWorld()->GetAuthGameMode());
-
 	if (GameMode)
 	{
 		if (GameMode->IsLevelLoaded())
@@ -27,11 +26,12 @@ void ARunGameState::BeginPlay()
 	}
 
 	PlayerController = Cast<ARunPlayerController>(GetWorld()->GetFirstPlayerController());
-
 	if (PlayerController)
 	{
 		HUD = Cast<ARunHUD>(PlayerController->GetHUD());
 	}
+
+	AEnemyPawn::OnAnyEnemyDeath.AddDynamic(this, &ARunGameState::OnAnyEnemyDeath);
 }
 
 void ARunGameState::TimerTick()
@@ -42,7 +42,8 @@ void ARunGameState::TimerTick()
 
 	if (PhaseRemainingTime <= 0)
 	{
-		GetWorldTimerManager().ClearTimer(TimerHandle);
+		StopTimer();
+		GoToNextPhase();
 	}
 }
 
@@ -88,6 +89,23 @@ void ARunGameState::GoToNextPhase()
 	}
 
 	OnPhaseStart.Broadcast(Phase);
+
+	if (Phase == ERunPhase::Defense)
+	{
+		TArray<FWaveEnemiesGroup> HardCodedEnemies = {
+			FWaveEnemiesGroup(1.0, "Tank", 4),
+			FWaveEnemiesGroup(1.0, "Fast", 10),
+		};
+		const FWave HardCodedWave = FWave(3.f, HardCodedEnemies);
+
+		EnemiesAlive = 0;
+		for (FWaveEnemiesGroup Group : HardCodedEnemies)
+		{
+			EnemiesAlive += Group.Count;
+		}
+		
+		OnDefensePhaseStart.Broadcast(HardCodedWave);
+	}
 	
 }
 
@@ -108,6 +126,24 @@ void ARunGameState::StartTimer(int32 Seconds)
 void ARunGameState::StopTimer()
 {
 	GetWorldTimerManager().ClearTimer(TimerHandle);
+}
+
+void ARunGameState::OnAnyEnemyDeath(AEnemyPawn* Enemy)
+{
+
+	if (Enemy && Enemy->Stats)
+	{
+		AddPlayerPoints(Enemy->Stats->Reward);
+		AddPlayerCoins(Enemy->Stats->Reward);
+
+		EnemiesAlive --;
+		UE_LOG(LogTemp, Warning, TEXT("ARunGameState::OnAnyEnemyDeath - Enemies alive %d"), EnemiesAlive);
+
+		if (EnemiesAlive <= 0)
+		{
+			GoToNextPhase();
+		}
+	}
 }
 
 void ARunGameState::SetPlayerHealth(float _PlayerHealth)
@@ -166,7 +202,7 @@ void ARunGameState::ToggleBuildTurretMode()
 
 void ARunGameState::SkipSetupPhase()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ARunGameState::SkipSetupPhase"));
+	// UE_LOG(LogTemp, Warning, TEXT("ARunGameState::SkipSetupPhase"));
 
 	StopTimer();
 

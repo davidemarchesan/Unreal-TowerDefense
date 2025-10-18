@@ -43,13 +43,13 @@ ANexus::ANexus()
 // Called when the game starts or when spawned
 void ANexus::BeginPlay()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ANexus beginplay"));
+	// UE_LOG(LogTemp, Warning, TEXT("ANexus beginplay"));
 	Super::BeginPlay();
 
 	GameState = GetWorld()->GetGameState<ARunGameState>();
 
 	Health = MaxHealth;
-	UE_LOG(LogTemp, Warning, TEXT("Health initial: %f"), Health);
+	// UE_LOG(LogTemp, Warning, TEXT("Health initial: %f"), Health);
 	
 }
 
@@ -65,7 +65,7 @@ void ANexus::TakeDamageFromEnemy(float EnemyHealth)
 
 	// Health = FMath::Clamp(Health - EnemyHealth, 0.f, MaxHealth);
 	Health = FMath::Max(0.f, (Health - EnemyHealth));
-	UE_LOG(LogTemp, Warning, TEXT("took %f damage, so Health: %f"), EnemyHealth, Health);
+	// UE_LOG(LogTemp, Warning, TEXT("took %f damage, so Health: %f"), EnemyHealth, Health);
 
 	if (HealthBarWidget && EnemyHealth)
 	{
@@ -97,7 +97,7 @@ void ANexus::OnEnemyEnterCollision(UPrimitiveComponent* OverlappedComponent, AAc
 	{
 		TakeDamageFromEnemy(Enemy->Health);
 
-		Enemy->Destroy();
+		Enemy->Die();
 	}
 
 }

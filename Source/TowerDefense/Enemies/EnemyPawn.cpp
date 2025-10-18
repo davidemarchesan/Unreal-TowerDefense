@@ -11,6 +11,8 @@
 #include "TowerDefense/GameStates/RunGameState.h"
 #include "TowerDefense/UI/Widgets/HealthBarWidgetWrapper.h"
 
+FOnAnyEnemyDeath AEnemyPawn::OnAnyEnemyDeath;
+
 // Sets default values
 AEnemyPawn::AEnemyPawn()
 {
@@ -48,14 +50,12 @@ void AEnemyPawn::SetDestination(FVector Location)
 void AEnemyPawn::ApplyDamage(float Damage)
 {
 
-	if (!Stats)
+	if (!Stats || Health <= 0.f)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("No stats"));
 		return;
 	}
 	
 	Health = FMath::Clamp(Health - Damage, 0.f, Stats->Health);
-	// UE_LOG(LogTemp, Warning, TEXT("Enemy: i took %f damage and my health is now %f"), Damage, Health);
 
 	if (HealthBarComponent && Stats)
 	{
@@ -67,19 +67,18 @@ void AEnemyPawn::ApplyDamage(float Damage)
 
 	if (Health <= 0.f)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Im dead, notifying all the turrets"));
-		// Notify turrets that I'm dead
-		OnEnemyDeath.Broadcast(this);
-
-		if (GameState && Stats)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Reward: %f"), Stats->Reward);
-			GameState->AddPlayerPoints(Stats->Reward);
-			GameState->AddPlayerCoins(Stats->Reward);
-		}
-
-		Destroy();
+		Die();
 	}
+}
+
+void AEnemyPawn::Die()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Im dead, notifying all the turrets"));
+	// Notify subscribers that I'm dead
+	OnEnemyDeath.Broadcast(this);
+	OnAnyEnemyDeath.Broadcast(this);
+		
+	Destroy();
 }
 
 // Called when the game starts or when spawned

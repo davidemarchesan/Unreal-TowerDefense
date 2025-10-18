@@ -26,8 +26,6 @@ fatto - prendere nemico e dare punteggio -> dare punteggio
 fatto - mostrare vita sopra nemico
 fatto - sync vita base con ui + vita sopra base
 devo fare questo >>>>>>>>>>>>>>>>>> - creare wave e post-wave (loop)
-- problema 1: non va il loop
-- problema 2: la wave finisce ma i nemici sono ancora vivi
 
 creare upgrade torri
 creare wave sempre più difficili

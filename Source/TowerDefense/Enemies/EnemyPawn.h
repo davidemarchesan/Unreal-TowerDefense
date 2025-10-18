@@ -14,6 +14,7 @@ class ARunGameMode;
 class ARunGameState;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDeath, AEnemyPawn*, Enemy);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAnyEnemyDeath, AEnemyPawn*, Enemy);
 
 UCLASS()
 class TOWERDEFENSE_API AEnemyPawn : public APawn
@@ -41,6 +42,12 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="Events")
 	FOnEnemyDeath OnEnemyDeath;
 
+	void Die();
+	static FOnAnyEnemyDeath OnAnyEnemyDeath;
+
+	// Stats
+	FEnemyStats* Stats;
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -48,9 +55,6 @@ protected:
 	ARunGameMode* GameMode;
 
 	ARunGameState* GameState;
-
-	// Stats
-	FEnemyStats* Stats;
 
 	// Components
 	UPROPERTY(VisibleAnywhere, Category = "Components")

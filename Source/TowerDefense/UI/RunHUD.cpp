@@ -23,7 +23,7 @@ void ARunHUD::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UE_LOG(LogTemp, Warning, TEXT("HUD: BEGINPLAY"));
+	// UE_LOG(LogTemp, Warning, TEXT("HUD: BEGINPLAY"));
 
 	// Getting game components
 	GameMode = Cast<ARunGameMode>(GetWorld()->GetAuthGameMode());
@@ -435,7 +435,7 @@ void ARunHUD::InitializeDelegateSubscribers()
 
 void ARunHUD::OnLevelReady()
 {
-	UE_LOG(LogTemp, Warning, TEXT("HUD: Game is ready!"));
+	// UE_LOG(LogTemp, Warning, TEXT("HUD: Game is ready!"));
 	if (LoadingScreen)
 	{
 		LoadingScreen->SetVisibility(EVisibility::Collapsed);

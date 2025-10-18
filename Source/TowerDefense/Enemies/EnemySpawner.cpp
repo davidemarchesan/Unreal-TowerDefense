@@ -15,34 +15,26 @@ AEnemySpawner::AEnemySpawner()
 	PrimaryActorTick.bCanEverTick = true;
 }
 
-void AEnemySpawner::OnPhaseStart(ERunPhase NewPhase)
+void AEnemySpawner::OnDefensePhaseStart(FWave Wave)
 {
-	switch (NewPhase)
-	{
-	case ERunPhase::Defense:
-		StartWave();
-		break;
-
-	case ERunPhase::Setup:
-		// GetWorldTimerManager().ClearTimer(EnemiesGroupSpawnTimerHandle);
-		break;
-	}
+	HardCodedWave = Wave;
+	StartWave();
 }
 
 void AEnemySpawner::StartWave()
 {
-	TArray<FWaveEnemiesGroup> HardCodedEnemies = {
-		FWaveEnemiesGroup(1.0, "Tank", 2),
-		FWaveEnemiesGroup(1.0, "Fast", 5),
-	};
-	HardCodedWave = FWave(3.f, HardCodedEnemies);
+	UE_LOG(LogTemp, Warning, TEXT("EnemySpawner: start wave"));
 
+	CurrentEnemyGroup = 0;
 	StartEnemiesGroup();
 }
 
 void AEnemySpawner::StartEnemiesGroup()
 {
 	GetWorldTimerManager().ClearTimer(EnemiesGroupSpawnTimerHandle);
+
+	UE_LOG(LogTemp, Warning, TEXT("EnemySpawner: start enemies group index %d of %d"), CurrentEnemyGroup,
+	       HardCodedWave.EnemiesGroups.Num());
 
 	if (CurrentEnemyGroup >= HardCodedWave.EnemiesGroups.Num())
 	{
@@ -70,11 +62,6 @@ void AEnemySpawner::GoToNextEnemiesGroup()
 		// Wave is over
 		GetWorldTimerManager().ClearTimer(EnemiesGroupSpawnTimerHandle);
 		GetWorldTimerManager().ClearTimer(EnemyUnitSpawnTimerHandle);
-
-		if (GameState)
-		{
-			GameState->GoToNextPhase();
-		}
 	}
 	else
 	{
@@ -102,7 +89,7 @@ void AEnemySpawner::BeginPlay()
 	GameState = GetWorld()->GetGameState<ARunGameState>();
 	if (GameState)
 	{
-		GameState->OnPhaseStart.AddDynamic(this, &AEnemySpawner::OnPhaseStart);
+		GameState->OnDefensePhaseStart.AddDynamic(this, &AEnemySpawner::OnDefensePhaseStart);
 	}
 }
 

@@ -4,10 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
+#include "TowerDefense/Enemies/Data/Wave.h"
 #include "TowerDefense/Enums/RunPhase.h"
 #include "RunGameState.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPhaseStart, ERunPhase, NewPhase);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDefensePhaseStart, FWave, Wave);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTimerUpdate, int32, Time);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBuildWallModeToggle, bool, bIsBuildWallMode);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBuildTurretModeToggle, bool, bIsBuildTurretMode);
@@ -18,6 +20,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerPointsChange, float, Player
 class ARunGameMode;
 class ARunPlayerController;
 class ARunHUD;
+class AEnemyPawn;
 
 /**
  * 
@@ -51,7 +54,13 @@ private:
 
 	void StopTimer();
 
+	// Wave
 	int32 WaveNumber = 0;
+
+	int32 EnemiesAlive = 0;
+
+	UFUNCTION()
+	void OnAnyEnemyDeath(AEnemyPawn* Enemy);
 
 	// Stats
 	void SetPlayerHealth(float _PlayerHealth);
@@ -88,6 +97,7 @@ public:
 	ERunPhase GetPhase() const { return Phase; }
 
 	FOnPhaseStart OnPhaseStart;
+	FOnDefensePhaseStart OnDefensePhaseStart;
 
 	FOnTimerUpdate OnTimerUpdate;
 

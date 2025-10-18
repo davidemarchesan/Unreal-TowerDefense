@@ -26,7 +26,7 @@ private:
 	ERunPhase Phase = ERunPhase::Setup;
 
 	UFUNCTION()
-	void OnPhaseStart(ERunPhase NewPhase);
+	void OnDefensePhaseStart(FWave Wave);
 
 	ARunGameMode* GameMode;
 
