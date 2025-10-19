@@ -23,7 +23,7 @@ void AEnemySpawner::OnDefensePhaseStart(FWave Wave)
 
 void AEnemySpawner::StartWave()
 {
-	UE_LOG(LogTemp, Warning, TEXT("EnemySpawner: start wave"));
+	// UE_LOG(LogTemp, Warning, TEXT("EnemySpawner: start wave"));
 
 	CurrentEnemyGroup = 0;
 	StartEnemiesGroup();
@@ -33,8 +33,8 @@ void AEnemySpawner::StartEnemiesGroup()
 {
 	GetWorldTimerManager().ClearTimer(EnemiesGroupSpawnTimerHandle);
 
-	UE_LOG(LogTemp, Warning, TEXT("EnemySpawner: start enemies group index %d of %d"), CurrentEnemyGroup,
-	       HardCodedWave.EnemiesGroups.Num());
+	// UE_LOG(LogTemp, Warning, TEXT("EnemySpawner: start enemies group index %d of %d"), CurrentEnemyGroup,
+	       // HardCodedWave.EnemiesGroups.Num());
 
 	if (CurrentEnemyGroup >= HardCodedWave.EnemiesGroups.Num())
 	{

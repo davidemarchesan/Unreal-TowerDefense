@@ -15,6 +15,9 @@ struct FTurretStats : public FTableRowBase
 	float Damage = 10.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Turret")
+	float ProjectileSpeed = 400.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Turret")
 	float RateOfFire = 10.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Turret")

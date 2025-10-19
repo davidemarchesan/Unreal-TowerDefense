@@ -5,6 +5,8 @@
 
 #include "Data/TurretDataAsset.h"
 #include "TowerDefense/Enemies/EnemyPawn.h"
+#include "TowerDefense/Projectiles/Projectile.h"
+#include "TowerDefense/Projectiles/ProjectilePool.h"
 
 ATurretCannon::ATurretCannon()
 {
@@ -63,7 +65,17 @@ void ATurretCannon::Fire()
 
 	if (CurrentTarget && CurrentTarget->IsPendingKillPending() == false)
 	{
-		CurrentTarget->ApplyDamage(Stats->Damage);
+		// CurrentTarget->ApplyDamage(Stats->Damage);
+		if (ProjectilePool)
+		{
+			AProjectile* Projectile = ProjectilePool->GetFreeProjectile();
+			if (Projectile)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Spawning projectile"));
+				Projectile->SetActorLocation(GetActorLocation());
+				Projectile->InitProjectile(CurrentTarget, this, Stats->ProjectileSpeed, Stats->Damage);
+			}
+		}
 	}
 	else
 	{

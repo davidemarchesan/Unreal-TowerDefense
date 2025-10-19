@@ -140,7 +140,7 @@ void ARunPlayerController::PrimaryAction()
 					if (AWall* TurretWall = Cast<AWall>(Hit.GetActor()))
 					{
 						FVector SocketLocation = TurretWall->GetTurretSocketLocation();
-						GameMode->RequestTurretBuild(TEXT("Cannon"), SocketLocation);
+						GameMode->RequestTurretBuild(TEXT("Minigun"), SocketLocation);
 					}
 				}
 			}

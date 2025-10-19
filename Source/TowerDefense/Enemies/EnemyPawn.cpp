@@ -54,6 +54,8 @@ void AEnemyPawn::ApplyDamage(float Damage)
 	{
 		return;
 	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Damage: %f"), Damage);
 	
 	Health = FMath::Clamp(Health - Damage, 0.f, Stats->Health);
 

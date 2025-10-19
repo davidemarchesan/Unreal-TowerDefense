@@ -25,10 +25,13 @@ fatto - prendere muro e dare costo -> ridurre coins
 fatto - prendere nemico e dare punteggio -> dare punteggio
 fatto - mostrare vita sopra nemico
 fatto - sync vita base con ui + vita sopra base
-devo fare questo >>>>>>>>>>>>>>>>>> - creare wave e post-wave (loop)
+fatto - creare wave e post-wave (loop)
 
+- creare proiettili
+creare altra torre
 creare upgrade torri
 creare wave sempre più difficili
+creare statistiche
 
 problema warning nanite
 Tip pratico: per torrette e effetti semi-trasparenti (es. glow, selection ring), spesso si crea un componente separato (plane o decal) con materiale traslucido sopra la mesh Nanite. Così la torretta resta Nanite, e l’effetto trasparente è su un componente secondario.

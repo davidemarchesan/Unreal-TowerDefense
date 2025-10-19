@@ -93,8 +93,8 @@ void ARunGameState::GoToNextPhase()
 	if (Phase == ERunPhase::Defense)
 	{
 		TArray<FWaveEnemiesGroup> HardCodedEnemies = {
-			FWaveEnemiesGroup(1.0, "Tank", 4),
-			FWaveEnemiesGroup(1.0, "Fast", 10),
+			FWaveEnemiesGroup(1.0, "Tank", 1),
+			// FWaveEnemiesGroup(1.0, "Fast", 10),
 		};
 		const FWave HardCodedWave = FWave(3.f, HardCodedEnemies);
 

@@ -16,6 +16,7 @@ class UPrimitiveComponent;
 class UMaterialInstanceDynamic;
 class UDecalComponent;
 class ARunGameMode;
+class AProjectilePool;
 
 UCLASS()
 class TOWERDEFENSE_API ATurretBase : public AActor
@@ -71,6 +72,9 @@ protected:
 	void Fire();
 
 	void CheckForFiring();
+
+	// Projectile
+	AProjectilePool* ProjectilePool;
 
 	// Targeting
 	UPROPERTY()

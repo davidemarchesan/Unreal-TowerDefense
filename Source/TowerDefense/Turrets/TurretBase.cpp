@@ -3,10 +3,12 @@
 
 #include "TurretBase.h"
 
+#include "EngineUtils.h"
 #include "Components/DecalComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "TowerDefense/Enemies/EnemyPawn.h"
 #include "TowerDefense/GameModes/RunGameMode.h"
+#include "TowerDefense/Projectiles/ProjectilePool.h"
 
 
 // Sets default values
@@ -54,7 +56,11 @@ void ATurretBase::BeginPlay()
 		}
 	}
 
-	// SetPreview(true);
+	for (TActorIterator<AProjectilePool> It(GetWorld()); It; ++It)
+	{
+		ProjectilePool = *It;
+		break;
+	}
 }
 
 // Called every frame
