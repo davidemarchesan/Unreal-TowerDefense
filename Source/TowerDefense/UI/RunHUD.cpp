@@ -73,7 +73,7 @@ void ARunHUD::OnPlayerHealthChange(float PlayerHealth)
 	{
 		FNumberFormattingOptions FormattingOptions;
 		FormattingOptions.SetMaximumFractionalDigits(0);
-		
+
 		PlayerHealthStat->SetText(FText::AsNumber(PlayerHealth, &FormattingOptions));
 	}
 }
@@ -84,7 +84,7 @@ void ARunHUD::OnPlayerCoinsChange(float PlayerCoins)
 	{
 		FNumberFormattingOptions FormattingOptions;
 		FormattingOptions.SetMaximumFractionalDigits(0);
-		
+
 		PlayerCoinsStat->SetText(FText::AsNumber(PlayerCoins, &FormattingOptions));
 	}
 }
@@ -95,7 +95,7 @@ void ARunHUD::OnPlayerPointsChange(float PlayerPoints)
 	{
 		FNumberFormattingOptions FormattingOptions;
 		FormattingOptions.SetMaximumFractionalDigits(0);
-		
+
 		PlayerPointsStat->SetText(FText::AsNumber(PlayerPoints, &FormattingOptions));
 	}
 }
@@ -335,83 +335,98 @@ void ARunHUD::CreateTopBarOverlay(const TSharedRef<SOverlay>& RootOverlay)
 
 void ARunHUD::CreateBottomBarOverlay(const TSharedRef<SOverlay>& RootOverlay)
 {
-	RootOverlay->AddSlot()
-	           .HAlign(HAlign_Center)
-	           .VAlign(VAlign_Bottom)
+	if (!GameMode)
+	{
+		return;
+	}
 
-	[
-		SAssignNew(BottomBarBorder, SBorder)
-		.BorderImage(
-			new FSlateRoundedBoxBrush(FLinearColor::White, FVector4(12, 12, 0, 0)))
-		.BorderBackgroundColor(FLinearColor(0.f, 0.f, 0.f, 0.5f))
-		.Padding(FMargin(0, 15))
+	const float ItemOutPadding = 5.f;
+	const float ItemInPadding = 10.f;
+	const float ItemWidth = 120.f;
+
+	// Building menu
+	BottomBar = SNew(SHorizontalBox);
+
+	UDataTable* TurretDataTable = GameMode->TurretDataTable;
+	TArray<FName> RowNames = TurretDataTable->GetRowNames();
+
+	for (const FName& RowName : RowNames)
+	{
+		FTurretStats* TurretStats = TurretDataTable->FindRow<FTurretStats>(RowName, TEXT("Lookup Turret Stats"));
+		if (!TurretStats)
+		{
+			continue;
+		}
+
+		BottomBar->AddSlot()
+		         .AutoWidth()
+		         .Padding(ItemOutPadding, 0.f)
 		[
 
-			SNew(SHorizontalBox)
-
-			+ SHorizontalBox::Slot()
-			.Padding(15, 0)
+			SNew(SBox)
+			.WidthOverride(ItemWidth)
+			.HeightOverride(ItemWidth)
 			[
 
-				SNew(SVerticalBox)
-
-				+ SVerticalBox::Slot()
+				SNew(SBorder)
+				.Padding(10.f)
+				.BorderImage(
+					new FSlateRoundedBoxBrush(FLinearColor::White, 24.f))
+				.BorderBackgroundColor(FGameStyle::Get().GetColor("TowerDefense.Color.Gunmetal"))
 				[
-					SNew(SBox)
-					.HeightOverride(64.f)
-					.WidthOverride(64.f)
+
+					SNew(SOverlay)
+
+					+ SOverlay::Slot()
+					.HAlign(HAlign_Center)
+					.VAlign(VAlign_Center)
+					[
+						SNew(STextBlock)
+						.Justification(ETextJustify::Center)
+						.Text(FText::FromName(TurretStats->ID))
+						.Font(FGameStyle::Get().GetFontStyle("TowerDefense.Font.Bold.sm"))
+						.ColorAndOpacity(FGameStyle::Get().GetColor("TowerDefense.Color.Beige"))
+					]
+
+					+ SOverlay::Slot()
+					.HAlign(HAlign_Left)
+					.VAlign(VAlign_Bottom)
 					[
 						SNew(STextBlock)
 						.Justification(ETextJustify::Center)
 						.Text(FText::FromString("1"))
-						.Font(FGameStyle::Get().GetFontStyle("TowerDefense.Font.Bold.md"))
+						.Font(FGameStyle::Get().GetFontStyle("TowerDefense.Font.Bold.xs"))
 						.ColorAndOpacity(FGameStyle::Get().GetColor("TowerDefense.Color.Beige"))
 					]
-				]
 
-				+ SVerticalBox::Slot()
-				[
-					SNew(STextBlock)
-					.Justification(ETextJustify::Center)
-					.Text(FText::FromString("Wall"))
-					.Font(FGameStyle::Get().GetFontStyle("TowerDefense.Font.Bold.sm"))
-					.ColorAndOpacity(FGameStyle::Get().GetColor("TowerDefense.Color.Beige"))
-				]
-
-			]
-
-			+ SHorizontalBox::Slot()
-			.Padding(15, 0)
-			[
-
-				SNew(SVerticalBox)
-
-				+ SVerticalBox::Slot()
-				[
-					SNew(SBox)
-					.HeightOverride(64.f)
-					.WidthOverride(64.f)
+					+ SOverlay::Slot()
+					.HAlign(HAlign_Right)
+					.VAlign(VAlign_Bottom)
 					[
 						SNew(STextBlock)
 						.Justification(ETextJustify::Center)
-						.Text(FText::FromString("2"))
-						.Font(FGameStyle::Get().GetFontStyle("TowerDefense.Font.Bold.md"))
+						.Text(FText::AsNumber(TurretStats->Price))
+						.Font(FGameStyle::Get().GetFontStyle("TowerDefense.Font.Bold.xs"))
 						.ColorAndOpacity(FGameStyle::Get().GetColor("TowerDefense.Color.Beige"))
 					]
-				]
 
-				+ SVerticalBox::Slot()
-				[
-					SNew(STextBlock)
-					.Justification(ETextJustify::Center)
-					.Text(FText::FromString("Turret"))
-					.Font(FGameStyle::Get().GetFontStyle("TowerDefense.Font.Bold.sm"))
-					.ColorAndOpacity(FGameStyle::Get().GetColor("TowerDefense.Color.Beige"))
 				]
 
 			]
 
-		]
+		];
+	}
+
+	RootOverlay->AddSlot()
+	           .HAlign(HAlign_Center)
+	           .VAlign(VAlign_Bottom)
+	           .Padding(FMargin(20.f))
+
+	[
+
+		BottomBar.ToSharedRef()
+
+
 	];
 }
 
@@ -467,7 +482,7 @@ void ARunHUD::PrepareForSetupPhase()
 	NextWaveSkipButton->SetVisibility(EVisibility::Visible);
 	NextWaveHBox->SetVisibility(EVisibility::Visible);
 
-	BottomBarBorder->SetVisibility(EVisibility::Visible);
+	BottomBar->SetVisibility(EVisibility::Visible);
 }
 
 void ARunHUD::PrepareForDefensePhase()
@@ -478,5 +493,5 @@ void ARunHUD::PrepareForDefensePhase()
 	}
 
 	NextWaveHBox->SetVisibility(EVisibility::Collapsed);
-	BottomBarBorder->SetVisibility(EVisibility::Collapsed);
+	BottomBar->SetVisibility(EVisibility::Collapsed);
 }

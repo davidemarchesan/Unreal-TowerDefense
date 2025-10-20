@@ -15,9 +15,19 @@ void ARunGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
+	LoadGameModeMetas();
+
 	GetGameComponents();
 
 	LoadLevel();
+}
+
+void ARunGameMode::LoadGameModeMetas()
+{
+	if (GameModeMetasTable)
+	{
+		GameModeMetas = GameModeMetasTable->FindRow<FRunGameModeMetas>(TEXT("0"), TEXT("Lookup Game Mode Metas"));
+	}
 }
 
 void ARunGameMode::GetGameComponents()
@@ -53,7 +63,7 @@ void ARunGameMode::InitializeGrid()
 		{
 			if (ANexus* Nexus = GetWorld()->SpawnActor<ANexus>(NexusBlueprintClass, Grid->GetWorldNexusLocation(), FRotator::ZeroRotator))
 			{
-				Nexus->SetMaxHealth(PlayerMaxHealth);
+				Nexus->SetMaxHealth(GameModeMetas->PlayerInitialHealth);
 			}
 		}
 
@@ -141,7 +151,7 @@ void ARunGameMode::RequestWallBuild(FVector Location)
 	{
 		if (bool bResult = Grid->RequestWallBuild(Location))
 		{
-			GameState->SpendPlayerCoins(WallPrice);
+			GameState->SpendPlayerCoins(GameModeMetas->WallPrice);
 		}
 	}
 }

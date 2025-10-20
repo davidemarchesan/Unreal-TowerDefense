@@ -33,7 +33,7 @@ void AProjectile::BeginPlay()
 
 void AProjectile::InitProjectile(AActor* _Target, AActor* _Owner, float _Speed, float _Damage)
 {
-
+	
 	Target = _Target;
 	Owner = _Owner;
 	Speed = _Speed;
@@ -63,11 +63,9 @@ bool AProjectile::UpdateProjectile(float DeltaTime)
 	if (FVector::DistSquared(NewLocation, TargetLocation) < FMath::Square(3.f))
 	{
 
-		UE_LOG(LogTemp, Warning, TEXT("projectile: i am at target"));
 		AEnemyPawn* Enemy = Cast<AEnemyPawn>(Target);
 		if (Enemy)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("projectile: apply damange %f"), Damage);
 			Enemy->ApplyDamage(Damage);
 		}
 		

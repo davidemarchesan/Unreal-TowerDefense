@@ -77,7 +77,7 @@ private:
 	TSharedPtr<STextBlock> NextWaveTimerTextBlock;
 	TSharedPtr<SButton> NextWaveSkipButton;
 
-	TSharedPtr<SBorder> BottomBarBorder;
+	TSharedPtr<SHorizontalBox> BottomBar;
 
 	TSharedPtr<STopBarStat> PlayerHealthStat;
 	TSharedPtr<STopBarStat> PlayerCoinsStat;

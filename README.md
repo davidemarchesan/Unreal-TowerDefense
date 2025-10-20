@@ -2,36 +2,16 @@
 
 ## Cosa stavo facendo
 
-stavo lavorando sullo spawn delle torri che funziona grazie al socket nelle mesh
-poi volevo spostare lo spawn dalla grid alla gamemode, che regola tutto, che forse dovrebbe tenere anche la griglia logica (non saprei)
+fatto - creare proiettili
+fatto - creare altra torre
 
-poi volevo lavorare sulle preview delle torri, perché non posso fare blueprint e mesh diverse per ogni torre, bisogna usare le dynamic
-
-fatto questo, volevo fare lo spawn dei nemici alla fase defense
-grid deve dire a gamemode dove sono gli spawn dei nemici, e dove è la base alleata
-gamemode spawna base alleata e enemyspawner
-
-enemyspawner spawna nemici
-base muore
-
--- sono qui
-
-push su economia e punteggio
-fatto - dare soldi a inizio game
-fatto - prendere torre e dare costo
-fatto - risolvere problema data asset che si ricarica -> passare a tmap
-fatto - fare cambio target
-fatto - prendere muro e dare costo -> ridurre coins
-fatto - prendere nemico e dare punteggio -> dare punteggio
-fatto - mostrare vita sopra nemico
-fatto - sync vita base con ui + vita sopra base
-fatto - creare wave e post-wave (loop)
-
-- creare proiettili
-creare altra torre
-creare upgrade torri
-creare wave sempre più difficili
-creare statistiche
+>>>>>>>> - refactor menu con n torri e prezzo
+>>>>>>>> - mettere pulsante per muro
+>>>>>>>> - indice in basso a sx
+>>>>>>>> - collegare con playercontroller
+- creare upgrade e hud torri
+- creare wave sempre più difficili
+- creare statistiche (dare nomi a torri)
 
 problema warning nanite
 Tip pratico: per torrette e effetti semi-trasparenti (es. glow, selection ring), spesso si crea un componente separato (plane o decal) con materiale traslucido sopra la mesh Nanite. Così la torretta resta Nanite, e l’effetto trasparente è su un componente secondario.

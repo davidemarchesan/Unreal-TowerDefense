@@ -71,7 +71,6 @@ void ATurretCannon::Fire()
 			AProjectile* Projectile = ProjectilePool->GetFreeProjectile();
 			if (Projectile)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Spawning projectile"));
 				Projectile->SetActorLocation(GetActorLocation());
 				Projectile->InitProjectile(CurrentTarget, this, Stats->ProjectileSpeed, Stats->Damage);
 			}

@@ -38,6 +38,8 @@ public:
 	bool UpdateProjectile(float DeltaTime);
 	void Deactivate();
 
+	bool IsActive() const { return bActive; }
+
 private:
 
 	UPROPERTY()

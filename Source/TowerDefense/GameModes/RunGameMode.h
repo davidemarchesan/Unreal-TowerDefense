@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Data/RunGameModeMetas.h"
 #include "GameFramework/GameModeBase.h"
 #include "TowerDefense/Enemies/Data/EnemyRegistry.h"
 #include "TowerDefense/Enemies/Data/EnemyStats.h"
@@ -31,6 +32,9 @@ public:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Registry")
+	UDataTable* GameModeMetasTable;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Registry")
 	UTurretRegistry* TurretRegistry;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Registry")
@@ -42,8 +46,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Registry")
 	UDataTable* EnemyDataTable;
 
-	
-
 	// Getters
 	bool IsLevelLoaded() const { return bIsLevelLoaded; }
 
@@ -54,6 +56,8 @@ private:
 	ARunPlayerController* PlayerController;
 
 	ARunGameState* GameState;
+
+	void LoadGameModeMetas();
 
 	void GetGameComponents();
 
@@ -71,14 +75,7 @@ private:
 
 public:
 	// Stats
-	UPROPERTY(EditDefaultsOnly, Category = "Stats")
-	float PlayerMaxHealth = 2000.f;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Stats")
-	float PlayerInitialCoins = 2000.f;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Stats")
-	float WallPrice = 200.f;
+	FRunGameModeMetas* GameModeMetas;
 
 	FTurretStats* GetTurretStats(FName TurretID);
 

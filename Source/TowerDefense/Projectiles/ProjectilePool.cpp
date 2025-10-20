@@ -25,7 +25,7 @@ void AProjectilePool::Tick(float DeltaTime)
 
 	for (AProjectile* Projectile : ProjectilePool)
 	{
-		if (Projectile)
+		if (Projectile && Projectile->IsActive() == true)
 		{
 			Projectile->UpdateProjectile(DeltaTime);
 		}
@@ -37,7 +37,7 @@ AProjectile* AProjectilePool::GetFreeProjectile()
 	// Get the first free projectile from pool
 	for (AProjectile* Projectile : ProjectilePool)
 	{
-		if (Projectile && Projectile->IsHidden() == false)
+		if (Projectile && Projectile->IsHidden() == false && Projectile->IsActive() == false)
 		{
 			return Projectile;
 		}

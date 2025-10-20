@@ -56,8 +56,8 @@ void ARunGameState::OnLevelReady()
 	}
 	
 	// Setup player
-	SetPlayerHealth(GameMode->PlayerMaxHealth);
-	SetPlayerCoins(GameMode->PlayerInitialCoins);
+	SetPlayerHealth(GameMode->GameModeMetas->PlayerInitialHealth);
+	SetPlayerCoins(GameMode->GameModeMetas->PlayerInitialCoins);
 
 	StartTimer(WaveNumber == 0 ? GameMode->FirstSetupPhaseTimer : GameMode->SetupPhaseTimer);
 
