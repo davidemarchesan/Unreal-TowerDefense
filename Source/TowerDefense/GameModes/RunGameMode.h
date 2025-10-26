@@ -123,9 +123,9 @@ public:
 	void RequestWallRemoval(int32 Col, int32 Row);
 
 	// Build Turret Mode
-	void RequestToggleBuildTurretMode();
+	void RequestToggleBuildTurretMode(FName& TurretID);
 
-	void RequestTurretPreview(FVector Location);
+	void RequestTurretPreview(FName TurretID, FVector Location);
 
 	void RequestResetPreviewTurret();
 

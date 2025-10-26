@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ToolbarSlot.h"
 #include "GameFramework/PlayerController.h"
 #include "RunPlayerController.generated.h"
 
@@ -35,6 +36,8 @@ public:
 	
 	void SkipSetupPhase();
 
+	TArray<FToolbarSlot> ToolbarSlots;
+
 private:
 	
 	// Pawn
@@ -61,6 +64,9 @@ private:
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputMappingContext* CameraMappingContext;
 
+	// Toolbar slots
+	void InitializeToolbarSlots();
+	
 	// Input functions
 	void PrimaryAction();
 
@@ -76,12 +82,15 @@ private:
 	UFUNCTION()
 	void OnBuildWallModeToggle(bool _bIsBuildWallMode);
 
-	void RequestToggleBuildTurretMode();
+	void RequestToggleBuildTurretMode_Slot2();
+
+	void RequestToggleBuildTurretMode_Slot3();
+
+	void RequestToggleBuildTurretMode(const int32 SlotNumber);
 	bool bIsBuildTurretMode = false;
 
 	UFUNCTION()
 	void OnBuildTurretModeToggle(bool _bIsBuildTurretMode);
-	
 
 	void DeprojectPointer();
 

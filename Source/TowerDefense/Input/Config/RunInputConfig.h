@@ -25,6 +25,9 @@ public:
 	UInputAction* IA_BuildWall;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input")
-	UInputAction* IA_BuildTurret;
+	UInputAction* IA_BuildTurret_Slot2;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input")
+	UInputAction* IA_BuildTurret_Slot3;
 	
 };

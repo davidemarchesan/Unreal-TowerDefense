@@ -51,7 +51,7 @@ public:
 	void RequestResetPreviewWall();
 
 	// Turrets
-	void RequestPreviewTurret(FVector Location);
+	void RequestPreviewTurret(TSubclassOf<ATurretBase>* TurretClass, FVector Location);
 
 	bool RequestTurretBuild(TSubclassOf<ATurretBase>* TurretClass, FVector Location);
 

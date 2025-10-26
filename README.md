@@ -6,9 +6,11 @@ fatto - creare proiettili
 fatto - creare altra torre
 
 >>>>>>>> - refactor menu con n torri e prezzo
->>>>>>>> - mettere pulsante per muro
->>>>>>>> - indice in basso a sx
->>>>>>>> - collegare con playercontroller
+>>>>>>>> - allora, ci sono riuscito. da sistemare:
+>>>>>>>> - hud > fare un sub menu per le torri.
+>>>>>>>> - pc -> prendere lista torri da gamestate
+>>>>>>>> - pc -> chiedere a gamemode di costruire con id torre
+
 - creare upgrade e hud torri
 - creare wave sempre più difficili
 - creare statistiche (dare nomi a torri)

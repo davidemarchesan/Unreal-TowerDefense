@@ -123,7 +123,7 @@ void ALayoutGrid::RequestResetPreviewWall()
 	ResetPreviewWall();
 }
 
-void ALayoutGrid::RequestPreviewTurret(FVector Location)
+void ALayoutGrid::RequestPreviewTurret(TSubclassOf<ATurretBase>* TurretClass, FVector Location)
 {
 	if (bIsGridInitialized == false)
 	{
@@ -151,7 +151,7 @@ void ALayoutGrid::RequestPreviewTurret(FVector Location)
 
 		if (PreviewTurret == nullptr)
 		{
-			PreviewTurret = GetWorld()->SpawnActor<ATurretBase>(TurretBluePrintClass,
+			PreviewTurret = GetWorld()->SpawnActor<ATurretBase>(**TurretClass,
 			                                                    FVector(Location),
 			                                                    FRotator::ZeroRotator);
 

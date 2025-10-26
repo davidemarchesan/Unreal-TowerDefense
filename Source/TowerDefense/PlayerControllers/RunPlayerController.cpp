@@ -4,12 +4,9 @@
 #include "RunPlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
-#include "TowerDefense/Input/Config/LayoutEditorInputConfig.h"
 #include "TowerDefense/Input/Config/CameraInputConfig.h"
 #include "InputActionValue.h"
 #include "TowerDefense/GameCamera.h"
-#include "TowerDefense/LayoutGrid.h"
-#include "EngineUtils.h"
 #include "TowerDefense/TowerDefenseGameInstance.h"
 #include "TowerDefense/GameModes/RunGameMode.h"
 #include "TowerDefense/GameStates/RunGameState.h"
@@ -42,6 +39,7 @@ void ARunPlayerController::BeginPlay()
 	HUD = Cast<ARunHUD>(GetHUD());
 
 	GameMode = Cast<ARunGameMode>(GetWorld()->GetAuthGameMode());
+	InitializeToolbarSlots();
 
 	GameState = Cast<ARunGameState>(GetWorld()->GetGameState());
 	if (GameState)
@@ -70,12 +68,15 @@ void ARunPlayerController::SetupInputComponent()
 		{
 			EnhancedInput->BindAction(RunInputConfig->IA_PrimaryAction, ETriggerEvent::Triggered, this,
 			                          &ARunPlayerController::PrimaryAction);
-
+			
 			EnhancedInput->BindAction(RunInputConfig->IA_BuildWall, ETriggerEvent::Triggered, this,
 			                          &ARunPlayerController::RequestToggleBuildWallMode);
 
-			EnhancedInput->BindAction(RunInputConfig->IA_BuildTurret, ETriggerEvent::Triggered, this,
-									  &ARunPlayerController::RequestToggleBuildTurretMode);
+			EnhancedInput->BindAction(RunInputConfig->IA_BuildTurret_Slot2, ETriggerEvent::Triggered, this,
+									  &ARunPlayerController::RequestToggleBuildTurretMode_Slot2);
+
+			EnhancedInput->BindAction(RunInputConfig->IA_BuildTurret_Slot3, ETriggerEvent::Triggered, this,
+									  &ARunPlayerController::RequestToggleBuildTurretMode_Slot3);
 		}
 
 		if (CameraInputConfig)
@@ -103,6 +104,31 @@ void ARunPlayerController::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	DeprojectPointer();
+}
+
+void ARunPlayerController::InitializeToolbarSlots()
+{
+	if (!GameMode)
+	{
+		return;
+	}
+
+	ToolbarSlots.Add(FToolbarSlot(1, GameMode->GameModeMetas->WallPrice, FText::FromName(TEXT("Wall")), FName("wall")));
+
+	UDataTable* TurretDataTable = GameMode->TurretDataTable;
+	TArray<FName> RowNames = TurretDataTable->GetRowNames();
+	
+	for (int32 i = 0; i < RowNames.Num(); i++)
+	{
+		FTurretStats* TurretStats = TurretDataTable->FindRow<FTurretStats>(RowNames[i], TEXT("Lookup Turret Stats"));
+		if (!TurretStats)
+		{
+			continue;
+		}
+		
+		ToolbarSlots.Add(FToolbarSlot(i + 2, TurretStats->Price, FText::FromName(TurretStats->ID), TurretStats->ID));
+	}
+	
 }
 
 void ARunPlayerController::PrimaryAction()
@@ -183,6 +209,16 @@ void ARunPlayerController::ZoomCamera(const FInputActionValue& Value)
 	}
 }
 
+void ARunPlayerController::RequestToggleBuildTurretMode_Slot2()
+{
+	RequestToggleBuildTurretMode(2);
+}
+
+void ARunPlayerController::RequestToggleBuildTurretMode_Slot3()
+{
+	RequestToggleBuildTurretMode(3);
+}
+
 void ARunPlayerController::RequestToggleBuildWallMode()
 {
 	if (GameMode)
@@ -196,11 +232,22 @@ void ARunPlayerController::OnBuildWallModeToggle(bool _bIsBuildWallMode)
 	bIsBuildWallMode = _bIsBuildWallMode;
 }
 
-void ARunPlayerController::RequestToggleBuildTurretMode()
+void ARunPlayerController::RequestToggleBuildTurretMode(const int32 SlotNumber)
 {
-	if (GameMode)
+	if (GameMode && ToolbarSlots.Num() > 0)
 	{
-		GameMode->RequestToggleBuildTurretMode();
+
+		FToolbarSlot* FoundSlot = ToolbarSlots.FindByPredicate([&](const FToolbarSlot& ToolbarSlot)
+		{
+			return ToolbarSlot.Key == SlotNumber;
+		});
+
+		if (FoundSlot != nullptr)
+		{
+			// FoundSlot->ID;
+			GameMode->RequestToggleBuildTurretMode(FoundSlot->ID);
+		}
+		
 	}
 }
 
@@ -249,7 +296,7 @@ void ARunPlayerController::DeprojectPointer()
 					// UE_LOG(LogTemp, Warning, TEXT("Im pointing to turret wall in position %d %d"), TurretWall->Col, TurretWall->Row);
 	
 					FVector SocketLocation = TurretWall->GetTurretSocketLocation();
-					GameMode->RequestTurretPreview(SocketLocation);
+					GameMode->RequestTurretPreview("Cannon", SocketLocation);
 					// UE_LOG(LogTemp, Warning, TEXT("SocketLocation: %s"), *SocketLocation.ToString());
 				}
 			}

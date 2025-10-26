@@ -4,6 +4,7 @@
 #include "RunHUD.h"
 
 #include "GameStyle.h"
+#include "Components/ToolbarWidget.h"
 #include "Components/TopBarStat.h"
 #include "Engine/Engine.h"
 #include "Engine/GameViewportClient.h"
@@ -150,7 +151,7 @@ void ARunHUD::InitializeOverlays()
 		];
 
 		CreateTopBarOverlay(RootOverlay);
-		CreateBottomBarOverlay(RootOverlay);
+		CreateToolBarOverlay(RootOverlay);
 
 		// Do not edit this overlay
 		RootOverlay->AddSlot()
@@ -333,9 +334,9 @@ void ARunHUD::CreateTopBarOverlay(const TSharedRef<SOverlay>& RootOverlay)
 	];
 }
 
-void ARunHUD::CreateBottomBarOverlay(const TSharedRef<SOverlay>& RootOverlay)
+void ARunHUD::CreateToolBarOverlay(const TSharedRef<SOverlay>& RootOverlay)
 {
-	if (!GameMode)
+	if (!PlayerController || !GameMode)
 	{
 		return;
 	}
@@ -350,14 +351,16 @@ void ARunHUD::CreateBottomBarOverlay(const TSharedRef<SOverlay>& RootOverlay)
 	UDataTable* TurretDataTable = GameMode->TurretDataTable;
 	TArray<FName> RowNames = TurretDataTable->GetRowNames();
 
-	for (const FName& RowName : RowNames)
-	{
-		FTurretStats* TurretStats = TurretDataTable->FindRow<FTurretStats>(RowName, TEXT("Lookup Turret Stats"));
-		if (!TurretStats)
-		{
-			continue;
-		}
+	// for (const FName& RowName : RowNames)
 
+	if (PlayerController->ToolbarSlots.Num() == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("pc has no toolbars"));
+		return;
+	}
+
+	for (const FToolbarSlot& Slot : PlayerController->ToolbarSlots)
+	{
 		BottomBar->AddSlot()
 		         .AutoWidth()
 		         .Padding(ItemOutPadding, 0.f)
@@ -383,7 +386,7 @@ void ARunHUD::CreateBottomBarOverlay(const TSharedRef<SOverlay>& RootOverlay)
 					[
 						SNew(STextBlock)
 						.Justification(ETextJustify::Center)
-						.Text(FText::FromName(TurretStats->ID))
+						.Text(Slot.Name)
 						.Font(FGameStyle::Get().GetFontStyle("TowerDefense.Font.Bold.sm"))
 						.ColorAndOpacity(FGameStyle::Get().GetColor("TowerDefense.Color.Beige"))
 					]
@@ -394,7 +397,7 @@ void ARunHUD::CreateBottomBarOverlay(const TSharedRef<SOverlay>& RootOverlay)
 					[
 						SNew(STextBlock)
 						.Justification(ETextJustify::Center)
-						.Text(FText::FromString("1"))
+						.Text(FText::AsNumber(Slot.Key))
 						.Font(FGameStyle::Get().GetFontStyle("TowerDefense.Font.Bold.xs"))
 						.ColorAndOpacity(FGameStyle::Get().GetColor("TowerDefense.Color.Beige"))
 					]
@@ -405,7 +408,7 @@ void ARunHUD::CreateBottomBarOverlay(const TSharedRef<SOverlay>& RootOverlay)
 					[
 						SNew(STextBlock)
 						.Justification(ETextJustify::Center)
-						.Text(FText::AsNumber(TurretStats->Price))
+						.Text(FText::AsNumber(Slot.Price))
 						.Font(FGameStyle::Get().GetFontStyle("TowerDefense.Font.Bold.xs"))
 						.ColorAndOpacity(FGameStyle::Get().GetColor("TowerDefense.Color.Beige"))
 					]
@@ -424,7 +427,23 @@ void ARunHUD::CreateBottomBarOverlay(const TSharedRef<SOverlay>& RootOverlay)
 
 	[
 
-		BottomBar.ToSharedRef()
+		SNew(SVerticalBox)
+		
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			SNew(SToolbarWidget)
+			.Slots(PlayerController->ToolbarSlots)
+		]
+
+		+ SVerticalBox::Slot()
+		[
+			SNew(STextBlock)
+			.Justification(ETextJustify::Center)
+			.Text(FText::FromString(TEXT("Loading")))
+		]
+
+		// BottomBar.ToSharedRef()
 
 
 	];

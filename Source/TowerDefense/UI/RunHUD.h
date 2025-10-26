@@ -37,7 +37,7 @@ private:
 	void InitializeOverlays();
 
 	void CreateTopBarOverlay(const TSharedRef<SOverlay>& RootOverlay);
-	void CreateBottomBarOverlay(const TSharedRef<SOverlay>& RootOverlay);
+	void CreateToolBarOverlay(const TSharedRef<SOverlay>& RootOverlay);
 	
 	bool bShowLoadingScreen = true;
 

@@ -87,7 +87,7 @@ public:
 
 	FOnBuildWallModeToggle OnBuildWallModeToggle;
 
-	// Build Turret Mod
+	// Build Turret Mode
 	void ToggleBuildTurretMode();
 	bool IsBuildTurretMode() const { return bIsBuildTurretMode; }
 

@@ -164,7 +164,7 @@ void ARunGameMode::RequestWallRemoval(int32 Col, int32 Row)
 	}
 }
 
-void ARunGameMode::RequestToggleBuildTurretMode()
+void ARunGameMode::RequestToggleBuildTurretMode(FName& TurretID)
 {
 	if (GameState && GameState->GetPhase() == ERunPhase::Setup)
 	{
@@ -177,12 +177,20 @@ void ARunGameMode::RequestToggleBuildTurretMode()
 	}
 }
 
-void ARunGameMode::RequestTurretPreview(FVector Location)
+void ARunGameMode::RequestTurretPreview(FName TurretID, FVector Location)
 {
-	if (Grid)
+	if (TurretRegistry && TurretDataTable && GameState && GameState->IsBuildTurretMode() && Grid)
 	{
-		Grid->RequestPreviewTurret(Location);
+		if (TSubclassOf<ATurretBase> TurretClass = TurretRegistry->GetTurretClass(TurretID))
+		{
+			if (Grid)
+			{
+				Grid->RequestPreviewTurret(&TurretClass, Location);
+			}
+		}
 	}
+	
+	
 }
 
 void ARunGameMode::RequestResetPreviewTurret()
