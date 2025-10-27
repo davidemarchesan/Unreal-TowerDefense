@@ -36,9 +36,15 @@ public:
 	
 	void SkipSetupPhase();
 
-	TArray<FToolbarSlot> ToolbarSlots;
+	// Toolbar slots
+	TArray<FToolbarSlot> ToolbarSlots;	
+	TArray<FToolbarSlot> TurretsToolbarSlots;
 
 private:
+
+	void AddMappingContexts();
+
+	void InitializeDelegates();
 	
 	// Pawn
 	AGameCamera* CameraPawn;
@@ -46,7 +52,6 @@ private:
 	// Game components
 	ARunGameMode* GameMode;
 	ARunGameState* GameState;
-	UTowerDefenseGameInstance* GameInstance;
 
 	// HUD
 	ARunHUD* HUD;
@@ -70,11 +75,26 @@ private:
 	// Input functions
 	void PrimaryAction();
 
+	void DeprojectPointer();
+
+	// Input functions - Camera
 	void MoveCamera(const FInputActionValue& Value);
 
 	void RotateCamera(const FInputActionValue& Value);
 
 	void ZoomCamera(const FInputActionValue& Value);
+
+	// Input functions - Toolbar
+	TArray<FToolbarSlot>* ActiveToolbar = nullptr;
+	void OnToolbarSelectSlot(const int32 Slot);
+	void OnToolbarSelectSlot1();
+	void OnToolbarSelectSlot2();
+	void OnToolbarSelectSlot3();
+	void OnToolbarSelectSlot4();
+	void OnToolbarSelectSlot5();
+	void OnToolbarSelectSlot6();
+
+	
 	
 	void RequestToggleBuildWallMode();
 	bool bIsBuildWallMode = false;
@@ -91,8 +111,5 @@ private:
 
 	UFUNCTION()
 	void OnBuildTurretModeToggle(bool _bIsBuildTurretMode);
-
-	void DeprojectPointer();
-
-
+	
 };

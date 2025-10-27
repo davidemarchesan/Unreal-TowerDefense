@@ -9,7 +9,7 @@ struct FToolbarSlot
 
 	GENERATED_BODY()
 
-	FToolbarSlot(const int32 InButton, const float InPrice, const FText& InName, const FName& InID): Key(InButton), Price(InPrice), Name(InName), ID(InID) {}
+	FToolbarSlot(const int32 InButton, const float InPrice, const FText& InName, const FName& InID, TFunction<void()> InAction): Key(InButton), Price(InPrice), Name(InName), ID(InID), Action(MoveTemp(InAction)) {}
 
 	FToolbarSlot(): Key(0), Price(0.f), Name(FText::GetEmpty()), ID(NAME_None) {}
 
@@ -24,5 +24,7 @@ struct FToolbarSlot
 
 	UPROPERTY()
 	FName ID;
+	
+	TFunction<void()> Action;
 	
 };

@@ -20,21 +20,7 @@ void ARunPlayerController::BeginPlay()
 
 	bShowMouseCursor = true;
 
-	if (ULocalPlayer* LocalPlayer = Cast<ULocalPlayer>(Player))
-	{
-		if (UEnhancedInputLocalPlayerSubsystem* InputSystem = LocalPlayer->GetSubsystem<
-			UEnhancedInputLocalPlayerSubsystem>())
-		{
-			if (RunMappingContext)
-			{
-				InputSystem->AddMappingContext(RunMappingContext, 1);
-			}
-			if (CameraMappingContext)
-			{
-				InputSystem->AddMappingContext(CameraMappingContext, 1);
-			}
-		}
-	}
+	AddMappingContexts();	
 
 	HUD = Cast<ARunHUD>(GetHUD());
 
@@ -42,14 +28,8 @@ void ARunPlayerController::BeginPlay()
 	InitializeToolbarSlots();
 
 	GameState = Cast<ARunGameState>(GetWorld()->GetGameState());
-	if (GameState)
-	{
-		GameState->OnBuildWallModeToggle.AddDynamic(this, &ARunPlayerController::OnBuildWallModeToggle);
-		GameState->OnBuildTurretModeToggle.AddDynamic(this, &ARunPlayerController::OnBuildTurretModeToggle);
-	}
-
-	GameInstance = Cast<UTowerDefenseGameInstance>(GetGameInstance());
-
+	InitializeDelegates();
+	
 	CameraPawn = Cast<AGameCamera>(GetPawn());
 	if (GameMode && CameraPawn)
 	{
@@ -69,14 +49,23 @@ void ARunPlayerController::SetupInputComponent()
 			EnhancedInput->BindAction(RunInputConfig->IA_PrimaryAction, ETriggerEvent::Triggered, this,
 			                          &ARunPlayerController::PrimaryAction);
 			
-			EnhancedInput->BindAction(RunInputConfig->IA_BuildWall, ETriggerEvent::Triggered, this,
-			                          &ARunPlayerController::RequestToggleBuildWallMode);
+			EnhancedInput->BindAction(RunInputConfig->IA_SelectSlot_1, ETriggerEvent::Triggered, this,
+									  &ARunPlayerController::OnToolbarSelectSlot1);
 
-			EnhancedInput->BindAction(RunInputConfig->IA_BuildTurret_Slot2, ETriggerEvent::Triggered, this,
-									  &ARunPlayerController::RequestToggleBuildTurretMode_Slot2);
+			EnhancedInput->BindAction(RunInputConfig->IA_SelectSlot_2, ETriggerEvent::Triggered, this,
+									  &ARunPlayerController::OnToolbarSelectSlot2);
 
-			EnhancedInput->BindAction(RunInputConfig->IA_BuildTurret_Slot3, ETriggerEvent::Triggered, this,
-									  &ARunPlayerController::RequestToggleBuildTurretMode_Slot3);
+			EnhancedInput->BindAction(RunInputConfig->IA_SelectSlot_3, ETriggerEvent::Triggered, this,
+									  &ARunPlayerController::OnToolbarSelectSlot3);
+
+			EnhancedInput->BindAction(RunInputConfig->IA_SelectSlot_4, ETriggerEvent::Triggered, this,
+									  &ARunPlayerController::OnToolbarSelectSlot4);
+
+			EnhancedInput->BindAction(RunInputConfig->IA_SelectSlot_5, ETriggerEvent::Triggered, this,
+									  &ARunPlayerController::OnToolbarSelectSlot5);
+			
+			EnhancedInput->BindAction(RunInputConfig->IA_SelectSlot_5, ETriggerEvent::Triggered, this,
+									  &ARunPlayerController::OnToolbarSelectSlot6);
 		}
 
 		if (CameraInputConfig)
@@ -113,8 +102,11 @@ void ARunPlayerController::InitializeToolbarSlots()
 		return;
 	}
 
-	ToolbarSlots.Add(FToolbarSlot(1, GameMode->GameModeMetas->WallPrice, FText::FromName(TEXT("Wall")), FName("wall")));
-
+	// Main toolbar
+	ToolbarSlots.Add(FToolbarSlot(1, GameMode->GameModeMetas->WallPrice, FText::FromString(TEXT("Wall")), FName("wall"), [this]() { this->RequestToggleBuildWallMode(); }));
+	ToolbarSlots.Add(FToolbarSlot(2, 0, FText::FromString(TEXT("Turrets")), FName("turrets"), [this]() { this->RequestToggleBuildWallMode(); }));
+	
+	// Turrets toolbar
 	UDataTable* TurretDataTable = GameMode->TurretDataTable;
 	TArray<FName> RowNames = TurretDataTable->GetRowNames();
 	
@@ -126,7 +118,7 @@ void ARunPlayerController::InitializeToolbarSlots()
 			continue;
 		}
 		
-		ToolbarSlots.Add(FToolbarSlot(i + 2, TurretStats->Price, FText::FromName(TurretStats->ID), TurretStats->ID));
+		TurretsToolbarSlots.Add(FToolbarSlot(i + 1, TurretStats->Price, FText::FromName(TurretStats->ID), TurretStats->ID, [this]() { this->RequestToggleBuildWallMode(); }));
 	}
 	
 }
@@ -182,6 +174,34 @@ void ARunPlayerController::SkipSetupPhase()
 	}
 }
 
+void ARunPlayerController::AddMappingContexts()
+{
+	if (ULocalPlayer* LocalPlayer = Cast<ULocalPlayer>(Player))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* InputSystem = LocalPlayer->GetSubsystem<
+			UEnhancedInputLocalPlayerSubsystem>())
+		{
+			if (RunMappingContext)
+			{
+				InputSystem->AddMappingContext(RunMappingContext, 1);
+			}
+			if (CameraMappingContext)
+			{
+				InputSystem->AddMappingContext(CameraMappingContext, 1);
+			}
+		}
+	}
+}
+
+void ARunPlayerController::InitializeDelegates()
+{
+	if (GameState)
+	{
+		GameState->OnBuildWallModeToggle.AddDynamic(this, &ARunPlayerController::OnBuildWallModeToggle);
+		GameState->OnBuildTurretModeToggle.AddDynamic(this, &ARunPlayerController::OnBuildTurretModeToggle);
+	}
+}
+
 void ARunPlayerController::MoveCamera(const FInputActionValue& Value)
 {
 	if (CameraPawn)
@@ -207,6 +227,58 @@ void ARunPlayerController::ZoomCamera(const FInputActionValue& Value)
 		float InputValue = Value.Get<float>();
 		CameraPawn->RequestZoom(InputValue);
 	}
+}
+
+void ARunPlayerController::OnToolbarSelectSlot(const int32 Slot)
+{
+	if (ActiveToolbar == nullptr)
+	{
+		ActiveToolbar = &ToolbarSlots;
+	}
+
+	const int32 Index = Slot - 1;
+	if (Index < 0 || Index >= ActiveToolbar->Num())
+	{
+		return;
+	}
+
+	FToolbarSlot SelectedSlot = (*ActiveToolbar)[Index];
+
+	if (SelectedSlot.Action)
+	{
+		SelectedSlot.Action();
+	}
+	
+}
+
+void ARunPlayerController::OnToolbarSelectSlot1()
+{
+	OnToolbarSelectSlot(1);
+}
+
+void ARunPlayerController::OnToolbarSelectSlot2()
+{
+	OnToolbarSelectSlot(2);
+}
+
+void ARunPlayerController::OnToolbarSelectSlot3()
+{
+	OnToolbarSelectSlot(3);
+}
+
+void ARunPlayerController::OnToolbarSelectSlot4()
+{
+	OnToolbarSelectSlot(4);
+}
+
+void ARunPlayerController::OnToolbarSelectSlot5()
+{
+	OnToolbarSelectSlot(5);
+}
+
+void ARunPlayerController::OnToolbarSelectSlot6()
+{
+	OnToolbarSelectSlot(6);
 }
 
 void ARunPlayerController::RequestToggleBuildTurretMode_Slot2()

@@ -428,6 +428,13 @@ void ARunHUD::CreateToolBarOverlay(const TSharedRef<SOverlay>& RootOverlay)
 	[
 
 		SNew(SVerticalBox)
+
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			SNew(SToolbarWidget)
+			.Slots(PlayerController->TurretsToolbarSlots)
+		]
 		
 		+ SVerticalBox::Slot()
 		.AutoHeight()
@@ -435,16 +442,6 @@ void ARunHUD::CreateToolBarOverlay(const TSharedRef<SOverlay>& RootOverlay)
 			SNew(SToolbarWidget)
 			.Slots(PlayerController->ToolbarSlots)
 		]
-
-		+ SVerticalBox::Slot()
-		[
-			SNew(STextBlock)
-			.Justification(ETextJustify::Center)
-			.Text(FText::FromString(TEXT("Loading")))
-		]
-
-		// BottomBar.ToSharedRef()
-
 
 	];
 }
