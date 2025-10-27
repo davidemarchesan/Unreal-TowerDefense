@@ -17,4 +17,17 @@ struct FRunGameModeMetas : public FTableRowBase
 
 	UPROPERTY(EditDefaultsOnly, Category = "Metas")
 	float WallPrice = 200.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Metas")
+	int32 FirstSetupPhaseTimer = 60;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Metas")
+	int32 SetupPhaseTimer = 20;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Grid")
+	int32 GridCols = 10;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Grid")
+	int32 GridRows = 10;
+	
 };

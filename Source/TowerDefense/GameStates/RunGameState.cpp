@@ -36,13 +36,13 @@ void ARunGameState::BeginPlay()
 
 void ARunGameState::TimerTick()
 {
-	PhaseRemainingTime--;
+	SetupPhaseRemainingTime--;
 
-	OnTimerUpdate.Broadcast(PhaseRemainingTime);
+	OnTimerUpdate.Broadcast(SetupPhaseRemainingTime);
 
-	if (PhaseRemainingTime <= 0)
+	if (SetupPhaseRemainingTime <= 0)
 	{
-		StopTimer();
+		StopSetupPhaseTimer();
 		GoToNextPhase();
 	}
 }
@@ -59,7 +59,7 @@ void ARunGameState::OnLevelReady()
 	SetPlayerHealth(GameMode->GameModeMetas->PlayerInitialHealth);
 	SetPlayerCoins(GameMode->GameModeMetas->PlayerInitialCoins);
 
-	StartTimer(WaveNumber == 0 ? GameMode->FirstSetupPhaseTimer : GameMode->SetupPhaseTimer);
+	StartSetupPhaseTimer(WaveNumber == 0 ? GameMode->FirstSetupPhaseTimer : GameMode->SetupPhaseTimer);
 
 	OnPhaseStart.Broadcast(Phase);
 }
@@ -85,7 +85,7 @@ void ARunGameState::GoToNextPhase()
 	else
 	{
 		Phase = ERunPhase::Setup;
-		StartTimer(GameMode->SetupPhaseTimer);
+		StartSetupPhaseTimer(GameMode->SetupPhaseTimer);
 	}
 
 	OnPhaseStart.Broadcast(Phase);
@@ -109,13 +109,13 @@ void ARunGameState::GoToNextPhase()
 	
 }
 
-void ARunGameState::StartTimer(int32 Seconds)
+void ARunGameState::StartSetupPhaseTimer(int32 Seconds)
 {
 
-	PhaseRemainingTime = Seconds;
+	SetupPhaseRemainingTime = Seconds;
 	
 	GetWorldTimerManager().SetTimer(
-		TimerHandle,
+		SetupPhaseTimerHandle,
 		this,
 		&ARunGameState::TimerTick,
 		1.0f,
@@ -123,9 +123,9 @@ void ARunGameState::StartTimer(int32 Seconds)
 	);
 }
 
-void ARunGameState::StopTimer()
+void ARunGameState::StopSetupPhaseTimer()
 {
-	GetWorldTimerManager().ClearTimer(TimerHandle);
+	GetWorldTimerManager().ClearTimer(SetupPhaseTimerHandle);
 }
 
 void ARunGameState::OnAnyEnemyDeath(AEnemyPawn* Enemy)
@@ -204,7 +204,7 @@ void ARunGameState::SkipSetupPhase()
 {
 	// UE_LOG(LogTemp, Warning, TEXT("ARunGameState::SkipSetupPhase"));
 
-	StopTimer();
+	StopSetupPhaseTimer();
 
 	GoToNextPhase();
 }

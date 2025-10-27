@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/ToolbarWidget.h"
 #include "GameFramework/HUD.h"
 #include "RunHUD.generated.h"
 
@@ -37,7 +38,7 @@ private:
 	void InitializeOverlays();
 
 	void CreateTopBarOverlay(const TSharedRef<SOverlay>& RootOverlay);
-	void CreateToolBarOverlay(const TSharedRef<SOverlay>& RootOverlay);
+	void CreateToolbarOverlay(const TSharedRef<SOverlay>& RootOverlay);
 	
 	bool bShowLoadingScreen = true;
 
@@ -77,7 +78,9 @@ private:
 	TSharedPtr<STextBlock> NextWaveTimerTextBlock;
 	TSharedPtr<SButton> NextWaveSkipButton;
 
-	TSharedPtr<SHorizontalBox> BottomBar;
+	TSharedPtr<SVerticalBox> Toolbar;
+	TSharedPtr<SToolbarWidget> ToolbarSlots;
+	TSharedPtr<SToolbarWidget> TurretsToolbarSlots;
 
 	TSharedPtr<STopBarStat> PlayerHealthStat;
 	TSharedPtr<STopBarStat> PlayerCoinsStat;

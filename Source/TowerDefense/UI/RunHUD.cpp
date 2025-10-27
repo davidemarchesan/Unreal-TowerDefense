@@ -151,7 +151,7 @@ void ARunHUD::InitializeOverlays()
 		];
 
 		CreateTopBarOverlay(RootOverlay);
-		CreateToolBarOverlay(RootOverlay);
+		CreateToolbarOverlay(RootOverlay);
 
 		// Do not edit this overlay
 		RootOverlay->AddSlot()
@@ -334,90 +334,11 @@ void ARunHUD::CreateTopBarOverlay(const TSharedRef<SOverlay>& RootOverlay)
 	];
 }
 
-void ARunHUD::CreateToolBarOverlay(const TSharedRef<SOverlay>& RootOverlay)
+void ARunHUD::CreateToolbarOverlay(const TSharedRef<SOverlay>& RootOverlay)
 {
-	if (!PlayerController || !GameMode)
+	if (!PlayerController)
 	{
 		return;
-	}
-
-	const float ItemOutPadding = 5.f;
-	const float ItemInPadding = 10.f;
-	const float ItemWidth = 120.f;
-
-	// Building menu
-	BottomBar = SNew(SHorizontalBox);
-
-	UDataTable* TurretDataTable = GameMode->TurretDataTable;
-	TArray<FName> RowNames = TurretDataTable->GetRowNames();
-
-	// for (const FName& RowName : RowNames)
-
-	if (PlayerController->ToolbarSlots.Num() == 0)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("pc has no toolbars"));
-		return;
-	}
-
-	for (const FToolbarSlot& Slot : PlayerController->ToolbarSlots)
-	{
-		BottomBar->AddSlot()
-		         .AutoWidth()
-		         .Padding(ItemOutPadding, 0.f)
-		[
-
-			SNew(SBox)
-			.WidthOverride(ItemWidth)
-			.HeightOverride(ItemWidth)
-			[
-
-				SNew(SBorder)
-				.Padding(10.f)
-				.BorderImage(
-					new FSlateRoundedBoxBrush(FLinearColor::White, 24.f))
-				.BorderBackgroundColor(FGameStyle::Get().GetColor("TowerDefense.Color.Gunmetal"))
-				[
-
-					SNew(SOverlay)
-
-					+ SOverlay::Slot()
-					.HAlign(HAlign_Center)
-					.VAlign(VAlign_Center)
-					[
-						SNew(STextBlock)
-						.Justification(ETextJustify::Center)
-						.Text(Slot.Name)
-						.Font(FGameStyle::Get().GetFontStyle("TowerDefense.Font.Bold.sm"))
-						.ColorAndOpacity(FGameStyle::Get().GetColor("TowerDefense.Color.Beige"))
-					]
-
-					+ SOverlay::Slot()
-					.HAlign(HAlign_Left)
-					.VAlign(VAlign_Bottom)
-					[
-						SNew(STextBlock)
-						.Justification(ETextJustify::Center)
-						.Text(FText::AsNumber(Slot.Key))
-						.Font(FGameStyle::Get().GetFontStyle("TowerDefense.Font.Bold.xs"))
-						.ColorAndOpacity(FGameStyle::Get().GetColor("TowerDefense.Color.Beige"))
-					]
-
-					+ SOverlay::Slot()
-					.HAlign(HAlign_Right)
-					.VAlign(VAlign_Bottom)
-					[
-						SNew(STextBlock)
-						.Justification(ETextJustify::Center)
-						.Text(FText::AsNumber(Slot.Price))
-						.Font(FGameStyle::Get().GetFontStyle("TowerDefense.Font.Bold.xs"))
-						.ColorAndOpacity(FGameStyle::Get().GetColor("TowerDefense.Color.Beige"))
-					]
-
-				]
-
-			]
-
-		];
 	}
 
 	RootOverlay->AddSlot()
@@ -427,19 +348,19 @@ void ARunHUD::CreateToolBarOverlay(const TSharedRef<SOverlay>& RootOverlay)
 
 	[
 
-		SNew(SVerticalBox)
+		SAssignNew(Toolbar, SVerticalBox)
 
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		[
-			SNew(SToolbarWidget)
+			SAssignNew(ToolbarSlots, SToolbarWidget)
 			.Slots(PlayerController->TurretsToolbarSlots)
 		]
-		
+
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		[
-			SNew(SToolbarWidget)
+			SAssignNew(TurretsToolbarSlots, SToolbarWidget)
 			.Slots(PlayerController->ToolbarSlots)
 		]
 
@@ -498,7 +419,7 @@ void ARunHUD::PrepareForSetupPhase()
 	NextWaveSkipButton->SetVisibility(EVisibility::Visible);
 	NextWaveHBox->SetVisibility(EVisibility::Visible);
 
-	BottomBar->SetVisibility(EVisibility::Visible);
+	Toolbar->SetVisibility(EVisibility::Visible);
 }
 
 void ARunHUD::PrepareForDefensePhase()
@@ -509,5 +430,5 @@ void ARunHUD::PrepareForDefensePhase()
 	}
 
 	NextWaveHBox->SetVisibility(EVisibility::Collapsed);
-	BottomBar->SetVisibility(EVisibility::Collapsed);
+	Toolbar->SetVisibility(EVisibility::Collapsed);
 }

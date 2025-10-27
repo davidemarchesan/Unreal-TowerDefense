@@ -4,8 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
+#include "TowerDefense/Enemies/Data/EnemyRegistry.h"
 #include "TowerDefense/Enemies/Data/Wave.h"
 #include "TowerDefense/Enums/RunPhase.h"
+#include "TowerDefense/GameModes/Data/RunGameModeMetas.h"
+#include "TowerDefense/Turrets/Data/TurretRegistry.h"
 #include "RunGameState.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPhaseStart, ERunPhase, NewPhase);
@@ -36,33 +39,33 @@ protected:
 	
 private:
 
-	ARunGameMode* GameMode;
+	void TimerTick();
+
 	ARunPlayerController* PlayerController;
 	ARunHUD* HUD;
-
-	ERunPhase Phase = ERunPhase::Setup;
-
-	int32 PhaseRemainingTime;
-	FTimerHandle TimerHandle;
-
-	void TimerTick();
 
 	UFUNCTION()
 	void OnLevelReady();
 
-	void StartTimer(int32 Seconds);
+	// Game phase
+	ERunPhase Phase = ERunPhase::Setup;
 
-	void StopTimer();
+	// Game phase - Setup phase timer
+	int32 SetupPhaseRemainingTime;
+	FTimerHandle SetupPhaseTimerHandle;
 
-	// Wave
+	void StartSetupPhaseTimer(int32 Seconds);
+	void StopSetupPhaseTimer();
+
+	// Game phase - Defense phase
 	int32 WaveNumber = 0;
 
 	int32 EnemiesAlive = 0;
-
+	
 	UFUNCTION()
 	void OnAnyEnemyDeath(AEnemyPawn* Enemy);
 
-	// Stats
+	// Player stats
 	void SetPlayerHealth(float _PlayerHealth);
 	float PlayerHealth;
 	
@@ -70,6 +73,9 @@ private:
 	float PlayerCoins;
 
 	float PlayerPoints = 0.f;
+	
+	// Build mode
+	bool bIsBuildingMode = false;
 
 	// Build Wall Mode
 	bool bIsBuildWallMode = false;
@@ -79,7 +85,36 @@ private:
 	bool bIsBuildTurretMode = false;
 	void SetBuildTurretMode(bool _bIsBuildTurretMode);
 
+	// Game camera
+	FVector CameraStartLocation;
+
+	// Turrets data
+	UTurretRegistry* TurretRegistry;
+	UDataTable* TurretDataTable;
+
+	// Enemies data
+	UEnemyRegistry* EnemyRegistry;
+	UDataTable* EnemyDataTable;
+
+	// Game mode metas
+	FRunGameModeMetas* GameModeMetas;
+
 public:
+
+	// Turrets data
+	void SetTurretData(UTurretRegistry* InTurretRegistry, UDataTable* InTurretDataTable) { TurretRegistry = InTurretRegistry; TurretDataTable = InTurretDataTable; }
+	UDataTable* GetTurretDataTable() { return TurretDataTable; }
+	
+	// Enemies data
+	void SetEnemyData(UEnemyRegistry* InEnemyRegistry, UDataTable* InEnemyDataTable) { EnemyRegistry = InEnemyRegistry; EnemyDataTable = InEnemyDataTable; }
+	UDataTable* GetEnemyDataTable() { return EnemyDataTable; }
+	
+	// Game mode metas
+	void SetGameModeMetas(FRunGameModeMetas* InGameModeMetas) { GameModeMetas = InGameModeMetas; }
+	FRunGameModeMetas* GetGameModeMetas() const { return GameModeMetas; }
+
+	// Build mode
+	bool IsBuildingMode() const { return bIsBuildingMode; }
 
 	// Build Wall Mode
 	void ToggleBuildWallMode();
@@ -93,7 +128,11 @@ public:
 
 	FOnBuildTurretModeToggle OnBuildTurretModeToggle;
 
-	// Phase
+	// Game camera
+	FVector GetCameraStartLocation() { return CameraStartLocation; }
+	void SetCameraStartLocation(FVector InLocation) { CameraStartLocation = InLocation; }
+
+	// Game phase
 	ERunPhase GetPhase() const { return Phase; }
 
 	FOnPhaseStart OnPhaseStart;
@@ -104,13 +143,13 @@ public:
 	void GoToNextPhase();
 	void SkipSetupPhase();
 	
-	// Stats - Health
+	// Player stats - Health
 	float GetPlayerHealth() const { return PlayerHealth; }
 	FOnPlayerHealthChange OnPlayerHealthChange;
 	
 	void ReducePlayerHealth(float Damage);
 
-	// Stats - Coins
+	// Player stats - Coins
 	float GetPlayerCoins() const { return PlayerCoins; }
 	FOnPlayerCoinsChange OnPlayerCoinsChange;
 
@@ -118,7 +157,7 @@ public:
 	
 	void SpendPlayerCoins(float _PlayerCoins);
 
-	// Stats - Points
+	// Player stats - Points
 	float GetPlayerPoints() const { return PlayerPoints; }
 	FOnPlayerPointsChange OnPlayerPointsChange;
 	
